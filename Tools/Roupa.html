@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Roupa com Ciclo</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Roupa">
+<meta name="theme-color" content="#f5f3ef">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,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">
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f5f3ef;
+    margin: 0;
+    
+    color: #2b2b28;
+  }
+  .header {
+    max-width: 480px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header button {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .header h1 {
+    font-size: 16px;
+    text-align: center;
+    margin: 0;
+    flex: 1;
+  }
+  .summary {
+    max-width: 480px;
+    margin: 0 auto 18px;
+    background: white;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .summary-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .summary-total {
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .summary-limit {
+    font-size: 13px;
+    color: #6b6558;
+  }
+  .bar-bg {
+    background: #eee;
+    border-radius: 6px;
+    height: 10px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.3s ease;
+    background: #4a7c59;
+  }
+  .bar-fill.warn { background: #d69a3e; }
+  .bar-fill.danger { background: #b5473f; }
+  .calendar {
+    max-width: 480px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    font-size: 11px;
+    color: #999;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+  .cell {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    background: #f7f6f3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    position: relative;
+  }
+  .cell.empty { background: none; cursor: default; }
+  .cell.selected { border-color: #4a7c59; }
+  .cell .num { font-weight: 600; }
+  .cell .amt {
+    font-size: 10px;
+    color: #4a7c59;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .cell.month-start .num::after {
+    content: attr(data-month);
+    display: block;
+    font-size: 8px;
+    color: #999;
+    font-weight: 400;
+  }
+  .add-panel {
+    max-width: 480px;
+    margin: 16px auto 0;
+    background: white;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    display: none;
+  }
+  .add-panel.active { display: block; }
+  .add-panel .label {
+    font-size: 13px;
+    color: #6b6558;
+    margin-bottom: 8px;
+  }
+  .add-row {
+    display: flex;
+    gap: 8px;
+  }
+  input[type="number"] {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+  .add-row button {
+    background: #4a7c59;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .add-row button:hover { filter: brightness(0.96); }
+  .add-row button:active { transform: translateY(1px); }
+  #clearBtn { background: #b5473f; }
+  #clearBtn:disabled {
+    background: #c9c5bf;
+    cursor: not-allowed;
+    filter: none;
+  }
+  @media (max-width: 420px) {
+    .add-row { flex-wrap: wrap; }
+    .add-row input { flex: 1 1 100%; }
+    .add-row button { flex: 1; }
+  }
+  .settings-link {
+    max-width: 480px;
+    margin: 0 auto 10px;
+    text-align: center;
+  }
+  .settings-link button {
+    background: none;
+    border: none;
+    color: #6b8f7a;
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .settings-panel {
+    max-width: 480px;
+    margin: 0 auto 16px;
+    background: white;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    display: none;
+  }
+  .settings-panel.active { display: block; }
+  .settings-panel .label {
+    font-size: 13px;
+    color: #6b6558;
+    margin-bottom: 8px;
+  }
+  .settings-hint {
+    font-size: 11px;
+    color: #999;
+    margin-top: 8px;
+    line-height: 1.4;
+  }
+  .notif-bar {
+    max-width: 480px;
+    margin: 14px auto 0;
+    text-align: center;
+    font-size: 12px;
+    color: #999;
+  }
+  .notif-bar button {
+    background: none;
+    border: none;
+    text-decoration: underline;
+    color: #6b8f7a;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .save-bar { max-width:480px; margin:14px auto 0; display:flex; align-items:center; justify-content:center; gap:10px; }
+  .save-bar button { background:#4a7c59; color:white; border:0; border-radius:8px; padding:9px 14px; font-weight:600; cursor:pointer; }
+  .save-info { font-size:12px; color:#6b6558; }
+  .status {
+    text-align: center;
+    font-size: 12px;
+    color: #999;
+    margin-top: 10px;
+    min-height: 14px;
+  }
+
+  :root { color-scheme: light; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { background:#f5f3ef; color:#2b2b28; -webkit-tap-highlight-color: transparent; padding-inline: max(14px, env(safe-area-inset-left), env(safe-area-inset-right)); padding-block: 20px 60px; }
+  button, .cell { touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+  input[type="number"] { font-size: 16px; min-width: 0; -webkit-appearance: none; appearance: none; background:#fff; color:#2b2b28; }
+  .header button { min-width: 44px; min-height: 40px; }
+  .add-row button { min-height: 44px; }
+
+  .check-row { display:flex; gap:10px; align-items:flex-start; margin-top:14px; font-size:13px; color:#6b6558; line-height:1.4; }
+  .check-row input { width:20px; height:20px; margin:0; flex:none; accent-color:#4a7c59; }
+  .backup-bar { max-width:480px; margin:14px auto 0; display:flex; flex-wrap:wrap; justify-content:center; gap:8px; }
+  .backup-bar button, .import-panel button { background:white; color:#2b2b28; border:1px solid #ddd; border-radius:8px; padding:9px 14px; font-weight:600; font-size:14px; cursor:pointer; min-height:44px; }
+  .import-panel { max-width:480px; margin:12px auto 0; background:white; border-radius:12px; padding:14px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+  .import-panel[hidden] { display:none; }
+  .import-panel .label { font-size:13px; color:#6b6558; margin-bottom:8px; }
+  .import-panel textarea { width:100%; min-height:90px; padding:10px; border:1px solid #ddd; border-radius:8px; font:13px ui-monospace, Menlo, monospace; background:#fff; color:#2b2b28; resize:vertical; margin-top:10px; }
+  .import-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .import-actions .primary { background:#4a7c59; color:white; border-color:#4a7c59; }
+  .import-actions .danger { color:#b5473f; border-color:#b5473f; }
+  .import-msg { font-size:12px; color:#6b6558; margin-top:10px; line-height:1.4; }
+</style>
+</head>
+<body>
+<div class="header">
+  <button id="prevBtn">‹</button>
+  <h1 id="cycleLabel">Ciclo</h1>
+  <button id="nextBtn">›</button>
+</div>
+
+<div class="settings-link">
+  <button id="settingsToggle" type="button">⚙ Configurar ciclo</button>
+</div>
+
+<div class="settings-panel" id="settingsPanel">
+  <div class="label" id="cycleStartLabel">Este ciclo começa no dia</div>
+  <div class="add-row">
+    <input type="number" id="startDayInput" min="1" max="31" placeholder="16">
+    <button id="saveSettingsBtn" type="button">Guardar</button>
+  </div>
+  <div class="settings-hint">O ciclo vai do dia escolhido até ao dia anterior do mês seguinte (ex.: 25 a 24, 18 a 17). Estas definições aplicam-se só a este ciclo: os outros ficam como estão e nenhum valor é apagado. Em meses mais curtos, os dias 29 a 31 usam o último dia do mês.</div>
+
+  <div class="label" style="margin-top:14px" id="cycleSettingsLabel">Limite deste ciclo</div>
+  <div class="add-row">
+    <input type="number" id="limitInput" min="1" step="any" placeholder="200">
+  </div>
+
+  <div class="label" style="margin-top:14px">Avisar quando atingir (% do limite)</div>
+  <div class="add-row">
+    <input type="number" id="warnInput" min="1" max="100" step="1" placeholder="80">
+  </div>
+  <label class="check-row" for="applyFutureChk">
+    <input type="checkbox" id="applyFutureChk">
+    <span>Usar também como valores de base nos ciclos novos que ainda não editei</span>
+  </label>
+</div>
+
+<div class="summary">
+  <div class="summary-top">
+    <div class="summary-total"><span id="totalVal">0</span></div>
+    <div class="summary-limit">limite: <span id="limitVal">200</span></div>
+  </div>
+  <div class="bar-bg"><div class="bar-fill" id="barFill" style="width:0%"></div></div>
+</div>
+
+<div class="calendar">
+  <div class="weekdays">
+    <div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div><div>D</div>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="add-panel" id="addPanel">
+  <div class="label" id="addLabel">Dia selecionado</div>
+  <div class="add-row">
+    <input type="number" id="amountInput" placeholder="quantidade" min="0">
+    <button id="addBtn">Adicionar</button>
+    <button id="clearBtn" type="button" disabled>Limpar valor</button>
+  </div>
+</div>
+
+<div class="save-bar">
+  <button id="forceSaveBtn" type="button">Guardar agora</button>
+  <span class="save-info" id="saveInfo">Gravação automática ativa</span>
+</div>
+<div class="backup-bar">
+  <button id="exportBtn" type="button">Exportar dados</button>
+  <button id="copyBtn" type="button">Copiar dados</button>
+  <button id="importToggle" type="button">Importar dados</button>
+</div>
+<div class="import-panel" id="importPanel" hidden>
+  <div class="label">Escolhe um ficheiro exportado ou cola o texto copiado.</div>
+  <input type="file" id="importFile" accept="application/json,.json,text/plain">
+  <textarea id="importText" placeholder="Os dados aparecem aqui" spellcheck="false"></textarea>
+  <div class="import-actions">
+    <button id="mergeBtn" type="button" class="primary">Juntar ao que tenho</button>
+    <button id="replaceBtn" type="button" class="danger">Substituir tudo</button>
+    <button id="importCancel" type="button">Fechar</button>
+  </div>
+  <div class="import-msg" id="importMsg">Juntar mantém tudo o que já tens e só acrescenta o que falta. Substituir guarda primeiro uma cópia dos dados atuais neste aparelho.</div>
+</div>
+<div class="notif-bar">
+  <button id="enableNotif">Ativar notificações no browser</button>
+</div>
+
+<div class="status" id="status"></div>
+
+<script>
+const STORE_KEY = 'cycles-v2';
+const LEGACY_SETTINGS_KEY = 'settings-cycle';
+const FACTORY = { startDay: 16, limit: 200, warnPercent: 80 };
+// entries: { "YYYY-MM-DD": valor }  (por data, independente dos ciclos)
+// cycles:  { "YYYY-MM": { startDay, limit, warnPercent, notifiedWarn, notifiedLimit } }
+// defaults: valores usados por ciclos que ainda não foram personalizados
+let state = { entries: {}, cycles: {}, defaults: { ...FACTORY } };
+let slot = null; // ciclo aberto: { y, m } = mês em que começa
+let selectedDateStr = null;
+
+const gridEl = document.getElementById('grid');
+const cycleLabelEl = document.getElementById('cycleLabel');
+const totalValEl = document.getElementById('totalVal');
+const barFillEl = document.getElementById('barFill');
+const addPanel = document.getElementById('addPanel');
+const addLabel = document.getElementById('addLabel');
+const amountInput = document.getElementById('amountInput');
+const statusEl = document.getElementById('status');
+const saveInfoEl = document.getElementById('saveInfo');
+const clearBtn = document.getElementById('clearBtn');
+const settingsToggle = document.getElementById('settingsToggle');
+const settingsPanel = document.getElementById('settingsPanel');
+const startDayInput = document.getElementById('startDayInput');
+const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+const limitInput = document.getElementById('limitInput');
+const cycleSettingsLabel = document.getElementById('cycleSettingsLabel');
+const warnInput = document.getElementById('warnInput');
+const limitValEl = document.getElementById('limitVal');
+
+const MONTH_NAMES = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+const MONTH_NAMES_FULL = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+function toKey(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function today() { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function round2(n) { return Math.round(n * 100) / 100; }
+function okDay(n) { return Number.isInteger(n) && n >= 1 && n <= 31; }
+
+// ---------- ciclos ----------
+function norm(s) { const d = new Date(s.y, s.m, 1); return { y: d.getFullYear(), m: d.getMonth() }; }
+function shiftSlot(s, n) { return norm({ y: s.y, m: s.m + n }); }
+function slotIdx(s) { return s.y * 12 + s.m; }
+function slotKey(s) { return `${s.y}-${pad(s.m + 1)}`; }
+
+function cycleMeta(s) {
+  const c = state.cycles[slotKey(s)] || {};
+  const d = state.defaults;
+  return {
+    startDay: okDay(c.startDay) ? c.startDay : d.startDay,
+    limit: c.limit > 0 ? c.limit : d.limit,
+    warnPercent: c.warnPercent >= 1 && c.warnPercent <= 100 ? c.warnPercent : d.warnPercent,
+    notifiedWarn: !!c.notifiedWarn,
+    notifiedLimit: !!c.notifiedLimit
+  };
+}
+function dayIn(y, m, d) { const last = new Date(y, m + 1, 0).getDate(); return new Date(y, m, Math.min(d, last)); }
+function startDateOf(s) { return dayIn(s.y, s.m, cycleMeta(s).startDay); }
+// Um ciclo vai do dia de início até ao dia anterior do mês seguinte (ex.: 25 a 24).
+function boundsOf(s) {
+  const start = startDateOf(s);
+  const n = shiftSlot(s, 1);
+  const next = dayIn(n.y, n.m, cycleMeta(s).startDay);
+  const end = new Date(next.getFullYear(), next.getMonth(), next.getDate() - 1);
+  return { start, end };
+}
+function slotOfDate(d) {
+  const base = norm({ y: d.getFullYear(), m: d.getMonth() });
+  let best = null;
+  for (const n of [1, 0, -1, -2]) { // do mais recente para o mais antigo
+    const c = shiftSlot(base, n);
+    const b = boundsOf(c);
+    if (d >= b.start && d <= b.end) return c;
+    if (!best && d >= b.start) best = c;
+  }
+  return best || base;
+}
+// Fixa os valores efetivos de um ciclo para que mudanças noutros ciclos não o alterem.
+function freeze(s) {
+  const k = slotKey(s);
+  const m = cycleMeta(s);
+  const c = state.cycles[k] || (state.cycles[k] = {});
+  c.startDay = m.startDay; c.limit = m.limit; c.warnPercent = m.warnPercent;
+  c.notifiedWarn = m.notifiedWarn; c.notifiedLimit = m.notifiedLimit;
+  return c;
+}
+function freezeRange() {
+  let first = slot;
+  const dates = Object.keys(state.entries).sort();
+  if (dates.length) {
+    const [y, m, d] = dates[0].split('-').map(Number);
+    const s = slotOfDate(new Date(y, m - 1, d));
+    if (slotIdx(s) < slotIdx(first)) first = s;
+  }
+  first = shiftSlot(first, -1);
+  const cur = slotOfDate(today());
+  const last = slotIdx(cur) > slotIdx(slot) ? cur : slot;
+  for (let s = first; slotIdx(s) <= slotIdx(last); s = shiftSlot(s, 1)) freeze(s);
+}
+function cycleTotal(start, end) {
+  const a = toKey(start), b = toKey(end);
+  let t = 0;
+  for (const k in state.entries) if (k >= a && k <= b) t += state.entries[k];
+  return round2(t);
+}
+
+// ---------- gravação ----------
+function setStatus(msg) {
+  statusEl.textContent = msg;
+  if (msg) setTimeout(() => { statusEl.textContent = ''; }, 1500);
+}
+async function readStoredValue(key) {
+  if (window.storage && typeof window.storage.get === 'function') {
+    try { const r = await window.storage.get(key, false); if (r && r.value) return r.value; } catch (e) {}
+  }
+  try { return localStorage.getItem(key); } catch (e) { return null; }
+}
+async function save(force = false) {
+  const snap = JSON.stringify(state);
+  try {
+    localStorage.setItem(STORE_KEY, snap);
+    if (window.storage && typeof window.storage.set === 'function') {
+      try { await window.storage.set(STORE_KEY, snap, false); } catch (e) {}
+    }
+    const now = new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+    saveInfoEl.textContent = `Guardado às ${now}`;
+    if (force) setStatus('Guardado manualmente');
+  } catch (e) {
+    saveInfoEl.textContent = 'Erro ao guardar';
+    setStatus('Erro ao guardar');
+    console.error(e);
+  }
+}
+
+// Importa os dados da versão anterior (chaves "cycle-AAAA-MM-DD"). Não apaga nada.
+function migrateLegacy() {
+  const defaults = { ...FACTORY };
+  try {
+    const s = JSON.parse(localStorage.getItem(LEGACY_SETTINGS_KEY));
+    if (s) {
+      if (okDay(s.startDay)) defaults.startDay = s.startDay;
+      if (s.limit > 0) defaults.limit = s.limit;
+      if (s.warnPercent >= 1 && s.warnPercent <= 100) defaults.warnPercent = s.warnPercent;
+    }
+  } catch (e) {}
+  const entries = {}, cycles = {};
+  const keys = [];
+  try { for (let i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i)); } catch (e) {}
+  keys.filter(k => /^cycle-\d{4}-\d{2}-\d{2}$/.test(k)).sort().forEach(k => {
+    const [, y, mo, d] = /^cycle-(\d{4})-(\d{2})-(\d{2})$/.exec(k);
+    let p; try { p = JSON.parse(localStorage.getItem(k)); } catch (e) { return; }
+    if (!p) return;
+    cycles[`${y}-${mo}`] = {
+      startDay: Math.min(31, Math.max(1, parseInt(d, 10))),
+      limit: p.limit > 0 ? p.limit : defaults.limit,
+      warnPercent: p.warnPercent >= 1 && p.warnPercent <= 100 ? p.warnPercent : defaults.warnPercent,
+      notifiedWarn: !!p.notifiedWarn, notifiedLimit: !!p.notifiedLimit
+    };
+    const e = p.entries || {};
+    for (const dk in e) if (typeof e[dk] === 'number') entries[dk] = round2((entries[dk] || 0) + e[dk]);
+  });
+  state = { entries, cycles, defaults };
+}
+async function loadState() {
+  const raw = await readStoredValue(STORE_KEY);
+  if (raw) {
+    try {
+      const p = JSON.parse(raw);
+      state = { entries: p.entries || {}, cycles: p.cycles || {}, defaults: { ...FACTORY, ...(p.defaults || {}) } };
+      return;
+    } catch (e) {
+      try { localStorage.setItem(STORE_KEY + '-backup', raw); } catch (e2) {}
+    }
+  }
+  migrateLegacy();
+  await save();
+}
+
+// ---------- ecrã ----------
+function render() {
+  const { start, end } = boundsOf(slot);
+  cycleLabelEl.textContent = `${start.getDate()} ${MONTH_NAMES[start.getMonth()]} – ${end.getDate()} ${MONTH_NAMES[end.getMonth()]}`;
+  renderGrid(start, end);
+  renderSummary(start, end);
+  selectedDateStr = null;
+  addPanel.classList.remove('active');
+  clearBtn.disabled = true;
+  if (settingsPanel.classList.contains('active')) fillSettingsInputs();
+}
+
+function renderGrid(start, end) {
+  gridEl.innerHTML = '';
+  const offset = (start.getDay() + 6) % 7;
+  for (let i = 0; i < offset; i++) {
+    const blank = document.createElement('div');
+    blank.className = 'cell empty';
+    gridEl.appendChild(blank);
+  }
+  const cur = new Date(start);
+  while (cur <= end) {
+    const key = toKey(cur);
+    const dateObj = new Date(cur);
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    if (cur.getDate() === 1 || key === toKey(start)) {
+      cell.classList.add('month-start');
+      cell.dataset.month = MONTH_NAMES[cur.getMonth()];
+    }
+    const amt = state.entries[key];
+    cell.innerHTML = `<div class="num">${cur.getDate()}</div>${amt ? `<div class="amt">${amt}</div>` : ''}`;
+    cell.dataset.key = key;
+    cell.addEventListener('click', () => selectDay(key, dateObj));
+    gridEl.appendChild(cell);
+    cur.setDate(cur.getDate() + 1);
+  }
+}
+
+function selectDay(key, dateObj) {
+  selectedDateStr = key;
+  document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
+  const el = gridEl.querySelector(`[data-key="${key}"]`);
+  if (el) el.classList.add('selected');
+  const weekday = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][dateObj.getDay()];
+  addLabel.textContent = `${weekday}, ${dateObj.getDate()} de ${MONTH_NAMES_FULL[dateObj.getMonth()]}`;
+  amountInput.value = '';
+  clearBtn.disabled = !Object.prototype.hasOwnProperty.call(state.entries, key);
+  addPanel.classList.add('active');
+  amountInput.focus();
+}
+
+function renderSummary(start, end) {
+  if (!start) ({ start, end } = boundsOf(slot));
+  const meta = cycleMeta(slot);
+  const total = cycleTotal(start, end);
+  totalValEl.textContent = total;
+  limitValEl.textContent = meta.limit;
+  const pct = Math.min(100, (total / meta.limit) * 100);
+  barFillEl.style.width = pct + '%';
+  barFillEl.classList.remove('warn', 'danger');
+  if (total >= meta.limit) barFillEl.classList.add('danger');
+  else if (total >= meta.limit * (meta.warnPercent / 100)) barFillEl.classList.add('warn');
+  checkNotifications(total, meta);
+}
+
+function checkNotifications(total, meta) {
+  const c = state.cycles[slotKey(slot)];
+  if (c) { // reabre os avisos se o total voltou a ficar abaixo
+    if (total < meta.limit) c.notifiedLimit = false;
+    if (total < meta.limit * (meta.warnPercent / 100)) c.notifiedWarn = false;
+  }
+  const m = c ? cycleMeta(slot) : meta;
+  if (total >= meta.limit && !m.notifiedLimit) {
+    freeze(slot).notifiedLimit = true;
+    fireNotification(`Limite atingido: ${total}/${meta.limit}`, 'Já chegaste ao limite deste ciclo.');
+    save();
+  } else if (total >= meta.limit * (meta.warnPercent / 100) && total < meta.limit && !m.notifiedWarn) {
+    freeze(slot).notifiedWarn = true;
+    fireNotification(`A aproximar-se do limite: ${total}/${meta.limit}`, 'Estás perto do limite deste ciclo.');
+    save();
+  }
+}
+
+function fireNotification(title, body) {
+  try { if (window.Notification && Notification.permission === 'granted') new Notification(title, { body }); } catch (e) {}
+}
+
+function changeCycle(n) {
+  slot = shiftSlot(slot, n);
+  render();
+}
+document.getElementById('prevBtn').addEventListener('click', () => changeCycle(-1));
+document.getElementById('nextBtn').addEventListener('click', () => changeCycle(1));
+
+async function addAmount() {
+  const val = parseFloat(amountInput.value);
+  if (!selectedDateStr || isNaN(val) || val <= 0) return;
+  const key = selectedDateStr;
+  state.entries[key] = round2((state.entries[key] || 0) + val);
+  await save();
+  const { start, end } = boundsOf(slot);
+  renderGrid(start, end);
+  renderSummary(start, end);
+  const el = gridEl.querySelector(`[data-key="${key}"]`);
+  if (el) el.classList.add('selected');
+  clearBtn.disabled = false;
+  amountInput.value = '';
+}
+
+async function clearDay() {
+  if (!selectedDateStr || !Object.prototype.hasOwnProperty.call(state.entries, selectedDateStr)) return;
+  const key = selectedDateStr;
+  delete state.entries[key];
+  await save();
+  const { start, end } = boundsOf(slot);
+  renderGrid(start, end);
+  renderSummary(start, end);
+  const el = gridEl.querySelector(`[data-key="${key}"]`);
+  if (el) el.classList.add('selected');
+  amountInput.value = '';
+  clearBtn.disabled = true;
+  setStatus('Valor limpo');
+}
+
+document.getElementById('addBtn').addEventListener('click', addAmount);
+clearBtn.addEventListener('click', clearDay);
+document.getElementById('forceSaveBtn').addEventListener('click', () => save(true));
+amountInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); addAmount(); }
+});
+
+// ---------- definições do ciclo aberto ----------
+function fillSettingsInputs() {
+  const meta = cycleMeta(slot);
+  const { start, end } = boundsOf(slot);
+  const span = `${start.getDate()} ${MONTH_NAMES[start.getMonth()]} – ${end.getDate()} ${MONTH_NAMES[end.getMonth()]}`;
+  document.getElementById('applyFutureChk').checked = false;
+  startDayInput.value = meta.startDay;
+  limitInput.value = meta.limit;
+  warnInput.value = meta.warnPercent;
+  document.getElementById('cycleStartLabel').textContent = `Este ciclo começa no dia (${span})`;
+  cycleSettingsLabel.textContent = 'Limite deste ciclo';
+}
+
+async function saveSettings() {
+  const day = parseInt(startDayInput.value, 10);
+  const limitVal = parseFloat(limitInput.value);
+  const warnVal = parseFloat(warnInput.value);
+  if (!okDay(day)) { setStatus('Usa um dia entre 1 e 31'); return; }
+  if (isNaN(limitVal) || limitVal <= 0) { setStatus('Limite inválido'); return; }
+  if (isNaN(warnVal) || warnVal < 1 || warnVal > 100) { setStatus('Aviso: usa uma % entre 1 e 100'); return; }
+
+  const applyFuture = document.getElementById('applyFutureChk').checked;
+  freezeRange(); // os outros ciclos ficam com os valores que têm agora
+  const c = state.cycles[slotKey(slot)];
+  c.startDay = day; c.limit = limitVal; c.warnPercent = warnVal;
+  const { start, end } = boundsOf(slot);
+  const total = cycleTotal(start, end);
+  if (total < limitVal) c.notifiedLimit = false;
+  if (total < limitVal * (warnVal / 100)) c.notifiedWarn = false;
+  // Só muda os valores de base (ciclos novos) se o pedires.
+  if (applyFuture) state.defaults = { startDay: day, limit: limitVal, warnPercent: warnVal };
+  await save();
+  settingsPanel.classList.remove('active');
+  setStatus('Definições guardadas');
+  render();
+}
+
+settingsToggle.addEventListener('click', () => {
+  settingsPanel.classList.toggle('active');
+  if (settingsPanel.classList.contains('active')) fillSettingsInputs();
+});
+saveSettingsBtn.addEventListener('click', saveSettings);
+[startDayInput, limitInput, warnInput].forEach(el => el.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); saveSettings(); }
+}));
+
+document.getElementById('enableNotif').addEventListener('click', async () => {
+  if (!window.Notification) { setStatus('Notificações não suportadas neste browser'); return; }
+  const perm = await Notification.requestPermission();
+  setStatus(perm === 'granted' ? 'Notificações ativadas' : 'Permissão não concedida');
+});
+if (!window.Notification) { const n = document.querySelector('.notif-bar'); if (n) n.hidden = true; }
+
+
+// ---------- exportar / importar ----------
+const importPanel = document.getElementById('importPanel');
+const importText = document.getElementById('importText');
+const importMsg = document.getElementById('importMsg');
+function exportPayload() {
+  return { app: 'roupa-com-ciclo', version: 2, exportedAt: new Date().toISOString(), state };
+}
+function exportData() {
+  const text = JSON.stringify(exportPayload(), null, 1);
+  try {
+    const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = `roupa-ciclos-${toKey(today())}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    setStatus('Ficheiro exportado');
+  } catch (e) { showText(text); }
+}
+function showText(text) {
+  importPanel.hidden = false; importText.value = text; importText.focus(); importText.select();
+  importMsg.textContent = 'Seleciona e copia este texto para guardar os dados.';
+}
+async function copyData() {
+  const text = JSON.stringify(exportPayload());
+  try { await navigator.clipboard.writeText(text); setStatus('Dados copiados'); }
+  catch (e) { showText(text); }
+}
+function parseImport(text) {
+  let p;
+  try { p = JSON.parse(text); } catch (e) { throw new Error('Este texto não é um ficheiro de dados válido.'); }
+  const src = p && p.state ? p.state : p;
+  if (!src || typeof src !== 'object') throw new Error('Não encontrei valores nem ciclos neste ficheiro.');
+  const entries = {}, cycles = {};
+  for (const [k, v] of Object.entries(src.entries || {})) {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(k) && typeof v === 'number' && isFinite(v)) entries[k] = v;
+  }
+  for (const [k, c] of Object.entries(src.cycles || {})) {
+    if (!/^\d{4}-\d{2}$/.test(k) || !c || typeof c !== 'object') continue;
+    const o = {};
+    if (okDay(c.startDay)) o.startDay = c.startDay;
+    if (c.limit > 0) o.limit = c.limit;
+    if (c.warnPercent >= 1 && c.warnPercent <= 100) o.warnPercent = c.warnPercent;
+    o.notifiedWarn = !!c.notifiedWarn; o.notifiedLimit = !!c.notifiedLimit;
+    cycles[k] = o;
+  }
+  if (!Object.keys(entries).length && !Object.keys(cycles).length) throw new Error('Não encontrei valores nem ciclos neste ficheiro.');
+  const d = src.defaults || {}, defaults = { ...FACTORY };
+  if (okDay(d.startDay)) defaults.startDay = d.startDay;
+  if (d.limit > 0) defaults.limit = d.limit;
+  if (d.warnPercent >= 1 && d.warnPercent <= 100) defaults.warnPercent = d.warnPercent;
+  return { entries, cycles, defaults };
+}
+function backupBeforeImport() {
+  try { localStorage.setItem('cycles-v2-before-import', JSON.stringify(state)); } catch (e) {}
+}
+async function runImport(mode) {
+  let data;
+  try { data = parseImport(importText.value.trim()); }
+  catch (e) { importMsg.textContent = e.message; return; }
+  backupBeforeImport();
+  let msg;
+  if (mode === 'merge') {
+    let addedE = 0, keptE = 0, addedC = 0, keptC = 0;
+    for (const k in data.entries) { if (k in state.entries) keptE++; else { state.entries[k] = data.entries[k]; addedE++; } }
+    for (const k in data.cycles) { if (k in state.cycles) keptC++; else { state.cycles[k] = data.cycles[k]; addedC++; } }
+    msg = `Acrescentei ${addedE} valores e ${addedC} ciclos. Mantive ${keptE} valores e ${keptC} ciclos que já existiam.`;
+  } else {
+    state = data;
+    msg = `Dados substituídos: ${Object.keys(data.entries).length} valores e ${Object.keys(data.cycles).length} ciclos.`;
+  }
+  await save();
+  slot = slotOfDate(today());
+  render();
+  importText.value = '';
+  importMsg.textContent = msg;
+}
+document.getElementById('exportBtn').addEventListener('click', exportData);
+document.getElementById('copyBtn').addEventListener('click', copyData);
+document.getElementById('importToggle').addEventListener('click', () => { importPanel.hidden = !importPanel.hidden; });
+document.getElementById('importCancel').addEventListener('click', () => { importPanel.hidden = true; });
+document.getElementById('mergeBtn').addEventListener('click', () => runImport('merge'));
+document.getElementById('replaceBtn').addEventListener('click', () => runImport('replace'));
+document.getElementById('importFile').addEventListener('change', (e) => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => { importText.value = String(r.result || ''); importMsg.textContent = `Ficheiro "${f.name}" carregado. Escolhe Juntar ou Substituir.`; };
+  r.onerror = () => { importMsg.textContent = 'Não consegui ler o ficheiro.'; };
+  r.readAsText(f);
+  e.target.value = '';
+});
+
+setInterval(() => save(false), 30000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') save(false); });
+
+(async () => {
+  await loadState();
+  slot = slotOfDate(today());
+  render();
+})();
+</script>
+</body>
+</html>
