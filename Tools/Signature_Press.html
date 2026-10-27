@@ -1,0 +1,597 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Signature Press</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@1,6..96,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a bookbinder's cutting mat. Grid ground, flat panels, mono numerals for measurements and page numbers. */
+:root {
+  --bg: #e8eee7;
+  --grid: rgba(31, 74, 56, 0.09);
+  --surface: #f7f9f5;
+  --surface2: #edf2eb;
+  --fg: #17261f;
+  --muted: #56675e;
+  --line: #c3d0c5;
+  --accent: #23684d;
+  --accent-fg: #f4faf6;
+  --fold: #b0701a;
+  --display: "Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12211a;
+    --grid: rgba(160, 220, 190, 0.07);
+    --surface: #1a2d24;
+    --surface2: #223a2e;
+    --fg: #e4eee7;
+    --muted: #9db3a5;
+    --line: #33503f;
+    --accent: #6cc79b;
+    --accent-fg: #0f1f17;
+    --fold: #e2ae4b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12211a;
+  --grid: rgba(160, 220, 190, 0.07);
+  --surface: #1a2d24;
+  --surface2: #223a2e;
+  --fg: #e4eee7;
+  --muted: #9db3a5;
+  --line: #33503f;
+  --accent: #6cc79b;
+  --accent-fg: #0f1f17;
+  --fold: #e2ae4b;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--fg);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 56px;
+}
+.wrap { max-width: 880px; margin: 0 auto; display: grid; gap: 18px; }
+header { display: grid; gap: 6px; padding-bottom: 4px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--display); font-style: italic; font-weight: 600; font-size: clamp(2.2rem, 8vw, 3.4rem); line-height: 1.02; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+header p { margin: 0; max-width: 56ch; color: var(--muted); }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 3px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+h2 { font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.note { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 66ch; }
+.note b { color: var(--fg); font-weight: 600; }
+
+.drop { display: grid; gap: 4px; justify-items: start; border: 1.5px dashed var(--fold); border-radius: 3px; padding: 18px; background: var(--surface2); cursor: pointer; }
+.drop:hover, .drop.over { border-style: solid; }
+.drop:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.drop input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.drop strong { font-weight: 600; font-size: 16px; }
+.drop span { font-size: 13.5px; color: var(--muted); }
+.fileline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.fileline .name { font-family: var(--mono); font-size: 13.5px; overflow-wrap: anywhere; min-width: 0; }
+
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px 16px; }
+.field { display: grid; gap: 5px; align-content: start; min-width: 0; }
+.field label, .field .lab { font-size: 13px; font-weight: 600; }
+.field small { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+select, input[type="number"] {
+  width: 100%; min-width: 0; font: inherit; font-size: 16px; color: var(--fg);
+  background: var(--surface2); border: 1px solid var(--line); border-radius: 3px; padding: 9px 10px;
+}
+input[type="number"] { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+input[type="number"]:disabled { color: var(--muted); }
+select:focus-visible, input:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+.check input { margin-top: 4px; width: 17px; height: 17px; accent-color: var(--accent); flex: none; }
+
+button { font: inherit; cursor: pointer; border-radius: 3px; }
+.primary { background: var(--accent); color: var(--accent-fg); border: 0; padding: 12px 20px; font-weight: 600; font-size: 15.5px; }
+.primary:disabled { opacity: 0.45; cursor: not-allowed; }
+.quiet { background: transparent; color: var(--fg); border: 1px solid var(--line); padding: 5px 11px; font-size: 13px; }
+.quiet:hover { border-color: var(--accent); }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 16px; margin: 0; }
+.stats div { display: grid; gap: 2px; border-left: 2px solid var(--fold); padding-left: 10px; min-width: 0; }
+.stats dt { font-size: 12px; color: var(--muted); }
+.stats dd { margin: 0; font-family: var(--mono); font-size: 15px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+
+.planhead, .sheetrow { display: grid; grid-template-columns: 3.6rem 1fr 1fr; gap: 8px; align-items: center; }
+.planhead { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.planhead span:nth-child(n+2) { text-align: center; }
+.plan { display: grid; gap: 8px; }
+details { border: 1px solid var(--line); border-radius: 3px; background: var(--surface); }
+details[open] > summary { border-bottom: 1px solid var(--line); }
+summary { cursor: pointer; padding: 10px 12px; display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: baseline; font-weight: 600; font-size: 14px; list-style-position: inside; }
+summary .meta { font-family: var(--mono); font-weight: 400; font-size: 12.5px; color: var(--muted); }
+.sheets { display: grid; gap: 8px; padding: 12px; }
+.sn { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+.face { display: grid; grid-template-columns: 1fr 1fr; position: relative; background: var(--surface2); border: 1px solid var(--line); font-family: var(--mono); font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.face::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; border-left: 1.5px dashed var(--fold); }
+.face .p { padding: 7px 0; text-align: center; min-width: 0; }
+.face .p.blank { color: var(--muted); }
+
+#msg { min-height: 1.4em; margin: 0; font-size: 13.5px; }
+#msg.err { color: var(--fold); font-weight: 600; }
+.exportrow { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+ol.how { margin: 0; padding-left: 1.3rem; display: grid; gap: 8px; max-width: 68ch; }
+ol.how li::marker { font-family: var(--mono); color: var(--fold); font-weight: 500; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Imposition for hand-bound books</div>
+    <h1>Signature Press</h1>
+    <p>Lay out a PDF as folded sheets. Print them double-sided, fold, nest and sew them into a real book.</p>
+  </header>
+
+  <section class="panel" aria-labelledby="h-src">
+    <h2 id="h-src">Source</h2>
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept="application/pdf,.pdf">
+      <strong>Choose a PDF or drop it here</strong>
+      <span>The file is read inside this page and is never uploaded.</span>
+    </label>
+    <div class="fileline" id="fileline" hidden>
+      <span class="name" id="fname"></span>
+      <button type="button" class="quiet" id="clear">Remove</button>
+    </div>
+    <p class="note" id="srcnote"></p>
+  </section>
+
+  <section class="panel" aria-labelledby="h-set">
+    <h2 id="h-set">Sheet and binding</h2>
+    <div class="fields">
+      <div class="field">
+        <label for="paper">Paper</label>
+        <select id="paper">
+          <option value="a4" selected>A4 · 210 × 297 mm</option>
+          <option value="a3">A3 · 297 × 420 mm</option>
+          <option value="a5">A5 · 148 × 210 mm</option>
+          <option value="letter">Letter · 8.5 × 11 in</option>
+          <option value="legal">Legal · 8.5 × 14 in</option>
+          <option value="tabloid">Tabloid · 11 × 17 in</option>
+        </select>
+        <small>Each sheet prints two pages per side, so the book page is half the sheet.</small>
+      </div>
+      <div class="field">
+        <label for="persig">Sheets per signature</label>
+        <select id="persig">
+          <option value="1">1 sheet · 4 pages</option>
+          <option value="2">2 sheets · 8 pages</option>
+          <option value="3">3 sheets · 12 pages</option>
+          <option value="4" selected>4 sheets · 16 pages</option>
+          <option value="5">5 sheets · 20 pages</option>
+          <option value="6">6 sheets · 24 pages</option>
+          <option value="8">8 sheets · 32 pages</option>
+          <option value="all">One booklet (all sheets nested)</option>
+        </select>
+        <small>4 to 6 sheets of ordinary paper sew and fold cleanly.</small>
+      </div>
+      <div class="field">
+        <label for="bind">Spine on the</label>
+        <select id="bind">
+          <option value="ltr" selected>Left (most languages)</option>
+          <option value="rtl">Right (Arabic, Hebrew, Japanese)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="flip">Duplex flip</label>
+        <select id="flip">
+          <option value="short" selected>Short edge</option>
+          <option value="long">Long edge</option>
+        </select>
+        <small>Print one sheet first. If the back is upside down, switch this.</small>
+      </div>
+      <div class="field">
+        <label for="pages">Pages in the book</label>
+        <input type="number" id="pages" min="1" max="3000" step="1" value="40" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label for="lead">Blank pages at the front</label>
+        <input type="number" id="lead" min="0" max="8" step="1" value="0" inputmode="numeric">
+        <small>For endpapers or a half-title.</small>
+      </div>
+      <div class="field">
+        <label for="margin">Page margin (mm)</label>
+        <input type="number" id="margin" min="0" max="30" step="0.5" value="6" inputmode="decimal">
+        <small>Home printers cannot print within about 5 mm of the paper edge.</small>
+      </div>
+      <div class="field">
+        <label for="gutter">Extra spine gutter (mm)</label>
+        <input type="number" id="gutter" min="0" max="30" step="0.5" value="0" inputmode="decimal">
+        <small>Added on the spine side of every page.</small>
+      </div>
+      <div class="field">
+        <label for="creep">Creep per sheet (mm)</label>
+        <input type="number" id="creep" min="0" max="2" step="0.05" value="0" inputmode="decimal">
+        <small>Nudges inner sheets toward the spine so thick signatures trim evenly. Leave at 0 for 4 sheets or fewer.</small>
+      </div>
+      <div class="field">
+        <label for="scale">Page scaling</label>
+        <select id="scale">
+          <option value="fit" selected>Fit each page to the space</option>
+          <option value="orig">Original size, shrink only if too big</option>
+        </select>
+      </div>
+    </div>
+    <label class="check"><input type="checkbox" id="marks" checked><span>Add printer's marks: fold ticks, a spine mark that steps down for each signature, and a small sheet label.</span></label>
+  </section>
+
+  <section class="panel" aria-labelledby="h-plan">
+    <h2 id="h-plan">Plan</h2>
+    <dl class="stats">
+      <div><dt>Book page size</dt><dd id="s-size">-</dd></div>
+      <div><dt>Pages with blanks</dt><dd id="s-pages">-</dd></div>
+      <div><dt>Signatures</dt><dd id="s-sigs">-</dd></div>
+      <div><dt>Sheets of paper</dt><dd id="s-sheets">-</dd></div>
+    </dl>
+    <div class="planhead"><span>Sheet</span><span>Front</span><span>Back</span></div>
+    <div class="plan" id="plan"></div>
+    <p class="note">Each box is one side of a sheet. The dashed line is the fold. Page numbers are the numbers in your PDF, and a dash is a blank page added to complete a sheet.</p>
+  </section>
+
+  <section class="panel" aria-labelledby="h-exp">
+    <h2 id="h-exp">Export</h2>
+    <div class="fields">
+      <div class="field">
+        <label for="which">Signatures to export</label>
+        <select id="which"></select>
+        <small>Export one at a time if your printer struggles with a long job.</small>
+      </div>
+    </div>
+    <div class="exportrow">
+      <button type="button" class="primary" id="go" disabled>Export print PDF</button>
+    </div>
+    <p id="msg" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="panel" aria-labelledby="h-how">
+    <h2 id="h-how">Printing and folding</h2>
+    <ol class="how">
+      <li>Print the exported PDF double-sided at actual size, with scaling turned off.</li>
+      <li>Print a single signature first and check that the back of each sheet lines up with the front.</li>
+      <li>Fold every sheet in half along the dashed line and crease it with a bone folder.</li>
+      <li>Nest the sheets of one signature, with sheet 1 on the outside.</li>
+      <li>Stack the signatures in order. The spine marks form a staircase when the order is right.</li>
+      <li>Sew or glue the spine, then trim the three open edges.</li>
+    </ol>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script>
+(function () {
+  var MM = 72 / 25.4;
+  var PAPER = {
+    a3: { name: "A3", w: 841.89, h: 1190.55, book: "A4 (210 × 297 mm)" },
+    a4: { name: "A4", w: 595.28, h: 841.89, book: "A5 (148 × 210 mm)" },
+    a5: { name: "A5", w: 419.53, h: 595.28, book: "A6 (105 × 148 mm)" },
+    letter: { name: "Letter", w: 612, h: 792, book: "Half letter (5.5 × 8.5 in)" },
+    legal: { name: "Legal", w: 612, h: 1008, book: "7 × 8.5 in" },
+    tabloid: { name: "Tabloid", w: 792, h: 1224, book: "Letter (8.5 × 11 in)" }
+  };
+
+  function $(id) { return document.getElementById(id); }
+
+  var srcDoc = null, srcName = "", pageCount = 40, dl = null, dlChecked = false, busy = false;
+
+  /* ---------- imposition ---------- */
+  function makePlan(n, o) {
+    var total = o.lead + n;
+    var k = o.perSig === "all" ? Math.max(1, Math.ceil(total / 4)) : parseInt(o.perSig, 10);
+    function map(v) { var q = v - o.lead; return q >= 0 && q < n ? q + 1 : null; }
+    var sigs = [], off = 0;
+    while (off < total) {
+      var rem = total - off;
+      var sheets = Math.min(k, Math.ceil(rem / 4));
+      var P = sheets * 4, list = [];
+      for (var s = 0; s < sheets; s++) {
+        var f = [map(off + P - 1 - 2 * s), map(off + 2 * s)];
+        var b = [map(off + 2 * s + 1), map(off + P - 2 - 2 * s)];
+        if (o.rtl) { f = [f[1], f[0]]; b = [b[1], b[0]]; }
+        list.push({ front: f, back: b });
+      }
+      sigs.push({ sheets: list, P: P, off: off, first: map(off), last: map(off + P - 1) });
+      off += P;
+    }
+    return { sigs: sigs, total: total, k: k };
+  }
+
+  function num(id, lo, hi, dflt) {
+    var v = parseFloat($(id).value);
+    if (!isFinite(v)) v = dflt;
+    return Math.min(hi, Math.max(lo, v));
+  }
+
+  function opts() {
+    return {
+      paper: $("paper").value,
+      perSig: $("persig").value,
+      rtl: $("bind").value === "rtl",
+      flip: $("flip").value,
+      lead: Math.round(num("lead", 0, 8, 0)),
+      margin: num("margin", 0, 30, 6),
+      gutter: num("gutter", 0, 30, 0),
+      creep: num("creep", 0, 2, 0),
+      scale: $("scale").value,
+      marks: $("marks").checked
+    };
+  }
+
+  function pageRange(sig) {
+    var lo = null, hi = null;
+    sig.sheets.forEach(function (sh) {
+      [].concat(sh.front, sh.back).forEach(function (p) {
+        if (p == null) return;
+        if (lo == null || p < lo) lo = p;
+        if (hi == null || p > hi) hi = p;
+      });
+    });
+    return lo == null ? "blank" : (lo === hi ? "page " + lo : "pages " + lo + "–" + hi);
+  }
+
+  function cell(p) { return '<span class="p' + (p == null ? " blank" : "") + '">' + (p == null ? "–" : p) + "</span>"; }
+  function face(a) { return '<div class="face">' + cell(a[0]) + cell(a[1]) + "</div>"; }
+
+  /* ---------- rendering ---------- */
+  function render() {
+    var o = opts();
+    var plan = makePlan(pageCount, o);
+    var paper = PAPER[o.paper];
+    var sheetsTotal = plan.sigs.reduce(function (a, s) { return a + s.sheets.length; }, 0);
+
+    $("s-size").textContent = paper.book;
+    $("s-pages").textContent = plan.total + " (" + (plan.sigs.reduce(function (a, s) { return a + s.P; }, 0) - pageCount) + " blank)";
+    $("s-sigs").textContent = plan.sigs.length + " × " + plan.k + (plan.k === 1 ? " sheet" : " sheets");
+    $("s-sheets").textContent = sheetsTotal + " (" + sheetsTotal * 2 + " printed sides)";
+
+    var html = "";
+    plan.sigs.forEach(function (sig, i) {
+      html += "<details" + (i === 0 ? " open" : "") + "><summary>Signature " + (i + 1) +
+        ' <span class="meta">' + pageRange(sig) + " · " + sig.sheets.length + (sig.sheets.length === 1 ? " sheet" : " sheets") + "</span></summary>" +
+        '<div class="sheets">';
+      sig.sheets.forEach(function (sh, s) {
+        html += '<div class="sheetrow"><span class="sn">Sheet ' + (s + 1) + "</span>" + face(sh.front) + face(sh.back) + "</div>";
+      });
+      html += "</div></details>";
+    });
+    $("plan").innerHTML = html;
+
+    var sel = $("which"), prev = sel.value;
+    var opt = '<option value="all">All ' + plan.sigs.length + (plan.sigs.length === 1 ? " signature" : " signatures") + " · " + sheetsTotal + " sheets</option>";
+    plan.sigs.forEach(function (sig, i) {
+      opt += '<option value="' + i + '">Signature ' + (i + 1) + " · " + pageRange(sig) + "</option>";
+    });
+    sel.innerHTML = opt;
+    if (Array.prototype.some.call(sel.options, function (x) { return x.value === prev; })) sel.value = prev;
+
+    updateSrcNote(o, paper);
+    updateExportState();
+  }
+
+  function updateSrcNote(o, paper) {
+    var note = $("srcnote");
+    if (!srcDoc) {
+      note.textContent = "No PDF loaded yet. The plan uses an example of " + pageCount + " pages. Change the page count to try other lengths.";
+      return;
+    }
+    var sz = srcDoc.getPage(0).getSize();
+    var W = Math.max(paper.w, paper.h), H = Math.min(paper.w, paper.h);
+    var bw = W / 2 - 2 * o.margin * MM - o.gutter * MM, bh = H - 2 * o.margin * MM;
+    var sc = Math.min(bw / sz.width, bh / sz.height);
+    if (o.scale === "orig") sc = Math.min(1, sc);
+    note.innerHTML = "Page 1 measures <b>" + Math.round(sz.width / MM) + " × " + Math.round(sz.height / MM) + " mm</b> and will print at <b>" +
+      Math.round(sc * 100) + "%</b> of its size. For a book at the exact trim size, set your PDF's page size to " + paper.book.split(" (")[0] + " before loading it here.";
+  }
+
+  function setMsg(text, isErr) {
+    var m = $("msg");
+    m.textContent = text || "";
+    m.className = isErr ? "err" : "";
+  }
+
+  function updateExportState() {
+    $("go").disabled = busy || !srcDoc || !dl;
+    if (dlChecked && !dl && !$("msg").textContent) {
+      setMsg("Saving files is not available in this view. Open the page in the Claude app or on claude.ai to export.", true);
+    }
+  }
+
+  /* ---------- loading ---------- */
+  async function loadFile(file) {
+    if (!file) return;
+    setMsg("Reading PDF…");
+    try {
+      var buf = await file.arrayBuffer();
+      var doc = await PDFLib.PDFDocument.load(buf, { ignoreEncryption: true });
+      if (doc.getPageCount() < 1) throw new Error("empty");
+      srcDoc = doc;
+      srcName = file.name;
+      pageCount = doc.getPageCount();
+      $("pages").value = pageCount;
+      $("pages").disabled = true;
+      $("fname").textContent = file.name + " · " + pageCount + (pageCount === 1 ? " page" : " pages");
+      $("fileline").hidden = false;
+      setMsg("");
+    } catch (e) {
+      setMsg("That file could not be read. It may be damaged or protected with a password.", true);
+    }
+    render();
+  }
+
+  function clearFile() {
+    srcDoc = null; srcName = "";
+    $("file").value = "";
+    $("pages").disabled = false;
+    pageCount = Math.round(num("pages", 1, 3000, 40));
+    $("pages").value = pageCount;
+    $("fileline").hidden = true;
+    setMsg("");
+    render();
+  }
+
+  /* ---------- export ---------- */
+  function tick() { return new Promise(function (r) { setTimeout(r, 0); }); }
+
+  async function build() {
+    var L = PDFLib, o = opts();
+    var plan = makePlan(pageCount, o);
+    var paper = PAPER[o.paper];
+    var W = Math.max(paper.w, paper.h), H = Math.min(paper.w, paper.h);
+    var which = $("which").value;
+    var chosen = which === "all" ? plan.sigs.map(function (_, i) { return i; }) : [parseInt(which, 10)];
+
+    var used = {};
+    chosen.forEach(function (i) {
+      plan.sigs[i].sheets.forEach(function (sh) {
+        [].concat(sh.front, sh.back).forEach(function (p) { if (p != null) used[p] = true; });
+      });
+    });
+    var idx = Object.keys(used).map(Number).sort(function (a, b) { return a - b; });
+
+    var out = await L.PDFDocument.create();
+    var font = await out.embedFont(L.StandardFonts.Courier);
+    var srcPages = srcDoc.getPages();
+    var embedded = await out.embedPages(idx.map(function (p) { return srcPages[p - 1]; }));
+    var emap = {}, rmap = {};
+    idx.forEach(function (p, j) {
+      emap[p] = embedded[j];
+      rmap[p] = ((srcPages[p - 1].getRotation().angle % 360) + 360) % 360;
+    });
+
+    var gray = L.rgb(0.35, 0.35, 0.35), black = L.rgb(0, 0, 0);
+    var m = o.margin * MM, g = o.gutter * MM;
+    var step = Math.min(9 * MM, (H - 25 * MM) / Math.max(1, plan.sigs.length - 1));
+
+    function drawPanel(page, p, isLeft, creepShift) {
+      if (p == null) return;
+      var e = emap[p], rot = rmap[p];
+      var ew = e.width, eh = e.height;
+      if (rot === 90 || rot === 270) { var t = ew; ew = eh; eh = t; }
+      var x0, x1;
+      if (isLeft) { x0 = m + creepShift; x1 = W / 2 - m - g + creepShift; }
+      else { x0 = W / 2 + m + g - creepShift; x1 = W - m - creepShift; }
+      var bw = Math.max(1, x1 - x0), bh = Math.max(1, H - 2 * m);
+      var sc = Math.min(bw / ew, bh / eh);
+      if (o.scale === "orig") sc = Math.min(1, sc);
+      var dw = ew * sc, dh = eh * sc;
+      var px = x0 + (bw - dw) / 2, py = m + (bh - dh) / 2;
+      var opt = { xScale: sc, yScale: sc };
+      if (rot === 0) { opt.x = px; opt.y = py; }
+      else if (rot === 90) { opt.x = px; opt.y = py + dh; opt.rotate = L.degrees(-90); }
+      else if (rot === 180) { opt.x = px + dw; opt.y = py + dh; opt.rotate = L.degrees(180); }
+      else { opt.x = px + dw; opt.y = py; opt.rotate = L.degrees(90); }
+      page.drawPage(e, opt);
+    }
+
+    function drawFace(si, s, sh, side) {
+      var page = out.addPage([W, H]);
+      if (side === "back" && o.flip === "long") page.setRotation(L.degrees(180));
+      var pair = side === "front" ? sh.front : sh.back;
+      var shift = s * o.creep * MM;
+      drawPanel(page, pair[0], true, shift);
+      drawPanel(page, pair[1], false, shift);
+      if (o.marks) {
+        var cx = W / 2;
+        page.drawLine({ start: { x: cx, y: 6 * MM }, end: { x: cx, y: 10 * MM }, thickness: 0.6, color: gray });
+        page.drawLine({ start: { x: cx, y: H - 10 * MM }, end: { x: cx, y: H - 6 * MM }, thickness: 0.6, color: gray });
+        page.drawText("sig " + (si + 1) + "/" + plan.sigs.length + " · sheet " + (s + 1) + "/" + plan.sigs[si].sheets.length + " · " + side, {
+          x: cx + 2.5 * MM, y: H - 8.2 * MM, size: 5.5, font: font, color: gray
+        });
+        if (side === "front" && s === 0 && plan.sigs.length > 1) {
+          page.drawRectangle({ x: cx - 1 * MM, y: H - 12 * MM - 5 * MM - si * step, width: 2 * MM, height: 5 * MM, color: black });
+        }
+      }
+    }
+
+    var totalSheets = chosen.reduce(function (a, i) { return a + plan.sigs[i].sheets.length; }, 0), done = 0;
+    for (var c = 0; c < chosen.length; c++) {
+      var si = chosen[c], sig = plan.sigs[si];
+      for (var s = 0; s < sig.sheets.length; s++) {
+        drawFace(si, s, sig.sheets[s], "front");
+        drawFace(si, s, sig.sheets[s], "back");
+        done++;
+        if (done % 4 === 0) { $("go").textContent = "Building " + done + " / " + totalSheets + "…"; await tick(); }
+      }
+    }
+    var bytes = await out.save();
+    return { bytes: bytes, which: which, paper: paper.name, sheets: totalSheets };
+  }
+
+  async function doExport() {
+    if (!srcDoc || !dl || busy) return;
+    busy = true; updateExportState();
+    setMsg("");
+    var label = $("go").textContent;
+    try {
+      var r = await build();
+      var base = (srcName || "book").replace(/\.pdf$/i, "").replace(/[^\w\-]+/g, "-").replace(/^-+|-+$/g, "") || "book";
+      var name = base + "-signatures-" + r.paper + (r.which === "all" ? "" : "-sig" + (parseInt(r.which, 10) + 1)) + ".pdf";
+      await dl.save({ filename: name, data: new Blob([r.bytes], { type: "application/pdf" }) });
+      setMsg("Saved " + r.sheets * 2 + " printed sides (" + r.sheets + " sheets).");
+    } catch (e) {
+      var code = e && e.code;
+      if (code === "declined") setMsg("Save cancelled.");
+      else if (code === "rate_limited") setMsg("Another save prompt is open. Answer it, then try again.", true);
+      else if (code === "unavailable" || code === "not_granted" || code === "capability_disabled" || code === "capability_removed") {
+        dl = null; setMsg("Saving files is not available in this view. Open the page in the Claude app or on claude.ai to export.", true);
+      } else setMsg("The PDF could not be built. Try a smaller range of signatures, or another copy of the file.", true);
+    }
+    busy = false;
+    $("go").textContent = label.indexOf("Building") === 0 ? "Export print PDF" : label;
+    updateExportState();
+  }
+
+  /* ---------- wiring ---------- */
+  ["paper", "persig", "bind", "flip", "scale", "marks", "lead", "margin", "gutter", "creep"].forEach(function (id) {
+    $(id).addEventListener("input", render);
+    $(id).addEventListener("change", render);
+  });
+  $("pages").addEventListener("input", function () {
+    if (srcDoc) return;
+    pageCount = Math.round(num("pages", 1, 3000, 40));
+    render();
+  });
+  $("file").addEventListener("change", function (e) { loadFile(e.target.files && e.target.files[0]); });
+  $("clear").addEventListener("click", clearFile);
+  $("go").addEventListener("click", doExport);
+
+  var drop = $("drop");
+  ["dragenter", "dragover"].forEach(function (ev) {
+    drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("over"); });
+  });
+  ["dragleave", "drop"].forEach(function (ev) {
+    drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("over"); });
+  });
+  drop.addEventListener("drop", function (e) {
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) loadFile(f);
+  });
+
+  render();
+
+  (async function () {
+    try { dl = (window.claude && window.claude.use) ? await window.claude.use("downloads") : null; } catch (e) { dl = null; }
+    dlChecked = true;
+    updateExportState();
+  })();
+})();
+</script>
+
+</body></html>
