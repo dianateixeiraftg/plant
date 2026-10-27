@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Garden Log</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%235C7048' d='M30 58V31C18 32 9 25 8 12c12-1 23 5 24 17 3-12 12-19 25-18-1 14-10 22-23 21v26z'/%3E%3Cpath fill='%23A15C38' d='M16 52h32l-4 10H20z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<style>
+  :root{
+    --paper:#F5F1E4;
+    --card:#FFFDF8;
+    --ink:#242A1D;
+    --ink-soft:#5B6350;
+    --forest:#2B3B27;
+    --moss:#5C7048;
+    --moss-light:#EDF0E2;
+    --sun:#C6961F;
+    --sun-light:#F7ECD2;
+    --clay:#A15C38;
+    --clay-light:#F3E2D6;
+    --line:#DED4B8;
+    --danger:#B3492F;
+    --danger-light:#F5DDD3;
+    --radius:16px;
+    --radius-sm:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Work Sans',sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:78px;
+  }
+  h1,h2,h3,.display{
+    font-family:'Fraunces',serif;
+    color:var(--forest);
+    margin:0;
+    font-weight:600;
+  }
+  button{font-family:inherit;cursor:pointer;}
+  input,textarea,select{font-family:inherit;font-size:15px;}
+  a{color:inherit;}
+
+  /* header */
+  header.top{
+    position:sticky;top:0;z-index:20;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    padding:18px 20px 14px;
+  }
+  header.top .row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .header-actions{display:flex;align-items:center;gap:8px;}
+  .save-state{font-size:11px;color:var(--ink-soft);white-space:nowrap;}
+  header.top h1{font-size:26px;letter-spacing:-0.01em;}
+  header.top .date{font-size:13px;color:var(--ink-soft);}
+  .leafmark{display:inline-block;transform:translateY(1px) rotate(-8deg);margin-right:6px;}
+
+  main{max-width:640px;margin:0 auto;padding:18px 16px 24px;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* cards */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:12px;
+  }
+  .empty{
+    text-align:center;
+    padding:34px 20px;
+    color:var(--ink-soft);
+    border:1px dashed var(--line);
+    border-radius:var(--radius);
+  }
+  .empty .big{font-size:34px;display:block;margin-bottom:8px;}
+
+  /* dashboard task rows */
+  .task-row{
+    display:flex;align-items:center;gap:12px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:12px 14px;
+    margin-bottom:10px;
+  }
+  .task-row .icon{font-size:26px;width:38px;text-align:center;flex-shrink:0;}
+  .task-row .info{flex:1;min-width:0;}
+  .task-row .info .name{font-weight:600;font-size:15px;}
+  .task-row .info .sub{font-size:13px;color:var(--ink-soft);margin-top:1px;}
+  .badge{
+    display:inline-block;font-size:11.5px;font-weight:600;
+    padding:3px 9px;border-radius:999px;margin-top:5px;
+  }
+  .badge.overdue{background:var(--danger-light);color:var(--danger);}
+  .badge.today{background:var(--sun-light);color:var(--sun);}
+  .badge.upcoming{background:var(--moss-light);color:var(--moss);}
+  .btn{
+    border:none;border-radius:999px;padding:9px 16px;font-weight:600;font-size:13.5px;
+    background:var(--forest);color:#fff;white-space:nowrap;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn.secondary{background:transparent;color:var(--forest);border:1.5px solid var(--forest);}
+  .btn.ghost{background:transparent;color:var(--ink-soft);border:1.5px solid var(--line);}
+  .btn.danger{background:var(--danger);}
+  .btn.small{padding:6px 12px;font-size:12.5px;}
+  .btn.full{width:100%;padding:12px;}
+
+  section.dash-group{margin-bottom:22px;}
+  section.dash-group h2{font-size:14px;text-transform:none;letter-spacing:0.01em;color:var(--ink-soft);font-family:'Work Sans',sans-serif;font-weight:600;margin-bottom:10px;}
+
+  /* plant grid */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .plant-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;text-align:left;padding:0;
+  }
+  .plant-card .thumb{
+    width:100%;aspect-ratio:1/1;background:var(--moss-light);
+    display:flex;align-items:center;justify-content:center;font-size:40px;
+    background-size:cover;background-position:center;
+  }
+  .plant-card .body{padding:10px 12px 12px;}
+  .plant-card .name{font-weight:600;font-size:14.5px;}
+  .plant-card .species{font-size:12.5px;color:var(--ink-soft);margin-top:1px;}
+
+  .fab-row{display:flex;justify-content:flex-end;margin-bottom:14px;}
+
+  /* species list */
+  .species-row{
+    display:flex;align-items:center;gap:12px;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:13px 14px;margin-bottom:10px;
+  }
+  .species-row .icon{font-size:26px;width:36px;text-align:center;}
+  .species-row .info{flex:1;}
+  .species-row .info .name{font-weight:600;}
+  .species-row .info .sub{font-size:12.5px;color:var(--ink-soft);margin-top:1px;}
+
+  /* journal */
+  .journal-entry{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);}
+  .journal-entry:last-child{border-bottom:none;}
+  .journal-entry .photo{
+    width:64px;height:64px;border-radius:var(--radius-sm);background:var(--moss-light);
+    background-size:cover;background-position:center;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:22px;
+  }
+  .journal-entry .content{flex:1;min-width:0;}
+  .journal-entry .meta{font-size:12px;color:var(--ink-soft);margin-bottom:2px;}
+  .journal-entry .plant{font-weight:600;color:var(--forest);}
+  .journal-entry .note{font-size:14px;}
+
+  /* settings */
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:5px;}
+  .field input[type=text],.field input[type=email],.field input[type=number],.field input[type=date],.field textarea,.field select{
+    width:100%;border:1.5px solid var(--line);border-radius:var(--radius-sm);
+    padding:9px 11px;background:#fff;color:var(--ink);
+  }
+  .field textarea{resize:vertical;min-height:64px;}
+  .status-pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:5px 11px;border-radius:999px;}
+  .status-pill.on{background:var(--moss-light);color:var(--moss);}
+  .status-pill.off{background:var(--danger-light);color:var(--danger);}
+  .dot{width:7px;height:7px;border-radius:50%;background:currentColor;}
+  .note-box{font-size:12.5px;color:var(--ink-soft);background:var(--sun-light);border-radius:var(--radius-sm);padding:10px 12px;margin-top:10px;}
+
+  /* nav */
+  nav.bottom{
+    position:fixed;bottom:0;left:0;right:0;z-index:20;
+    background:var(--card);border-top:1px solid var(--line);
+    display:flex;justify-content:space-around;padding:8px 4px calc(8px + env(safe-area-inset-bottom));
+  }
+  nav.bottom button{
+    background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;
+    color:var(--ink-soft);font-size:10.5px;font-weight:600;padding:4px 8px;flex:1;
+  }
+  nav.bottom button svg{width:21px;height:21px;stroke:var(--ink-soft);fill:none;stroke-width:1.7;}
+  nav.bottom button.active{color:var(--forest);}
+  nav.bottom button.active svg{stroke:var(--forest);}
+
+  /* modal */
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(36,42,29,0.45);z-index:50;
+    display:none;align-items:flex-end;justify-content:center;
+  }
+  .modal-backdrop.active{display:flex;}
+  .modal{
+    background:var(--paper);width:100%;max-width:640px;max-height:88vh;overflow-y:auto;
+    border-radius:20px 20px 0 0;padding:20px 20px calc(24px + env(safe-area-inset-bottom));
+  }
+  .modal .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .modal .head h2{font-size:19px;}
+  .modal .close{background:none;border:none;font-size:22px;color:var(--ink-soft);line-height:1;padding:4px;}
+  .modal-detail-thumb{width:100%;aspect-ratio:4/3;border-radius:var(--radius);background:var(--moss-light);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:52px;margin-bottom:14px;}
+  .inline-actions{display:flex;gap:8px;margin:12px 0;}
+  .photo-input-label{display:inline-flex;align-items:center;gap:6px;border:1.5px dashed var(--line);border-radius:var(--radius-sm);padding:9px 12px;font-size:13px;color:var(--ink-soft);font-weight:600;}
+  .photo-input-label input{display:none;}
+  .photo-drop{
+    border:2px dashed var(--line);border-radius:var(--radius-sm);padding:18px 12px;
+    text-align:center;color:var(--ink-soft);background:#fff;transition:.2s;
+  }
+  .photo-drop.dragover{border-color:var(--moss);background:var(--moss-light);color:var(--forest);}
+  .photo-preview{width:100%;max-height:230px;object-fit:cover;border-radius:var(--radius-sm);margin-top:10px;display:none;}
+  .search-box{background:var(--moss-light);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;}
+  .search-box p{font-size:12.5px;color:var(--ink-soft);margin:0 0 8px;}
+  .danger-link{color:var(--danger);border-color:var(--danger)!important;}
+  .icon-btn{background:none;border:1.5px solid var(--line);border-radius:999px;width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;padding:0;color:var(--forest);flex-shrink:0;}
+  .icon-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;}
+  .care-row{display:flex;align-items:center;gap:10px;padding:10px 0;}
+  .care-row + .care-row{border-top:1px solid var(--line);}
+  .care-row .ci{font-size:22px;width:30px;text-align:center;flex-shrink:0;}
+  .care-row .cinfo{flex:1;min-width:0;}
+  .care-row .cname{font-weight:600;font-size:14px;}
+  .care-row .csub{font-size:12px;color:var(--ink-soft);}
+  .care-row .badge{margin-top:3px;}
+  .care-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end;}
+  .check-row{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:14px;}
+  .check-row input{width:18px;height:18px;accent-color:var(--moss);flex-shrink:0;}
+  .check-row small{display:block;font-size:12px;color:var(--ink-soft);}
+  .switch-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;font-size:14px;}
+  .switch-row + .switch-row{border-top:1px solid var(--line);}
+  .switch-row small{display:block;font-size:12px;color:var(--ink-soft);}
+  .switch-row input{width:20px;height:20px;accent-color:var(--moss);flex-shrink:0;}
+  .ct-row{display:grid;grid-template-columns:48px 1fr 74px 64px;gap:8px;align-items:center;margin-bottom:10px;}
+  .ct-row input[type=text],.ct-row input[type=number]{width:100%;border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:8px;background:#fff;color:var(--ink);}
+  .ct-row input:disabled{background:var(--moss-light);color:var(--ink-soft);font-size:12px;}
+  .ct-row input[name=icon]{text-align:center;padding:8px 2px;}
+  .ct-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--moss);}
+  .ct-head{font-size:11.5px;font-weight:600;color:var(--ink-soft);margin-bottom:4px;}
+  @media(max-width:480px){.save-state{display:none}.header-actions .btn{padding:7px 10px;}}
+  .toast{
+    position:fixed;bottom:88px;left:50%;transform:translateX(-50%);
+    background:var(--forest);color:#fff;padding:10px 18px;border-radius:999px;
+    font-size:13.5px;font-weight:600;z-index:60;opacity:0;pointer-events:none;transition:opacity .25s;
+  }
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="row">
+    <h1><span class="leafmark">🌱</span>Garden Log</h1>
+    <div class="header-actions">
+      <span class="save-state" id="saveState">Saved</span>
+      <button class="btn small secondary" id="forceSaveBtn" type="button">Save now</button>
+      <button class="icon-btn" id="featuresBtn" type="button" aria-label="Features and care types" title="Features &amp; care types"><svg viewBox="0 0 24 24"><path d="M4 6h9M19 6h1M4 12h3M13 12h7M4 18h11M20 18h0"/><circle cx="16" cy="6" r="2.2"/><circle cx="10" cy="12" r="2.2"/><circle cx="18" cy="18" r="2.2"/></svg></button>
+      <span class="date" id="todayLabel"></span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- DASHBOARD -->
+  <div class="view active" id="view-dashboard"></div>
+  <!-- PLANTS -->
+  <div class="view" id="view-plants"></div>
+  <!-- SPECIES -->
+  <div class="view" id="view-species"></div>
+  <!-- JOURNAL -->
+  <div class="view" id="view-journal"></div>
+  <!-- SETTINGS -->
+  <div class="view" id="view-settings"></div>
+</main>
+
+<nav class="bottom">
+  <button data-tab="dashboard" class="active">
+    <svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8"/><path d="M5 10v9h14v-9"/></svg>
+    Today
+  </button>
+  <button data-tab="plants">
+    <svg viewBox="0 0 24 24"><path d="M12 21V10"/><path d="M12 10c0-4-3-6-7-6 0 4 2 7 7 7"/><path d="M12 10c0-4 3-6 7-6 0 4-2 7-7 7"/></svg>
+    My Plants
+  </button>
+  <button data-tab="species">
+    <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+    Species
+  </button>
+  <button data-tab="journal">
+    <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.4"/><path d="M8 6l1.4-2h5.2L16 6"/></svg>
+    Journal
+  </button>
+  <button data-tab="settings">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.7 7.7 0 000-3l2-1.6-2-3.4-2.4 1a7.6 7.6 0 00-2.6-1.5L14 2h-4l-.4 2.5a7.6 7.6 0 00-2.6 1.5l-2.4-1-2 3.4 2 1.6a7.7 7.7 0 000 3l-2 1.6 2 3.4 2.4-1c.8.7 1.7 1.2 2.6 1.5L10 22h4l.4-2.5c.9-.3 1.8-.8 2.6-1.5l2.4 1 2-3.4z"/></svg>
+    Settings
+  </button>
+</nav>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modalBody"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------------------------------------------------------
+   DATA MODEL
+   species:  {id,name,icon,wateringDays,fertilizeDays,sunlight,notes}
+   plants:   {id,speciesId,nickname,location,addedDate,lastWatered,lastFertilized,photo,
+             care:[{type,every(null = default),last}]}
+   journal:  {id,plantId,date,note,photo}
+   settings: {notifEnabled,checkIntervalMinutes,notifiedToday,
+              email,emailjsServiceId,emailjsTemplateId,emailjsPublicKey,emailEnabled}
+--------------------------------------------------------------- */
+
+const DEFAULT_SPECIES = [
+  {id:'sp_mango', name:'Mango Tree', icon:'🥭', wateringDays:5, fertilizeDays:30,
+    sunlight:'Full sun', notes:'Seedlings need consistently moist soil. Once established, let the top of the soil dry slightly between waterings.'},
+  {id:'sp_lemon', name:'Lemon Tree', icon:'🍋', wateringDays:3, fertilizeDays:21,
+    sunlight:'Full sun, 6+ hours', notes:'Keep soil evenly moist but never soggy — seedlings in small cells dry out fast, check them often.'},
+  {id:'sp_tomato', name:'Tomato', icon:'🍅', wateringDays:2, fertilizeDays:14,
+    sunlight:'Full sun', notes:'Water deeply at the base; avoid wetting the leaves to prevent blight.'},
+  {id:'sp_basil', name:'Basil', icon:'🌿', wateringDays:2, fertilizeDays:21,
+    sunlight:'Full sun / bright light', notes:'Keep soil moist. Pinch off flowers to keep leaf production going.'},
+  {id:'sp_parsley', name:'Parsley', icon:'🌿', wateringDays:2, fertilizeDays:21, sunlight:'Sun or partial shade', notes:'Keep evenly moist, especially in warm weather.'},
+  {id:'sp_arugula', name:'Arugula', icon:'🥬', wateringDays:2, fertilizeDays:21, sunlight:'Sun or partial shade', notes:'Regular moisture helps prevent bitter leaves and premature bolting.'},
+  {id:'sp_zucchini', name:'Zucchini', icon:'🥒', wateringDays:2, fertilizeDays:14, sunlight:'Full sun', notes:'Water deeply at soil level and allow generous space and airflow.'},
+  {id:'sp_pumpkin', name:'Pumpkin / Squash', icon:'🎃', wateringDays:3, fertilizeDays:14, sunlight:'Full sun', notes:'Water deeply at the base; vines and developing fruit need consistent moisture.'},
+  {id:'sp_mint', name:'Mint', icon:'🌿', wateringDays:2, fertilizeDays:30, sunlight:'Sun or partial shade', notes:'Keep moist and preferably grow in a container because it spreads quickly.'},
+  {id:'sp_rosemary', name:'Rosemary', icon:'🌱', wateringDays:7, fertilizeDays:45, sunlight:'Full sun', notes:'Use free-draining soil and let the top layer dry between waterings.'},
+  {id:'sp_lavender', name:'Lavender', icon:'🪻', wateringDays:7, fertilizeDays:60, sunlight:'Full sun', notes:'Avoid soggy soil; established plants prefer drier conditions.'},
+  {id:'sp_strawberry', name:'Strawberry', icon:'🍓', wateringDays:2, fertilizeDays:21, sunlight:'Full sun', notes:'Keep evenly moist while flowering and fruiting; avoid soaking the crown.'},
+  {id:'sp_pepper', name:'Pepper', icon:'🌶️', wateringDays:3, fertilizeDays:14, sunlight:'Full sun', notes:'Water consistently but let the surface dry slightly between waterings.'},
+  {id:'sp_succulent', name:'Succulent', icon:'🌵', wateringDays:14, fertilizeDays:60,
+    sunlight:'Bright indirect light', notes:'Let soil dry out completely between waterings — the #1 killer is overwatering.'}
+];
+
+const DEFAULT_SETTINGS = {
+  notifEnabled:false, checkIntervalMinutes:180, reminderDaysAhead:1, notifiedToday:{},
+  email:'', emailjsServiceId:'', emailjsTemplateId:'', emailjsPublicKey:'', emailEnabled:false
+};
+
+const DEFAULT_CARE_TYPES = [
+  {id:'water',     label:'Watering',    icon:'💧', enabled:true, defaultDays:null, builtIn:true},
+  {id:'fertilize', label:'Fertilizing', icon:'🌾', enabled:true, defaultDays:null, builtIn:true},
+  {id:'repot',     label:'Repotting',   icon:'🪴', enabled:true, defaultDays:365,  builtIn:true}
+];
+const DEFAULT_FEATURES = {journal:true, species:true, summaryCard:true, email:true};
+
+let DB = { species:[], plants:[], journal:[], settings:{...DEFAULT_SETTINGS} };
+let emailjsInited = false;
+
+/* ---------------- persistent storage + autosave ---------------- */
+const STORAGE_PREFIX = 'gardenLog.';
+let autosaveTimer = null;
+let lastSavedSnapshot = '';
+function storageGet(key){
+  try { const v=localStorage.getItem(STORAGE_PREFIX+key); return v===null ? null : JSON.parse(v); }
+  catch(e){ console.error('localStorage read failed',e); return null; }
+}
+async function loadKey(key, fallback){
+  const local=storageGet(key); if(local!==null) return local;
+  try{ const r=await window.storage?.get(key,false); return r?.value ? JSON.parse(r.value) : fallback; }
+  catch(e){ return fallback; }
+}
+async function saveKey(key,value){
+  const json=JSON.stringify(value);
+  let saved=false;
+  try{
+    localStorage.setItem(STORAGE_PREFIX+key,json);
+    saved=true;
+  }catch(e){ console.warn('localStorage save unavailable',key,e); }
+  try{
+    if(window.storage && typeof window.storage.set==='function'){
+      await window.storage.set(key,json,false);
+      saved=true;
+    }
+  }catch(e){ console.warn('secondary storage failed',key,e); }
+  return saved;
+}
+function databaseSnapshot(){ return JSON.stringify(DB); }
+async function saveAll(force=false){
+  const snap=databaseSnapshot(); if(!force && snap===lastSavedSnapshot) return;
+  const state=document.getElementById('saveState'); if(state) state.textContent='Saving…';
+  await Promise.all([saveKey('species',DB.species),saveKey('plants',DB.plants),saveKey('journal',DB.journal),saveKey('settings',DB.settings)]);
+  lastSavedSnapshot=snap;
+  if(state) state.textContent='Saved '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  if(force) toast('Everything saved');
+}
+function queueAutosave(){
+  const state=document.getElementById('saveState'); if(state) state.textContent='Unsaved changes';
+  clearTimeout(autosaveTimer); autosaveTimer=setTimeout(()=>saveAll(false),700);
+}
+async function initStorage(){
+  const savedSpecies=await loadKey('species',null);
+  DB.species=savedSpecies ?? DEFAULT_SPECIES;
+  // Merge newly supplied defaults without deleting user-created species.
+  DEFAULT_SPECIES.forEach(def=>{ if(!DB.species.some(x=>x.id===def.id)) DB.species.push(def); });
+  DB.plants=await loadKey('plants',[]) ?? [];
+  DB.journal=await loadKey('journal',[]) ?? [];
+  DB.settings={...DEFAULT_SETTINGS,...(await loadKey('settings',{}) ?? {})};
+  normalizeSettings(); migratePlants();
+  await saveAll(false); lastSavedSnapshot=databaseSnapshot();
+}
+const saveSpecies=()=>{ queueAutosave(); return Promise.resolve(); };
+const savePlants =()=>{ queueAutosave(); return Promise.resolve(); };
+const saveJournal=()=>{ queueAutosave(); return Promise.resolve(); };
+const saveSettings=()=>{ queueAutosave(); return Promise.resolve(); };
+/* ---------------- utils ---------------- */
+function uid(p){ return p+'_'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function isoLocal(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function todayISO(){ return isoLocal(new Date()); }
+function addDays(iso, n){ const d = new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return isoLocal(d); }
+function daysBetween(a,b){ return Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00'))/86400000); }
+function fmtDate(iso){ return new Date(iso+'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }
+function fmtDateTime(iso){ return new Date(iso).toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function speciesById(id){ return DB.species.find(s=>s.id===id); }
+function plantById(id){ return DB.plants.find(p=>p.id===id); }
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+function taskStatus(dueDate){
+  const diff = daysBetween(todayISO(), dueDate);
+  if(diff < 0) return {level:'overdue', label:`${Math.abs(diff)}d overdue`};
+  if(diff === 0) return {level:'today', label:'Due today'};
+  return {level:'upcoming', label:`In ${diff}d`};
+}
+
+function plantTasks(plant){
+  const sp = speciesById(plant.speciesId);
+  if(!sp) return [];
+  const tasks = [];
+  (plant.care||[]).forEach(entry=>{
+    const ct = careTypeById(entry.type);
+    if(!ct || !ct.enabled) return;
+    const every = careInterval(plant, entry);
+    if(!every || every < 1) return;
+    const due = addDays(entry.last || plant.addedDate, every);
+    const st = taskStatus(due);
+    tasks.push({type:entry.type, label:ct.label, icon:ct.icon, due, every, level:st.level, status:st.label});
+  });
+  return tasks;
+}
+
+/* ---------------- image compression ---------------- */
+function fileToCompressedDataURL(file, maxW=760, quality=0.72){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error);
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const scale = Math.min(1, maxW / img.width);
+        const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function firstImageFromTransfer(dt){
+  if(!dt) return null;
+  const files=[...(dt.files||[])];
+  return files.find(f=>f.type&&f.type.startsWith('image/')) || null;
+}
+function setupPhotoDrop(form, inputName='photo'){
+  const input=form.querySelector(`input[name="${inputName}"]`);
+  const zone=form.querySelector('[data-photo-drop]');
+  const preview=form.querySelector('[data-photo-preview]');
+  if(!input||!zone) return ()=>null;
+  let selectedFile=null;
+  async function useFile(file){
+    if(!file||!file.type.startsWith('image/')){ toast('Please use an image file'); return; }
+    selectedFile=file; zone.querySelector('strong').textContent=file.name||'Pasted image';
+    if(preview){ preview.src=await fileToCompressedDataURL(file,760,.72); preview.style.display='block'; }
+  }
+  input.addEventListener('change',()=>useFile(input.files[0]));
+  ['dragenter','dragover'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.add('dragover');}));
+  ['dragleave','drop'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.remove('dragover');}));
+  zone.addEventListener('drop',e=>useFile(firstImageFromTransfer(e.dataTransfer)));
+  form.addEventListener('paste',e=>{ const f=firstImageFromTransfer(e.clipboardData); if(f){e.preventDefault();useFile(f);} });
+  zone.addEventListener('click',()=>input.click());
+  return ()=>selectedFile||input.files[0]||null;
+}
+function photoDropHtml(){ return `<div class="photo-drop" data-photo-drop tabindex="0">📷 <strong>Choose, drop or paste a picture</strong><br><small>Click here, drag an image, or press Ctrl+V / Cmd+V</small><input type="file" accept="image/*" name="photo" hidden></div><img class="photo-preview" data-photo-preview alt="Selected plant preview">`; }
+function searchSpeciesCare(name){
+  const q=encodeURIComponent(`${name||'plant'} watering frequency sunlight soil fertilizing care guide`);
+  window.open(`https://www.bing.com/search?q=${q}`,'_blank','noopener');
+}
+
+/* ---------------- rendering: DASHBOARD ---------------- */
+function collectTasks(){
+  const out = [];
+  DB.plants.forEach(plant=>{
+    const sp = speciesById(plant.speciesId);
+    if(!sp) return;
+    plantTasks(plant).forEach(t=> out.push({plant, sp, t}));
+  });
+  return out.sort((a,b)=> a.t.due.localeCompare(b.t.due));
+}
+function taskRowHtml(x, withButton){
+  const {plant, sp, t} = x;
+  return `
+  <div class="task-row">
+    <div class="icon">${escapeHtml(t.icon)}</div>
+    <div class="info">
+      <div class="name">${escapeHtml(plant.nickname || sp.name)}</div>
+      <div class="sub">${escapeHtml(t.label)} · ${escapeHtml(sp.name)}</div>
+      <span class="badge ${t.level}">${escapeHtml(t.status)}</span>
+    </div>
+    ${withButton ? `<button class="btn small" data-action="complete" data-plant="${plant.id}" data-task="${t.type}">Done</button>` : ''}
+  </div>`;
+}
+
+function renderDashboard(){
+  const el = document.getElementById('view-dashboard');
+  const all = collectTasks();
+  const rows = all.filter(x=> x.t.level==='overdue' || x.t.level==='today');
+  const upcoming = all.filter(x=> x.t.level==='upcoming');
+  let html = '';
+  if(DB.plants.length===0){
+    html = `<div class="empty"><span class="big">🌱</span>No plants yet.<br>Add one from the <b>My Plants</b> tab to start tracking care.</div>`;
+  } else {
+    if(DB.settings.features.summaryCard){
+      const reminderItems = careReminders();
+      const overdueCount = reminderItems.filter(x=>x.level==='overdue').length;
+      const todayCount = reminderItems.filter(x=>x.level==='today').length;
+      html += `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <div><strong>Care reminders</strong><div style="font-size:12.5px;color:var(--ink-soft);">${overdueCount} overdue · ${todayCount} due today</div></div>
+        <span class="status-pill ${overdueCount?'off':'on'}"><span class="dot"></span>${overdueCount?'Attention needed':'On track'}</span>
+      </div>`;
+    }
+    html += `<section class="dash-group"><h2>${rows.length ? 'Needs attention' : 'All caught up'}</h2>`;
+    if(rows.length===0){
+      html += `<div class="empty"><span class="big">🌤️</span>Nothing due today.<br>Check back tomorrow.</div>`;
+    } else {
+      rows.forEach(x=>{ html += taskRowHtml(x, true); });
+    }
+    html += `</section>`;
+    if(upcoming.length){
+      html += `<section class="dash-group"><h2>Coming up</h2>`;
+      upcoming.slice(0,6).forEach(x=>{ html += taskRowHtml(x, false); });
+      html += `</section>`;
+    }
+  }
+  el.innerHTML = html;
+  el.querySelectorAll('[data-action="complete"]').forEach(btn=>{
+    btn.addEventListener('click', ()=> completeTask(btn.dataset.plant, btn.dataset.task));
+  });
+}
+
+async function completeTask(plantId, type){
+  const plant = plantById(plantId);
+  if(!plant) return;
+  const entry = (plant.care||[]).find(c=>c.type===type);
+  if(!entry) return;
+  entry.last = todayISO();
+  syncLegacyDates(plant, entry);
+  await savePlants();
+  const ct = careTypeById(type);
+  toast((ct ? ct.label : 'Care')+' logged '+(ct ? ct.icon : '✅'));
+  renderDashboard(); renderPlants();
+}
+
+/* ---------------- rendering: PLANTS ---------------- */
+function renderPlants(){
+  const el = document.getElementById('view-plants');
+  let html = `<div class="fab-row"><button class="btn" id="addPlantBtn">+ Add plant</button></div>`;
+  if(DB.plants.length===0){
+    html += `<div class="empty"><span class="big">🪴</span>No plants added yet.</div>`;
+  } else {
+    html += `<div class="grid">`;
+    DB.plants.forEach(plant=>{
+      const sp = speciesById(plant.speciesId) || {icon:'🌱', name:'Unknown species'};
+      const thumbStyle = plant.photo ? `style="background-image:url('${plant.photo}')"` : '';
+      html += `
+      <button class="plant-card" data-open-plant="${plant.id}" style="text-align:left;border:1px solid var(--line);">
+        <div class="thumb" ${thumbStyle}>${plant.photo ? '' : sp.icon}</div>
+        <div class="body">
+          <div class="name">${escapeHtml(plant.nickname || sp.name)}</div>
+          <div class="species">${escapeHtml(sp.name)}</div>
+        </div>
+      </button>`;
+    });
+    html += `</div>`;
+  }
+  el.innerHTML = html;
+  document.getElementById('addPlantBtn').addEventListener('click', openAddPlantModal);
+  el.querySelectorAll('[data-open-plant]').forEach(c=>{
+    c.addEventListener('click', ()=> openPlantDetail(c.dataset.openPlant));
+  });
+}
+
+function openAddPlantModal(){
+  if(DB.species.length===0){
+    toast('Add a species first, in the Species tab.');
+    return;
+  }
+  const options = DB.species.map(s=>`<option value="${s.id}">${s.icon} ${escapeHtml(s.name)}</option>`).join('');
+  const firstSp = DB.species[0];
+  const careChecks = enabledCareTypes().map(c=>{
+    const on = c.id==='water' || (c.id==='fertilize' && !!firstSp.fertilizeDays);
+    return `<label class="check-row"><input type="checkbox" name="care" value="${c.id}" ${on?'checked':''}><span>${escapeHtml(c.icon)} ${escapeHtml(c.label)}</span></label>`;
+  }).join('');
+  showModal(`
+    <div class="head"><h2>Add a plant</h2><button class="close" data-close>&times;</button></div>
+    <form id="plantForm">
+      <div class="field"><label>Species</label><select name="speciesId">${options}</select></div>
+      <div class="field"><label>Nickname (optional)</label><input type="text" name="nickname" placeholder="e.g. Kitchen window mango"></div>
+      <div class="field"><label>Location (optional)</label><input type="text" name="location" placeholder="e.g. Balcony, big pot"></div>
+      <div class="field"><label>Date added</label><input type="text" name="addedDate" value="${todayISO()}" placeholder="YYYY-MM-DD"></div>
+      <div class="field">
+        <label>Care to track</label>
+        ${careChecks || '<div style="font-size:13px;color:var(--ink-soft);">No care types are turned on. Use the sliders button at the top to enable some.</div>'}
+        <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">You can add or remove care later from the plant's page.</div>
+      </div>
+      <div class="field">
+        <label>Cover photo (optional)</label>
+        ${photoDropHtml()}
+      </div>
+      <button class="btn full" type="submit">Save plant</button>
+    </form>
+  `);
+  const form = document.getElementById('plantForm');
+  const sel = form.querySelector('[name=speciesId]');
+  sel.addEventListener('change', ()=>{
+    const sp = speciesById(sel.value) || {};
+    const fz = form.querySelector('input[name=care][value=fertilize]');
+    if(fz) fz.checked = !!sp.fertilizeDays;
+  });
+  const getPlantPhoto = setupPhotoDrop(form);
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    let photo = null;
+    const file = getPlantPhoto();
+    if(file && file.size) photo = await fileToCompressedDataURL(file);
+    const added = (fd.get('addedDate') || '').trim();
+    const addedDate = /^\d{4}-\d{2}-\d{2}$/.test(added) ? added : todayISO();
+    const plant = {
+      id: uid('pl'),
+      speciesId: fd.get('speciesId'),
+      nickname: fd.get('nickname').trim(),
+      location: fd.get('location').trim(),
+      addedDate,
+      lastWatered: addedDate,
+      lastFertilized: addedDate,
+      care: fd.getAll('care').map(t=>({type:t, every:null, last:addedDate})),
+      photo
+    };
+    DB.plants.push(plant);
+    await savePlants();
+    closeModal();
+    renderPlants(); renderDashboard();
+    toast('Plant added 🌱');
+  });
+}
+
+function careRowsHtml(plant){
+  const rows = (plant.care||[]).map(entry=>{
+    const ct = careTypeById(entry.type);
+    if(!ct || !ct.enabled) return '';
+    const every = careInterval(plant, entry);
+    const st = every>0 ? taskStatus(addDays(entry.last || plant.addedDate, every)) : null;
+    return `
+    <div class="care-row">
+      <div class="ci">${escapeHtml(ct.icon)}</div>
+      <div class="cinfo">
+        <div class="cname">${escapeHtml(ct.label)}</div>
+        <div class="csub">${every>0 ? 'Every '+every+' day'+(every===1?'':'s') : 'No schedule'} · last ${entry.last ? fmtDate(entry.last) : '—'}</div>
+        ${st ? `<span class="badge ${st.level}">${escapeHtml(st.label)}</span>` : ''}
+      </div>
+      <div class="care-actions">
+        <button class="btn small" type="button" data-care-done="${entry.type}">Done</button>
+        <button class="btn small ghost" type="button" data-care-edit="${entry.type}">Edit</button>
+      </div>
+    </div>`;
+  }).join('');
+  return rows || `<div style="font-size:13px;color:var(--ink-soft);padding:6px 0;">No care added yet. Tap “+ Add care” to choose what to track.</div>`;
+}
+
+function openPlantDetail(plantId){
+  const plant = plantById(plantId);
+  if(!plant) return;
+  const sp = speciesById(plant.speciesId) || {};
+  const f = DB.settings.features;
+  const entries = DB.journal.filter(j=>j.plantId===plantId).sort((a,b)=> b.date.localeCompare(a.date));
+
+  const entriesHtml = entries.length ? entries.map(en=>`
+    <div class="journal-entry">
+      <div class="photo" ${en.photo?`style="background-image:url('${en.photo}')"`:''}>${en.photo?'':'📝'}</div>
+      <div class="content">
+        <div class="meta">${fmtDateTime(en.date)}</div>
+        <div class="note">${escapeHtml(en.note)}</div>
+      </div>
+    </div>`).join('') : `<div class="empty">No journal entries yet.</div>`;
+
+  const journalHtml = f.journal ? `
+    <h2 style="font-size:16px;margin:18px 0 8px;">Add journal entry</h2>
+    <form id="journalForm" class="card">
+      <div class="field"><textarea name="note" placeholder="What's new with this plant?" required></textarea></div>
+      <div class="field">
+        ${photoDropHtml()}
+      </div>
+      <button class="btn full" type="submit">Save entry</button>
+    </form>
+
+    <h2 style="font-size:16px;margin:18px 0 8px;">History</h2>
+    <div class="card">${entriesHtml}</div>` : '';
+
+  showModal(`
+    <div class="head"><h2>${escapeHtml(plant.nickname || sp.name)}</h2><button class="close" data-close>&times;</button></div>
+    <div class="modal-detail-thumb" ${plant.photo?`style="background-image:url('${plant.photo}')"`:''}>${plant.photo?'':escapeHtml(sp.icon||'🌱')}</div>
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:2px;">${escapeHtml(sp.name||'Unknown species')}</div>
+      <div style="font-size:13px;color:var(--ink-soft);">${escapeHtml(sp.sunlight||'')}${plant.location ? ' · '+escapeHtml(plant.location) : ''}</div>
+      <div style="font-size:13px;color:var(--ink-soft);margin-top:6px;">Added ${fmtDate(plant.addedDate)}</div>
+      <h2 style="font-size:15px;margin:14px 0 2px;">Care</h2>
+      <div id="careList">${careRowsHtml(plant)}</div>
+      <div class="inline-actions">
+        <button class="btn small secondary" type="button" id="addCareBtn">+ Add care</button>
+        <button class="btn small ghost danger-link" type="button" data-delplant="${plant.id}">Delete plant</button>
+      </div>
+    </div>
+    ${journalHtml}
+  `);
+
+  document.querySelectorAll('[data-care-done]').forEach(b=>{
+    b.addEventListener('click', async ()=>{ await completeTask(plant.id, b.dataset.careDone); openPlantDetail(plant.id); });
+  });
+  document.querySelectorAll('[data-care-edit]').forEach(b=>{
+    b.addEventListener('click', ()=> openCareModal(plant.id, b.dataset.careEdit));
+  });
+  document.getElementById('addCareBtn').addEventListener('click', ()=> openCareModal(plant.id, null));
+  document.querySelector('[data-delplant]').addEventListener('click', async ()=>{
+    if(!confirm(`Delete ${plant.nickname || sp.name}? This will also delete its journal entries.`)) return;
+    DB.plants = DB.plants.filter(p=>p.id!==plant.id);
+    DB.journal = DB.journal.filter(j=>j.plantId!==plant.id);
+    await Promise.all([savePlants(),saveJournal()]); closeModal(); renderDashboard(); renderPlants(); renderJournal(); toast('Plant deleted');
+  });
+  if(f.journal){
+    const getJournalPhoto = setupPhotoDrop(document.getElementById('journalForm'));
+    document.getElementById('journalForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      let photo = null;
+      const file = getJournalPhoto();
+      if(file && file.size) photo = await fileToCompressedDataURL(file);
+      DB.journal.push({ id: uid('jr'), plantId: plant.id, date: new Date().toISOString(), note: fd.get('note').trim(), photo });
+      await saveJournal();
+      closeModal(); renderJournal();
+      toast('Journal entry saved 📝');
+    });
+  }
+}
+
+/* ---------------- rendering: SPECIES ---------------- */
+function renderSpecies(){
+  const el = document.getElementById('view-species');
+  let html = `<div class="fab-row"><button class="btn" id="addSpeciesBtn">+ Add species</button></div>`;
+  if(DB.species.length===0){
+    html += `<div class="empty"><span class="big">📖</span>No species in your library yet.</div>`;
+  } else {
+    DB.species.forEach(sp=>{
+      html += `
+      <div class="species-row">
+        <div class="icon">${sp.icon}</div>
+        <div class="info">
+          <div class="name">${escapeHtml(sp.name)}</div>
+          <div class="sub">Water every ${sp.wateringDays}d${sp.fertilizeDays ? ` · Fertilize every ${sp.fertilizeDays}d` : ''} · ${escapeHtml(sp.sunlight||'')}</div>
+        </div>
+        <button class="btn small ghost" data-edit-species="${sp.id}">Edit</button>
+      </div>`;
+    });
+  }
+  el.innerHTML = html;
+  document.getElementById('addSpeciesBtn').addEventListener('click', ()=> openSpeciesModal(null));
+  el.querySelectorAll('[data-edit-species]').forEach(b=>{
+    b.addEventListener('click', ()=> openSpeciesModal(b.dataset.editSpecies));
+  });
+}
+
+function openSpeciesModal(speciesId){
+  const editing = !!speciesId;
+  const sp = editing ? speciesById(speciesId) : { icon:'🌿', name:'', wateringDays:3, fertilizeDays:21, sunlight:'', notes:'' };
+  showModal(`
+    <div class="head"><h2>${editing ? 'Edit species' : 'New species'}</h2><button class="close" data-close>&times;</button></div>
+    <form id="speciesForm">
+      <div class="search-box">
+        <p>Search the internet for a care guide, then enter the verified watering and care values below. Alerts use the saved intervals.</p>
+        <button class="btn small secondary" type="button" id="searchCareBtn">🔎 Search plant care online</button>
+      </div>
+      <div class="field"><label>Icon (emoji)</label><input type="text" name="icon" value="${escapeHtml(sp.icon)}" maxlength="4"></div>
+      <div class="field"><label>Name</label><input type="text" name="name" value="${escapeHtml(sp.name)}" required></div>
+      <div class="field"><label>Water every (days)</label><input type="number" name="wateringDays" min="1" value="${sp.wateringDays}" required></div>
+      <div class="field"><label>Fertilize every (days, 0 = skip)</label><input type="number" name="fertilizeDays" min="0" value="${sp.fertilizeDays||0}"></div>
+      <div class="field"><label>Sunlight</label><input type="text" name="sunlight" value="${escapeHtml(sp.sunlight||'')}" placeholder="e.g. Full sun, 6+ hours"></div>
+      <div class="field"><label>Care notes</label><textarea name="notes">${escapeHtml(sp.notes||'')}</textarea></div>
+      <div class="inline-actions">
+        <button class="btn full" type="submit">${editing ? 'Save changes' : 'Add species'}</button>
+      </div>
+      ${editing ? `<button type="button" class="btn ghost full" id="deleteSpeciesBtn" style="margin-top:8px;">Delete species</button>` : ''}
+    </form>
+  `);
+  document.getElementById('searchCareBtn').addEventListener('click',()=>{ const n=document.querySelector('#speciesForm [name=name]').value.trim(); searchSpeciesCare(n); });
+  document.getElementById('speciesForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const data = {
+      icon: fd.get('icon').trim() || '🌿',
+      name: fd.get('name').trim(),
+      wateringDays: parseInt(fd.get('wateringDays'),10) || 1,
+      fertilizeDays: parseInt(fd.get('fertilizeDays'),10) || 0,
+      sunlight: fd.get('sunlight').trim(),
+      notes: fd.get('notes').trim()
+    };
+    if(editing){
+      Object.assign(sp, data);
+    } else {
+      DB.species.push({ id: uid('sp'), ...data });
+    }
+    await saveSpecies();
+    closeModal(); renderSpecies(); renderDashboard();
+    toast(editing ? 'Species updated' : 'Species added 🌿');
+  });
+  if(editing){
+    document.getElementById('deleteSpeciesBtn').addEventListener('click', async ()=>{
+      const inUse = DB.plants.some(p=>p.speciesId===speciesId);
+      if(inUse){ alert('This species is used by one or more of your plants. Remove those plants first.'); return; }
+      if(!confirm(`Delete "${sp.name}" from your species library?`)) return;
+      DB.species = DB.species.filter(s=>s.id!==speciesId);
+      await saveSpecies(); closeModal(); renderSpecies();
+    });
+  }
+}
+
+/* ---------------- rendering: JOURNAL ---------------- */
+function renderJournal(){
+  const el = document.getElementById('view-journal');
+  const entries = [...DB.journal].sort((a,b)=> b.date.localeCompare(a.date));
+  const plantOptions = DB.plants.map(p=>`<option value="${p.id}">${escapeHtml(p.nickname || (speciesById(p.speciesId)||{}).name || 'Plant')}</option>`).join('');
+  let html = `<div class="fab-row"><button class="btn" id="addJournalBtn" ${DB.plants.length===0?'disabled':''}>+ Add entry</button></div>`;
+  if(entries.length===0){
+    html += `<div class="empty"><span class="big">📔</span>Your grow journal is empty.<br>Log progress with photos as your plants grow.</div>`;
+  } else {
+    html += `<div class="card">`;
+    entries.forEach(en=>{
+      const plant = plantById(en.plantId);
+      const sp = plant ? speciesById(plant.speciesId) : null;
+      html += `
+      <div class="journal-entry">
+        <div class="photo" ${en.photo?`style="background-image:url('${en.photo}')"`:''}>${en.photo?'':(sp?sp.icon:'📝')}</div>
+        <div class="content">
+          <div class="meta"><span class="plant">${escapeHtml(plant ? (plant.nickname||sp.name) : 'Deleted plant')}</span> · ${fmtDateTime(en.date)}</div>
+          <div class="note">${escapeHtml(en.note)}</div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  el.innerHTML = html;
+  const btn = document.getElementById('addJournalBtn');
+  if(btn) btn.addEventListener('click', ()=>{
+    if(DB.plants.length===0){ toast('Add a plant first.'); return; }
+    showModal(`
+      <div class="head"><h2>New journal entry</h2><button class="close" data-close>&times;</button></div>
+      <form id="quickJournalForm">
+        <div class="field"><label>Plant</label><select name="plantId">${plantOptions}</select></div>
+        <div class="field"><textarea name="note" placeholder="What's new?" required></textarea></div>
+        <div class="field">${photoDropHtml()}</div>
+        <button class="btn full" type="submit">Save entry</button>
+      </form>
+    `);
+    const getQuickPhoto = setupPhotoDrop(document.getElementById('quickJournalForm'));
+    document.getElementById('quickJournalForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      let photo = null;
+      const file = getQuickPhoto();
+      if(file && file.size) photo = await fileToCompressedDataURL(file);
+      DB.journal.push({ id: uid('jr'), plantId: fd.get('plantId'), date: new Date().toISOString(), note: fd.get('note').trim(), photo });
+      await saveJournal(); closeModal(); renderJournal();
+      toast('Journal entry saved 📝');
+    });
+  });
+}
+
+/* ---------------- rendering: SETTINGS ---------------- */
+function renderSettings(){
+  const el = document.getElementById('view-settings');
+  const notifSupported = 'Notification' in window;
+  const notifGranted = notificationGranted();
+  el.innerHTML = `
+    <div class="card">
+      <h2 style="font-size:16px;margin-bottom:6px;">Features &amp; care types</h2>
+      <p style="font-size:13px;color:var(--ink-soft);margin:0 0 10px;">Choose which kinds of care you can add to a plant (watering, fertilizing, repotting or your own) and which sections of the app are shown.</p>
+      <button class="btn small" type="button" id="openFeaturesBtn">Open features</button>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:16px;margin-bottom:6px;">Browser notifications</h2>
+      <p style="font-size:13px;color:var(--ink-soft);margin:0 0 10px;">Get a notification when a plant's water or fertilize date is due, while this page is open.</p>
+      <span class="status-pill ${notifGranted?'on':'off'}"><span class="dot"></span>${notifGranted ? 'Enabled' : (notifSupported ? 'Not enabled' : 'Not supported here')}</span>
+      ${!notifGranted && notifSupported ? `<button class="btn small" id="enableNotifBtn" style="margin-left:8px;">Enable</button>` : ''}
+      <div class="field" style="margin-top:14px;">
+        <label>Check every</label>
+        <select id="intervalSelect">
+          <option value="60">1 hour</option>
+          <option value="180">3 hours</option>
+          <option value="360">6 hours</option>
+          <option value="720">12 hours</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Remind me before care is due</label>
+        <select id="reminderDaysSelect">
+          <option value="0">Only when due</option>
+          <option value="1">1 day before</option>
+          <option value="2">2 days before</option>
+          <option value="3">3 days before</option>
+          <option value="7">7 days before</option>
+        </select>
+      </div>
+      <div class="inline-actions">
+        <button class="btn small secondary" type="button" id="checkRemindersBtn">Check reminders now</button>
+        ${notifGranted ? `<button class="btn small ghost" type="button" id="testNotificationBtn">Test notification</button>` : ''}
+      </div>
+      <div class="note-box">Browser notifications work while this page is open. When the browser closes a standalone HTML page, scheduled checks normally stop. The <b>Today</b> tab always shows the current care schedule.</div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:16px;margin-bottom:6px;">Email reminders (optional)</h2>
+      <p style="font-size:13px;color:var(--ink-soft);margin:0 0 10px;">
+        This tool has no backend, so it can't send email on its own. To enable real emails, create a free
+        <a href="https://www.emailjs.com" target="_blank" rel="noopener">EmailJS</a> account, set up an email service and a template
+        (with a <code>message</code> variable), then paste your keys below.
+      </p>
+      <form id="emailForm">
+        <div class="field"><label>Your email</label><input type="email" name="email" value="${escapeHtml(DB.settings.email)}"></div>
+        <div class="field"><label>EmailJS Service ID</label><input type="text" name="emailjsServiceId" value="${escapeHtml(DB.settings.emailjsServiceId)}"></div>
+        <div class="field"><label>EmailJS Template ID</label><input type="text" name="emailjsTemplateId" value="${escapeHtml(DB.settings.emailjsTemplateId)}"></div>
+        <div class="field"><label>EmailJS Public Key</label><input type="text" name="emailjsPublicKey" value="${escapeHtml(DB.settings.emailjsPublicKey)}"></div>
+        <div class="inline-actions">
+          <button class="btn small" type="submit">Save</button>
+          <button class="btn small secondary" type="button" id="testEmailBtn">Send test</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:16px;margin-bottom:6px;">About this data</h2>
+      <p style="font-size:13px;color:var(--ink-soft);margin:0;">Everything — species, plants, and journal photos — is saved to this tool's private storage and stays on your account. Photos are compressed automatically to save space.</p>
+    </div>
+  `;
+
+  document.getElementById('openFeaturesBtn').addEventListener('click', openFeaturesModal);
+  const emailCard = document.getElementById('emailForm').closest('.card');
+  if(emailCard) emailCard.style.display = DB.settings.features.email ? '' : 'none';
+  const intervalSelect = document.getElementById('intervalSelect');
+  intervalSelect.value = String(DB.settings.checkIntervalMinutes);
+  intervalSelect.addEventListener('change', async ()=>{
+    DB.settings.checkIntervalMinutes = parseInt(intervalSelect.value,10);
+    await saveSettings();
+    setupCheckInterval();
+    toast('Check frequency updated');
+  });
+
+  const reminderDaysSelect=document.getElementById('reminderDaysSelect');
+  if(reminderDaysSelect){
+    reminderDaysSelect.value=String(DB.settings.reminderDaysAhead == null ? 1 : DB.settings.reminderDaysAhead);
+    reminderDaysSelect.addEventListener('change',function(){
+      DB.settings.reminderDaysAhead=parseInt(reminderDaysSelect.value,10)||0;
+      DB.settings.notifiedToday={};
+      saveSettings();
+      toast('Reminder timing updated');
+    });
+  }
+  const checkBtn=document.getElementById('checkRemindersBtn');
+  if(checkBtn) checkBtn.addEventListener('click',function(){
+    const result=runReminderCheck(true);
+    if(result.error) toast('Reminder check could not run');
+    else if(!result.total) toast('No care reminders are due');
+    else if(!notificationGranted()) toast(result.total+' reminder'+(result.total===1?'':'s')+' found. Enable notifications to display them.');
+    else toast(result.shown+' notification'+(result.shown===1?'':'s')+' sent');
+  });
+  const testBtn=document.getElementById('testNotificationBtn');
+  if(testBtn) testBtn.addEventListener('click',function(){
+    try{ new Notification('Garden Log test',{body:'Plant care notifications are working.'}); }
+    catch(e){ console.warn(e); toast('The browser blocked the test notification'); }
+  });
+  const enableBtn = document.getElementById('enableNotifBtn');
+  if(enableBtn) enableBtn.addEventListener('click', async function(){
+    try{
+      if(!notificationAvailable()){ toast('Browser notifications are not available here'); return; }
+      const perm=await Notification.requestPermission();
+      DB.settings.notifEnabled=perm==='granted';
+      await saveSettings();
+      renderSettings();
+      if(perm==='granted'){ toast('Notifications enabled 🔔'); setTimeout(checkAndNotify,300); }
+      else toast('Notification permission was not granted');
+    }catch(e){ console.warn('Permission request failed',e); toast('Could not enable notifications in this viewer'); }
+  });
+
+  document.getElementById('emailForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    DB.settings.email = fd.get('email').trim();
+    DB.settings.emailjsServiceId = fd.get('emailjsServiceId').trim();
+    DB.settings.emailjsTemplateId = fd.get('emailjsTemplateId').trim();
+    DB.settings.emailjsPublicKey = fd.get('emailjsPublicKey').trim();
+    DB.settings.emailEnabled = !!(DB.settings.emailjsServiceId && DB.settings.emailjsTemplateId && DB.settings.emailjsPublicKey && DB.settings.email);
+    emailjsInited = false;
+    await saveSettings();
+    toast('Email settings saved');
+  });
+
+  document.getElementById('testEmailBtn').addEventListener('click', ()=>{
+    sendEmailReminder([{plantName:'Test plant', label:'Water'}], true);
+  });
+}
+
+/* ---------------- safe care reminders ---------------- */
+function notificationAvailable(){
+  return typeof window !== 'undefined' && 'Notification' in window;
+}
+function notificationGranted(){
+  try{ return notificationAvailable() && Notification.permission==='granted'; }
+  catch(e){ return false; }
+}
+function reminderLabel(task){
+  if(task.level==='overdue') return task.label+' overdue';
+  if(task.level==='today') return task.label+' due today';
+  return task.label+' due in '+task.daysUntilDue+' day'+(task.daysUntilDue===1?'':'s');
+}
+function careReminders(){
+  const reminders=[];
+  const lead=Math.max(0,Number(DB.settings.reminderDaysAhead)||0);
+  DB.plants.forEach(function(plant){
+    const sp=speciesById(plant.speciesId);
+    if(!sp) return;
+    plantTasks(plant).forEach(function(task){
+      const daysUntilDue=daysBetween(todayISO(),task.due);
+      if(daysUntilDue<=lead){
+        reminders.push({
+          plantId:plant.id,
+          plantName:plant.nickname||sp.name,
+          label:task.label,
+          level:task.level,
+          due:task.due,
+          daysUntilDue:daysUntilDue
+        });
+      }
+    });
+  });
+  return reminders.sort(function(a,b){return a.due.localeCompare(b.due);});
+}
+function showCareNotification(item){
+  if(!notificationGranted()) return false;
+  try{
+    new Notification('Garden Log care reminder',{
+      body:item.plantName+' · '+reminderLabel(item),
+      tag:'garden-care-'+item.plantId+'-'+item.label+'-'+item.due
+    });
+    return true;
+  }catch(e){
+    console.warn('Notification could not be displayed',e);
+    return false;
+  }
+}
+function runReminderCheck(force){
+  try{
+    const items=careReminders();
+    const today=todayISO();
+    DB.settings.notifiedToday=DB.settings.notifiedToday||{};
+    let shown=0;
+    items.forEach(function(item){
+      const key=item.plantId+':'+item.label+':'+item.due;
+      if(force || DB.settings.notifiedToday[key]!==today){
+        if(showCareNotification(item)) shown++;
+        DB.settings.notifiedToday[key]=today;
+      }
+    });
+    saveSettings();
+    return {total:items.length,shown:shown};
+  }catch(e){
+    console.error('Reminder check failed',e);
+    return {total:0,shown:0,error:true};
+  }
+}
+
+/* ---------------- notifications & email ---------------- */
+function collectDueTasks(){
+  return careReminders();
+}
+
+function checkAndNotify(){
+  const result=runReminderCheck(false);
+  if(DB.settings.emailEnabled && DB.settings.features.email && result.total){
+    try{ sendEmailReminder(careReminders(),false); }catch(e){ console.warn('Email reminder failed',e); }
+  }
+}
+
+function sendEmailReminder(tasks, isTest){
+  if(typeof emailjs === 'undefined'){ if(isTest) toast('Could not load EmailJS.'); return; }
+  const s = DB.settings;
+  if(!s.emailjsServiceId || !s.emailjsTemplateId || !s.emailjsPublicKey || !s.email){
+    if(isTest) toast('Fill in all EmailJS fields first.');
+    return;
+  }
+  if(!emailjsInited){ emailjs.init(s.emailjsPublicKey); emailjsInited = true; }
+  const message = tasks.map(t=>`${t.plantName}: ${t.label}`).join('\n');
+  emailjs.send(s.emailjsServiceId, s.emailjsTemplateId, { to_email: s.email, message, plant_list: message })
+    .then(()=>{ if(isTest) toast('Test email sent ✉️'); })
+    .catch((err)=>{ console.error(err); if(isTest) toast('Email failed — check your EmailJS keys.'); });
+}
+
+let checkTimer = null;
+function setupCheckInterval(){
+  if(checkTimer) clearInterval(checkTimer);
+  const mins=Math.max(1,Number(DB.settings.checkIntervalMinutes)||180);
+  checkTimer=setInterval(function(){try{checkAndNotify();}catch(e){console.warn(e);}},mins*60*1000);
+}
+
+/* ---------------- care types & features ---------------- */
+function careTypeById(id){ return (DB.settings.careTypes||[]).find(c=>c.id===id); }
+function enabledCareTypes(){ return (DB.settings.careTypes||[]).filter(c=>c.enabled); }
+function defaultInterval(plant, type){
+  const sp = speciesById(plant.speciesId) || {};
+  if(type==='water') return sp.wateringDays || 0;
+  if(type==='fertilize') return sp.fertilizeDays || 0;
+  const ct = careTypeById(type);
+  return (ct && ct.defaultDays) || 0;
+}
+function careInterval(plant, entry){ return entry.every || defaultInterval(plant, entry.type); }
+function syncLegacyDates(plant, entry){
+  if(entry.type==='water') plant.lastWatered = entry.last;
+  if(entry.type==='fertilize') plant.lastFertilized = entry.last;
+}
+function normalizeSettings(){
+  const s = DB.settings;
+  const saved = Array.isArray(s.careTypes) ? s.careTypes : [];
+  DEFAULT_CARE_TYPES.forEach(def=>{ if(!saved.some(c=>c.id===def.id)) saved.push({...def}); });
+  s.careTypes = saved;
+  s.features = {...DEFAULT_FEATURES, ...(s.features||{})};
+}
+function migratePlants(){
+  DB.plants.forEach(p=>{
+    if(Array.isArray(p.care)) return;
+    const sp = speciesById(p.speciesId) || {};
+    p.care = [{type:'water', every:null, last:p.lastWatered || p.addedDate}];
+    if(sp.fertilizeDays) p.care.push({type:'fertilize', every:null, last:p.lastFertilized || p.addedDate});
+  });
+}
+function applyFeatures(){
+  const f = DB.settings.features;
+  document.querySelectorAll('nav.bottom button').forEach(b=>{
+    if(b.dataset.tab==='journal') b.style.display = f.journal ? '' : 'none';
+    if(b.dataset.tab==='species') b.style.display = f.species ? '' : 'none';
+  });
+  const active = document.querySelector('nav.bottom button.active');
+  if(active && active.style.display==='none') document.querySelector('nav.bottom button[data-tab="dashboard"]').click();
+}
+
+function openCareModal(plantId, type){
+  const plant = plantById(plantId);
+  if(!plant) return;
+  const editing = !!type;
+  const have = (plant.care||[]).map(c=>c.type);
+  const choices = enabledCareTypes().filter(c=> editing ? c.id===type : !have.includes(c.id));
+  if(!choices.length){ toast('Every enabled care type is already added. Turn on more via the sliders button.'); return; }
+  const entry = editing ? plant.care.find(c=>c.type===type) : null;
+  const first = choices[0].id;
+  const everyNow = editing ? careInterval(plant, entry) : (defaultInterval(plant, first) || 30);
+  const lastNow = editing ? (entry.last || todayISO()) : todayISO();
+  const options = choices.map(c=>`<option value="${c.id}">${escapeHtml(c.icon)} ${escapeHtml(c.label)}</option>`).join('');
+  showModal(`
+    <div class="head"><h2>${editing ? 'Edit care' : 'Add care'}</h2><button class="close" data-close>&times;</button></div>
+    <form id="careForm">
+      <div class="field"><label>Type of care</label><select name="type" ${editing?'disabled':''}>${options}</select></div>
+      <div class="field"><label>Repeat every (days)</label><input type="number" name="every" min="1" value="${everyNow}" required></div>
+      <div class="field"><label>Last done</label><input type="date" name="last" value="${lastNow}" max="${todayISO()}"></div>
+      <button class="btn full" type="submit">${editing ? 'Save changes' : 'Add care'}</button>
+      <div class="inline-actions">
+        <button class="btn ghost full" type="button" id="cancelCareBtn">Cancel</button>
+        ${editing ? `<button class="btn ghost full danger-link" type="button" id="removeCareBtn">Remove</button>` : ''}
+      </div>
+    </form>
+  `);
+  const form = document.getElementById('careForm');
+  const sel = form.querySelector('[name=type]');
+  if(!editing) sel.addEventListener('change', ()=>{ form.querySelector('[name=every]').value = defaultInterval(plant, sel.value) || 30; });
+  document.getElementById('cancelCareBtn').addEventListener('click', ()=> openPlantDetail(plant.id));
+  if(editing){
+    document.getElementById('removeCareBtn').addEventListener('click', async ()=>{
+      plant.care = plant.care.filter(c=>c.type!==type);
+      await savePlants(); renderDashboard(); renderPlants(); openPlantDetail(plant.id); toast('Care removed');
+    });
+  }
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const fd = new FormData(form);
+    const t = editing ? type : fd.get('type');
+    const every = Math.max(1, parseInt(fd.get('every'),10) || 1);
+    const lastRaw = fd.get('last');
+    const last = /^\d{4}-\d{2}-\d{2}$/.test(lastRaw||'') ? lastRaw : todayISO();
+    const val = (every === defaultInterval(plant, t)) ? null : every;
+    let target = entry;
+    if(editing){ entry.every = val; entry.last = last; }
+    else { target = {type:t, every:val, last}; plant.care.push(target); }
+    syncLegacyDates(plant, target);
+    await savePlants(); renderDashboard(); renderPlants(); openPlantDetail(plant.id);
+    toast(editing ? 'Care updated' : 'Care added');
+  });
+}
+
+function openFeaturesModal(){
+  const s = DB.settings, f = s.features;
+  const rowHtml = (c)=>`
+    <div class="ct-row" data-ct="${c.id}" data-builtin="${c.builtIn?1:0}">
+      <input type="text" name="icon" value="${escapeHtml(c.icon)}" maxlength="4" aria-label="Icon">
+      <input type="text" name="label" value="${escapeHtml(c.label)}" placeholder="Care name" aria-label="Name">
+      ${(c.id==='water'||c.id==='fertilize')
+        ? `<input type="text" value="per species" disabled aria-label="Interval set per species">`
+        : `<input type="number" name="days" min="1" value="${c.defaultDays||30}" aria-label="Default days">`}
+      <div class="care-actions">
+        <input type="checkbox" name="enabled" ${c.enabled?'checked':''} title="Turn on / off" aria-label="Turn on">
+        ${c.builtIn ? '' : `<button type="button" class="btn small ghost danger-link" data-del-ct aria-label="Delete">✕</button>`}
+      </div>
+    </div>`;
+  const switchHtml = (key, title, sub)=>`
+    <label class="switch-row"><span>${title}<small>${sub}</small></span><input type="checkbox" name="f_${key}" ${f[key]?'checked':''}></label>`;
+  showModal(`
+    <div class="head"><h2>Features &amp; care types</h2><button class="close" data-close>&times;</button></div>
+    <form id="featuresForm">
+      <div class="card">
+        <h2 style="font-size:16px;margin-bottom:6px;">Care types</h2>
+        <p style="font-size:13px;color:var(--ink-soft);margin:0 0 12px;">These are the kinds of care you can add to any plant. Turn one off to hide it everywhere, or add your own (misting, pruning, pest check…).</p>
+        <div class="ct-row ct-head"><span>Icon</span><span>Name</span><span>Every (d)</span><span>On</span></div>
+        <div id="ctRows">${s.careTypes.map(rowHtml).join('')}</div>
+        <button type="button" class="btn small secondary" id="addCtBtn">+ Add care type</button>
+      </div>
+      <div class="card">
+        <h2 style="font-size:16px;margin-bottom:6px;">Features</h2>
+        ${switchHtml('journal','Journal','The Journal tab and journal entries on each plant')}
+        ${switchHtml('species','Species library tab','Quick access to edit watering and fertilizing intervals')}
+        ${switchHtml('summaryCard','Reminder summary on Today','Overdue / due-today count at the top')}
+        ${switchHtml('email','Email reminders','Email section in Settings and automatic emails')}
+      </div>
+      <button class="btn full" type="submit">Save</button>
+    </form>
+  `);
+  const rows = document.getElementById('ctRows');
+  document.getElementById('addCtBtn').addEventListener('click', ()=>{
+    rows.insertAdjacentHTML('beforeend', rowHtml({id:uid('ct'), label:'', icon:'🌿', enabled:true, defaultDays:30, builtIn:false}));
+    const last = rows.lastElementChild.querySelector('[name=label]'); if(last) last.focus();
+  });
+  rows.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-del-ct]'); if(!btn) return;
+    const row = btn.closest('.ct-row'); const id = row.dataset.ct;
+    const used = DB.plants.some(p=>(p.care||[]).some(c=>c.type===id));
+    if(used && !confirm('This care type is used by some plants. Remove it from all of them?')) return;
+    row.remove();
+  });
+  document.getElementById('featuresForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const next = [];
+    for(const r of rows.querySelectorAll('.ct-row')){
+      const id = r.dataset.ct, builtIn = r.dataset.builtin==='1';
+      const label = r.querySelector('[name=label]').value.trim();
+      const prev = careTypeById(id);
+      if(!label){ if(prev){ toast('Every care type needs a name'); return; } continue; }
+      const daysEl = r.querySelector('[name=days]');
+      next.push({
+        id, label, builtIn,
+        icon: r.querySelector('[name=icon]').value.trim() || '🌿',
+        enabled: r.querySelector('[name=enabled]').checked,
+        defaultDays: daysEl ? Math.max(1, parseInt(daysEl.value,10) || 30) : (prev ? prev.defaultDays : null)
+      });
+    }
+    const keep = new Set(next.map(c=>c.id));
+    DB.plants.forEach(p=>{ p.care = (p.care||[]).filter(c=>keep.has(c.type)); });
+    s.careTypes = next;
+    const fd = new FormData(e.target);
+    s.features = {
+      journal: fd.has('f_journal'), species: fd.has('f_species'),
+      summaryCard: fd.has('f_summaryCard'), email: fd.has('f_email')
+    };
+    s.notifiedToday = {};
+    await Promise.all([saveSettings(), savePlants()]);
+    closeModal(); applyFeatures();
+    renderDashboard(); renderPlants(); renderJournal(); renderSettings();
+    toast('Settings saved');
+  });
+}
+
+/* ---------------- modal helpers ---------------- */
+function showModal(html){
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalBackdrop').classList.add('active');
+  document.querySelectorAll('[data-close]').forEach(b=> b.addEventListener('click', closeModal));
+}
+function closeModal(){
+  document.getElementById('modalBackdrop').classList.remove('active');
+}
+document.getElementById('modalBackdrop').addEventListener('click', (e)=>{
+  if(e.target.id === 'modalBackdrop') closeModal();
+});
+
+/* ---------------- nav ---------------- */
+const views = ['dashboard','plants','species','journal','settings'];
+const renderers = { dashboard:renderDashboard, plants:renderPlants, species:renderSpecies, journal:renderJournal, settings:renderSettings };
+document.querySelectorAll('nav.bottom button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav.bottom button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    views.forEach(v=> document.getElementById('view-'+v).classList.toggle('active', v===btn.dataset.tab));
+    renderers[btn.dataset.tab]();
+  });
+});
+
+/* ---------------- boot ---------------- */
+document.getElementById('forceSaveBtn').addEventListener('click',()=>saveAll(true));
+document.getElementById('featuresBtn').addEventListener('click',openFeaturesModal);
+setInterval(()=>saveAll(false),30000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden') saveAll(false);});
+window.addEventListener('pagehide',()=>{try{localStorage.setItem(STORAGE_PREFIX+'species',JSON.stringify(DB.species));localStorage.setItem(STORAGE_PREFIX+'plants',JSON.stringify(DB.plants));localStorage.setItem(STORAGE_PREFIX+'journal',JSON.stringify(DB.journal));localStorage.setItem(STORAGE_PREFIX+'settings',JSON.stringify(DB.settings));}catch(e){}});
+document.getElementById('todayLabel').textContent = new Date().toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
+
+(async function boot(){
+  try{
+    await initStorage();
+    applyFeatures();
+    renderDashboard();
+    setupCheckInterval();
+    setTimeout(function(){try{checkAndNotify();}catch(e){console.warn(e);}},1500);
+  }catch(e){
+    console.error('Garden Log startup failed',e);
+    try{ renderDashboard(); }catch(renderError){ console.error(renderError); }
+    const state=document.getElementById('saveState');
+    if(state) state.textContent='Local save unavailable';
+    toast('Garden Log loaded with limited storage');
+  }
+})();
+</script>
+</body>
+</html>

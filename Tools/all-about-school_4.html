@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>All About School</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBF6EC;
+    --ink:#332A22;
+    --line:#C9BEA8;
+    --school:#3F7D66;
+    --school-soft:#E3F0E9;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    padding:32px 16px;
+    background:#E7E1D3;
+    font-family:'Quicksand',sans-serif;
+    color:var(--ink);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:28px;
+  }
+
+  .toolbar{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-bottom:4px;
+  }
+
+  .toolbar button{
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:10px 18px;
+    border-radius:999px;
+    border:2px solid var(--ink);
+    background:var(--paper);
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .toolbar button:hover{ transform:translateY(-1px); }
+
+  .card-wrap{
+    position:relative;
+    width:620px;
+    max-width:92vw;
+    padding-top:20px;
+  }
+
+  .card{
+    position:relative;
+    z-index:1;
+    width:100%;
+    background:var(--paper);
+    border-radius:18px;
+    padding:46px 34px 30px;
+    box-shadow:0 10px 24px rgba(0,0,0,0.14);
+    background-image:
+      repeating-linear-gradient(180deg, transparent, transparent 37px, rgba(0,0,0,0.035) 38px);
+  }
+
+  .card::before{
+    content:"";
+    position:absolute;
+    inset:12px;
+    border:2.5px dashed var(--school);
+    border-radius:10px;
+    pointer-events:none;
+    opacity:0.55;
+  }
+
+  .ribbon{
+    position:absolute;
+    z-index:2;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--school);
+    color:#fff;
+    padding:12px 30px 10px;
+    border-radius:8px;
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:29px;
+    letter-spacing:0.5px;
+    white-space:nowrap;
+    box-shadow:0 4px 8px rgba(0,0,0,0.18);
+  }
+  .ribbon::before, .ribbon::after{
+    content:"";
+    position:absolute;
+    bottom:-9px;
+    width:0; height:0;
+    border-style:solid;
+  }
+  .ribbon::before{
+    left:-2px;
+    border-width:10px 10px 0 0;
+    border-color:color-mix(in srgb, var(--school) 65%, black) transparent transparent transparent;
+  }
+  .ribbon::after{
+    right:-2px;
+    border-width:10px 0 0 10px;
+    border-color:color-mix(in srgb, var(--school) 65%, black) transparent transparent transparent;
+  }
+
+  .top-row{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    margin-top:22px;
+    margin-bottom:2px;
+  }
+
+  .top-fields{ display:flex; flex-direction:column; gap:14px; }
+
+  .draw-box{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+  }
+  .draw-box .box{
+    width:100%;
+    height:190px;
+    border:2px solid var(--school);
+    border-radius:8px;
+    background:#fff;
+  }
+  .draw-box span{
+    font-size:12.5px;
+    color:var(--school);
+    font-weight:700;
+    text-align:center;
+    line-height:1.25;
+  }
+
+  .field{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .field label{
+    font-weight:600;
+    font-size:14px;
+    white-space:nowrap;
+    color:var(--ink);
+  }
+  .field .blank{
+    flex:1;
+    min-width:60px;
+    border-bottom:2px solid var(--line);
+    height:1.4em;
+  }
+
+  .fields{
+    display:flex;
+    flex-direction:column;
+    gap:11px;
+    margin-top:8px;
+  }
+
+  .footer-row{
+    display:flex;
+    gap:24px;
+    margin-top:16px;
+    padding-top:12px;
+    border-top:2px solid var(--school);
+  }
+  .footer-row .field{ flex:2; }
+  .footer-row .field.age{ flex:1; }
+
+  .date-row{ margin-top:10px; }
+
+  @media print{
+    body{ background:#fff; padding:0; gap:0; display:block; }
+    .toolbar{ display:none; }
+    .card-wrap{ page-break-after:always; break-after:page; page-break-inside:avoid; break-inside:avoid; margin:0 auto; }
+    .card-wrap:last-child{ page-break-after:auto; break-after:auto; }
+    .card{ box-shadow:none; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .ribbon{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button onclick="printWhenReady()">🖨️ Print / Save as PDF</button>
+</div>
+
+<script>
+  function printWhenReady(){
+    if (document.fonts && document.fonts.ready){
+      document.fonts.load("700 29px Caveat");
+      document.fonts.ready.then(() => window.print());
+    } else {
+      window.print();
+    }
+  }
+</script>
+
+<!-- SCHOOL - ENGLISH -->
+<div class="card-wrap">
+  <div class="ribbon">All About School</div>
+  <div class="card">
+    <div class="top-row">
+      <div class="top-fields">
+        <div class="field"><label>My school is called</label><span class="blank"></span></div>
+      </div>
+      <div class="draw-box">
+        <div class="box"></div>
+        <span>Drawing of<br>my school</span>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field"><label>School is a place where</label><span class="blank"></span></div>
+      <div class="field"><label>School is for</label><span class="blank"></span></div>
+      <div class="field"><label>My teacher's name is</label><span class="blank"></span></div>
+      <div class="field"><label>My teacher helps me by</label><span class="blank"></span></div>
+      <div class="field"><label>My favorite subject is</label><span class="blank"></span></div>
+      <div class="field"><label>My favorite thing about school is</label><span class="blank"></span></div>
+      <div class="field"><label>At school I like to</label><span class="blank"></span></div>
+      <div class="field"><label>My best friend at school is</label><span class="blank"></span></div>
+      <div class="field"><label>When I grow up I want to be</label><span class="blank"></span></div>
+    </div>
+    <div class="footer-row">
+      <div class="field"><label>Love,</label><span class="blank"></span></div>
+      <div class="field age"><label>Age:</label><span class="blank"></span></div>
+    </div>
+    <div class="field date-row"><label>Date:</label><span class="blank"></span></div>
+  </div>
+</div>
+
+<!-- SCHOOL - PORTUGUESE -->
+<div class="card-wrap">
+  <div class="ribbon">Tudo Sobre a Escola</div>
+  <div class="card">
+    <div class="top-row">
+      <div class="top-fields">
+        <div class="field"><label>A minha escola chama-se</label><span class="blank"></span></div>
+      </div>
+      <div class="draw-box">
+        <div class="box"></div>
+        <span>Desenho da<br>minha escola</span>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field"><label>A escola é um lugar onde</label><span class="blank"></span></div>
+      <div class="field"><label>A escola serve para</label><span class="blank"></span></div>
+      <div class="field"><label>A pessoa que me ensina chama-se</label><span class="blank"></span></div>
+      <div class="field"><label>O(a) meu(minha) professor(a) ajuda-me a</label><span class="blank"></span></div>
+      <div class="field"><label>A minha disciplina favorita é</label><span class="blank"></span></div>
+      <div class="field"><label>A coisa de que mais gosto na escola é</label><span class="blank"></span></div>
+      <div class="field"><label>Na escola gosto de</label><span class="blank"></span></div>
+      <div class="field"><label>O meu melhor amigo na escola é</label><span class="blank"></span></div>
+      <div class="field"><label>Quando crescer quero ser</label><span class="blank"></span></div>
+    </div>
+    <div class="footer-row">
+      <div class="field"><label>Com amor,</label><span class="blank"></span></div>
+      <div class="field age"><label>Idade:</label><span class="blank"></span></div>
+    </div>
+    <div class="field date-row"><label>Data:</label><span class="blank"></span></div>
+  </div>
+</div>
+
+</body>
+</html>

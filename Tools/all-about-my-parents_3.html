@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>All About My Dad & Mom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBF6EC;
+    --ink:#332A22;
+    --line:#C9BEA8;
+    --dad:#4A6FA0;
+    --dad-soft:#E4ECF6;
+    --mom:#C4677E;
+    --mom-soft:#F7E5EA;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    padding:32px 16px;
+    background:#E7E1D3;
+    font-family:'Quicksand',sans-serif;
+    color:var(--ink);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:28px;
+  }
+
+  .toolbar{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-bottom:4px;
+  }
+
+  .toolbar button{
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:10px 18px;
+    border-radius:999px;
+    border:2px solid var(--ink);
+    background:var(--paper);
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .toolbar button:hover{ transform:translateY(-1px); }
+
+  .card-wrap{
+    position:relative;
+    width:620px;
+    max-width:92vw;
+    padding-top:20px;
+  }
+  .card-wrap.dad{ --accent:var(--dad); }
+  .card-wrap.mom{ --accent:var(--mom); }
+
+  .card{
+    position:relative;
+    z-index:1;
+    width:100%;
+    background:var(--paper);
+    border-radius:18px;
+    padding:46px 34px 30px;
+    box-shadow:0 10px 24px rgba(0,0,0,0.14);
+    background-image:
+      repeating-linear-gradient(180deg, transparent, transparent 39px, rgba(0,0,0,0.035) 40px);
+  }
+
+  .card::before{
+    content:"";
+    position:absolute;
+    inset:12px;
+    border:2.5px dashed var(--accent);
+    border-radius:10px;
+    pointer-events:none;
+    opacity:0.55;
+  }
+
+  .ribbon{
+    position:absolute;
+    z-index:2;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--accent);
+    color:#fff;
+    padding:12px 30px 10px;
+    border-radius:8px;
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:30px;
+    letter-spacing:0.5px;
+    white-space:nowrap;
+    box-shadow:0 4px 8px rgba(0,0,0,0.18);
+  }
+  .ribbon::before, .ribbon::after{
+    content:"";
+    position:absolute;
+    bottom:-9px;
+    width:0; height:0;
+    border-style:solid;
+  }
+  .ribbon::before{
+    left:-2px;
+    border-width:10px 10px 0 0;
+    border-color:color-mix(in srgb, var(--accent) 65%, black) transparent transparent transparent;
+  }
+  .ribbon::after{
+    right:-2px;
+    border-width:10px 0 0 10px;
+    border-color:color-mix(in srgb, var(--accent) 65%, black) transparent transparent transparent;
+  }
+
+  .top-row{
+    display:flex;
+    gap:20px;
+    margin-top:22px;
+    margin-bottom:8px;
+  }
+
+  .top-fields{ flex:1; display:flex; flex-direction:column; gap:14px; }
+
+  .draw-box{
+    width:150px;
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+  }
+  .draw-box .box{
+    width:150px;
+    height:150px;
+    border:2px solid var(--accent);
+    border-radius:8px;
+    background:#fff;
+  }
+  .draw-box span{
+    font-size:12.5px;
+    color:var(--accent);
+    font-weight:700;
+    text-align:center;
+    line-height:1.25;
+  }
+
+  .field{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .field label{
+    font-weight:600;
+    font-size:14.5px;
+    white-space:nowrap;
+    color:var(--ink);
+  }
+  .field .blank{
+    flex:1;
+    min-width:60px;
+    border-bottom:2px solid var(--line);
+    height:1.5em;
+  }
+  .field.short .blank{ flex:none; width:70px; }
+  .field.stack{ flex-direction:column; align-items:stretch; gap:4px; }
+
+  .fields{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    margin-top:6px;
+  }
+
+  .inline-two{ display:flex; gap:24px; }
+  .inline-two .field{ flex:1; }
+
+  .footer-row{
+    display:flex;
+    gap:24px;
+    margin-top:18px;
+    padding-top:14px;
+    border-top:2px solid var(--accent);
+  }
+  .footer-row .field{ flex:2; }
+  .footer-row .field.age{ flex:1; }
+
+  .date-row{ margin-top:12px; }
+
+  @media print{
+    body{ background:#fff; padding:0; gap:0; display:block; }
+    .toolbar{ display:none; }
+    .card-wrap{ page-break-after:always; break-after:page; page-break-inside:avoid; break-inside:avoid; margin:0 auto; }
+    .card-wrap:last-child{ page-break-after:auto; break-after:auto; }
+    .card{ box-shadow:none; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .ribbon{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button onclick="printWhenReady()">🖨️ Print / Save as PDF</button>
+</div>
+
+<script>
+  function printWhenReady(){
+    if (document.fonts && document.fonts.ready){
+      document.fonts.load("700 30px Caveat");
+      document.fonts.ready.then(() => window.print());
+    } else {
+      window.print();
+    }
+  }
+</script>
+
+<!-- DAD - ENGLISH -->
+<div class="card-wrap dad">
+  <div class="ribbon">All About My Dad</div>
+  <div class="card">
+    <div class="top-row">
+      <div class="top-fields">
+        <div class="field"><label>My dad's name is</label><span class="blank"></span></div>
+        <div class="inline-two">
+          <div class="field short"><label>He is</label><span class="blank"></span><label>years old</label></div>
+        </div>
+        <div class="inline-two">
+          <div class="field short"><label>He is</label><span class="blank"></span><label>cm tall</label></div>
+          <div class="field short"><label>He weighs</label><span class="blank"></span><label>kg</label></div>
+        </div>
+      </div>
+      <div class="draw-box">
+        <div class="box"></div>
+        <span>Drawing of<br>my dad</span>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field"><label>His job is to</label><span class="blank"></span></div>
+      <div class="field"><label>He always says</label><span class="blank"></span></div>
+      <div class="field"><label>He is really good at</label><span class="blank"></span></div>
+      <div class="field"><label>He loves</label><span class="blank"></span></div>
+      <div class="field"><label>His nickname for me is</label><span class="blank"></span></div>
+      <div class="field"><label>His favorite thing to do is</label><span class="blank"></span></div>
+      <div class="field"><label>My dad and I like to</label><span class="blank"></span></div>
+      <div class="field"><label>I love my dad because</label><span class="blank"></span></div>
+    </div>
+    <div class="footer-row">
+      <div class="field"><label>Love,</label><span class="blank"></span></div>
+      <div class="field age"><label>Age:</label><span class="blank"></span></div>
+    </div>
+    <div class="field date-row"><label>Date:</label><span class="blank"></span></div>
+  </div>
+</div>
+
+<!-- DAD - PORTUGUESE -->
+<div class="card-wrap dad">
+  <div class="ribbon">Tudo Sobre o Meu Pai</div>
+  <div class="card">
+    <div class="top-row">
+      <div class="top-fields">
+        <div class="field"><label>O nome do meu pai é</label><span class="blank"></span></div>
+        <div class="inline-two">
+          <div class="field short"><label>Ele tem</label><span class="blank"></span><label>anos</label></div>
+        </div>
+        <div class="inline-two">
+          <div class="field short"><label>Ele mede</label><span class="blank"></span><label>cm</label></div>
+          <div class="field short"><label>Ele pesa</label><span class="blank"></span><label>kg</label></div>
+        </div>
+      </div>
+      <div class="draw-box">
+        <div class="box"></div>
+        <span>Desenho do<br>meu pai</span>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field"><label>O trabalho dele é</label><span class="blank"></span></div>
+      <div class="field"><label>Ele diz sempre</label><span class="blank"></span></div>
+      <div class="field"><label>Ele é muito bom a</label><span class="blank"></span></div>
+      <div class="field"><label>Ele adora</label><span class="blank"></span></div>
+      <div class="field"><label>A alcunha que ele me dá é</label><span class="blank"></span></div>
+      <div class="field"><label>A coisa favorita dele é</label><span class="blank"></span></div>
+      <div class="field"><label>Eu e o meu pai gostamos de</label><span class="blank"></span></div>
+      <div class="field"><label>Eu adoro o meu pai porque</label><span class="blank"></span></div>
+    </div>
+    <div class="footer-row">
+      <div class="field"><label>Com amor,</label><span class="blank"></span></div>
+      <div class="field age"><label>Idade:</label><span class="blank"></span></div>
+    </div>
+    <div class="field date-row"><label>Data:</label><span class="blank"></span></div>
+  </div>
+</div>
+
+<!-- MOM - ENGLISH -->
+<div class="card-wrap mom">
+  <div class="ribbon">All About My Mom</div>
+  <div class="card">
+    <div class="top-row">
+      <div class="top-fields">
+        <div class="field"><label>My mom's name is</label><span class="blank"></span></div>
+        <div class="inline-two">
+          <div class="field short"><label>She is</label><span class="blank"></span><label>years old</label></div>
+        </div>
+        <div class="inline-two">
+          <div class="field short"><label>She is</label><span class="blank"></span><label>cm tall</label></div>
+          <div class="field short"><label>She weighs</label><span class="blank"></span><label>kg</label></div>
+        </div>
+      </div>
+      <div class="draw-box">
+        <div class="box"></div>
+        <span>Drawing of<br>my mom</span>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field"><label>Her job is to</label><span class="blank"></span></div>
+      <div class="field"><label>She always says</label><span class="blank"></span></div>
+      <div class="field"><label>She is really good at</label><span class="blank"></span></div>
+      <div class="field"><label>She loves</label><span class="blank"></span></div>
+      <div class="field"><label>Her nickname for me is</label><span class="blank"></span></div>
+      <div class="field"><label>Her favorite thing to do is</label><span class="blank"></span></div>
+      <div class="field"><label>My mom and I like to</label><span class="blank"></span></div>
+      <div class="field"><label>I love my mom because</label><span class="blank"></span></div>
+    </div>
+    <div class="footer-row">
+      <div class="field"><label>Love,</label><span class="blank"></span></div>
+      <div class="field age"><label>Age:</label><span class="blank"></span></div>
+    </div>
+    <div class="field date-row"><label>Date:</label><span class="blank"></span></div>
+  </div>
+</div>
+
+<!-- MOM - PORTUGUESE -->
+<div class="card-wrap mom">
+  <div class="ribbon">Tudo Sobre a Minha Mãe</div>
+  <div class="card">
+    <div class="top-row">
+      <div class="top-fields">
+        <div class="field"><label>O nome da minha mãe é</label><span class="blank"></span></div>
+        <div class="inline-two">
+          <div class="field short"><label>Ela tem</label><span class="blank"></span><label>anos</label></div>
+        </div>
+        <div class="inline-two">
+          <div class="field short"><label>Ela mede</label><span class="blank"></span><label>cm</label></div>
+          <div class="field short"><label>Ela pesa</label><span class="blank"></span><label>kg</label></div>
+        </div>
+      </div>
+      <div class="draw-box">
+        <div class="box"></div>
+        <span>Desenho da<br>minha mãe</span>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field"><label>O trabalho dela é</label><span class="blank"></span></div>
+      <div class="field"><label>Ela diz sempre</label><span class="blank"></span></div>
+      <div class="field"><label>Ela é muito boa a</label><span class="blank"></span></div>
+      <div class="field"><label>Ela adora</label><span class="blank"></span></div>
+      <div class="field"><label>A alcunha que ela me dá é</label><span class="blank"></span></div>
+      <div class="field"><label>A coisa favorita dela é</label><span class="blank"></span></div>
+      <div class="field"><label>Eu e a minha mãe gostamos de</label><span class="blank"></span></div>
+      <div class="field"><label>Eu adoro a minha mãe porque</label><span class="blank"></span></div>
+    </div>
+    <div class="footer-row">
+      <div class="field"><label>Com amor,</label><span class="blank"></span></div>
+      <div class="field age"><label>Idade:</label><span class="blank"></span></div>
+    </div>
+    <div class="field date-row"><label>Data:</label><span class="blank"></span></div>
+  </div>
+</div>
+
+</body>
+</html>

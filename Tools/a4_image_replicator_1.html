@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>A4 Image Replicator - Exact Copy Mode</title>
+<style>
+    :root {
+        --bg: #f3f4f6;
+        --panel: #ffffff;
+        --text: #111827;
+        --muted: #6b7280;
+        --border: #d1d5db;
+        --accent: #2563eb;
+        --accent-dark: #1d4ed8;
+        --danger: #dc2626;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+    }
+
+    .app {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .toolbar {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px;
+        margin-bottom: 20px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+
+    h1 { margin: 0 0 6px 0; font-size: 24px; }
+
+    .subtitle {
+        margin: 0 0 18px 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .controls-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 12px;
+        align-items: end;
+    }
+
+    label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    input, select, button { font: inherit; }
+
+    input[type="file"], input[type="text"], select {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 9px 10px;
+        background: white;
+    }
+
+    .checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 40px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 9px 10px;
+        background: white;
+    }
+
+    .checkbox-row input { width: 18px; height: 18px; }
+    .checkbox-row span { font-size: 14px; font-weight: 700; }
+
+    button {
+        border: none;
+        border-radius: 10px;
+        padding: 10px 14px;
+        background: var(--accent);
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    button:hover { background: var(--accent-dark); }
+    button.secondary { background: #374151; }
+    button.secondary:hover { background: #111827; }
+    button.danger { background: var(--danger); }
+    button.danger:hover { background: #b91c1c; }
+
+    .drop-zone {
+        margin-top: 16px;
+        border: 2px dashed #9ca3af;
+        border-radius: 14px;
+        padding: 22px;
+        background: #f9fafb;
+        text-align: center;
+        color: var(--muted);
+        transition: 0.15s ease;
+    }
+
+    .drop-zone.dragover {
+        border-color: var(--accent);
+        background: #eff6ff;
+        color: var(--accent-dark);
+    }
+
+    .image-list {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 12px;
+    }
+
+    .thumb-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .thumb-card img {
+        width: 100%;
+        height: 110px;
+        object-fit: contain;
+        background: #f3f4f6;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .thumb-card input {
+        font-size: 12px;
+        padding: 7px;
+    }
+
+    .thumb-actions { display: flex; gap: 6px; }
+    .thumb-actions button { flex: 1; font-size: 12px; padding: 7px 8px; }
+
+    .preview-area {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .a4-page {
+        background: white;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+        page-break-after: always;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .a4-page.orient-portrait { width: 210mm; height: 297mm; }
+    .a4-page.orient-landscape { width: 297mm; height: 210mm; }
+
+    .page-inner {
+        width: 100%;
+        height: 100%;
+        display: grid;
+    }
+
+    .margin-standard { padding: 10mm; gap: 8mm; }
+    .margin-small { padding: 5mm; gap: 4mm; }
+    .margin-none { padding: 0; gap: 0; }
+
+    .layout-4 {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+
+    .layout-6 {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr;
+    }
+
+    .layout-9 {
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr;
+    }
+
+    .image-cell {
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        background: #ffffff;
+        position: relative;
+    }
+
+    .cut-border .image-cell {
+        border: 1px dashed #111827;
+    }
+
+    .cut-light .image-cell {
+        border: 1px solid #d1d5db;
+    }
+
+    .cut-none .image-cell {
+        border: none;
+    }
+
+    .image-box {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: #ffffff;
+    }
+
+    .image-box img {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    .image-box.fit img { object-fit: contain; }
+    .image-box.fill img { object-fit: cover; }
+
+    .exact-copy .image-box img {
+        object-fit: contain !important;
+    }
+
+    .caption {
+        border-top: 1px solid #e5e7eb;
+        padding: 4px 6px;
+        min-height: 8mm;
+        font-size: 10pt;
+        text-align: center;
+        color: #111827;
+        overflow: hidden;
+        line-height: 1.2;
+        background: white;
+    }
+
+    .caption.hidden { display: none; }
+
+    .placeholder {
+        border: 1px dashed #e5e7eb;
+        background: #fafafa;
+    }
+
+    .page-number {
+        position: absolute;
+        bottom: 3mm;
+        right: 6mm;
+        font-size: 8pt;
+        color: #9ca3af;
+        background: rgba(255,255,255,0.8);
+        padding: 1mm 2mm;
+        border-radius: 2mm;
+    }
+
+    .page-number.hidden { display: none; }
+
+    .crop-mark {
+        position: absolute;
+        width: 8mm;
+        height: 8mm;
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    .crop-mark::before,
+    .crop-mark::after {
+        content: "";
+        position: absolute;
+        background: #111827;
+    }
+
+    .crop-mark::before { width: 8mm; height: 0.25mm; }
+    .crop-mark::after { width: 0.25mm; height: 8mm; }
+
+    .crop-tl { top: 0; left: 0; }
+    .crop-tl::before { top: 0; left: 0; }
+    .crop-tl::after { top: 0; left: 0; }
+
+    .crop-tr { top: 0; right: 0; }
+    .crop-tr::before { top: 0; right: 0; }
+    .crop-tr::after { top: 0; right: 0; }
+
+    .crop-bl { bottom: 0; left: 0; }
+    .crop-bl::before { bottom: 0; left: 0; }
+    .crop-bl::after { bottom: 0; left: 0; }
+
+    .crop-br { bottom: 0; right: 0; }
+    .crop-br::before { bottom: 0; right: 0; }
+    .crop-br::after { bottom: 0; right: 0; }
+
+    .note {
+        margin-top: 12px;
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.4;
+    }
+
+    @media print {
+        html, body {
+            background: white;
+        }
+
+        .toolbar, .image-list { display: none !important; }
+
+        .app {
+            max-width: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .preview-area {
+            display: block;
+            margin: 0;
+            padding: 0;
+        }
+
+        .a4-page {
+            box-shadow: none;
+            margin: 0;
+        }
+    }
+</style>
+<style id="pageSizeStyle">
+    @page { size: A4 portrait; margin: 0; }
+</style>
+</head>
+<body>
+<div class="app">
+    <div class="toolbar">
+        <h1>A4 Image Replicator</h1>
+        <p class="subtitle">
+            Upload, drag, drop, or paste images. Exact Copy Mode keeps the full original image visible and prevents top, bottom, or side cropping.
+        </p>
+
+        <div class="controls-grid">
+            <div>
+                <label for="imageInput">Add images</label>
+                <input id="imageInput" type="file" accept="image/*" multiple />
+            </div>
+
+            <div>
+                <label for="pageOrientation">Page orientation</label>
+                <select id="pageOrientation">
+                    <option value="portrait">Portrait</option>
+                    <option value="landscape">Landscape</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="sizingMode">Sizing mode</label>
+                <select id="sizingMode">
+                    <option value="grid">Grid layout (choose images per page)</option>
+                    <option value="exact">Exact size (mm) - auto-fit as many as possible</option>
+                </select>
+            </div>
+
+            <div id="layoutSelectWrap">
+                <label for="layoutSelect">Layout</label>
+                <select id="layoutSelect">
+                    <option value="4">4 images per A4 page, 2 x 2</option>
+                    <option value="6">6 images per A4 page, 2 x 3</option>
+                    <option value="9">9 images per A4 page, 3 x 3</option>
+                </select>
+            </div>
+
+            <div id="exactSizeWrap" style="display:none;">
+                <label for="exactWidth">Exact image size (mm)</label>
+                <div style="display:flex; gap:6px;">
+                    <input id="exactWidth" type="number" min="5" max="210" step="1" value="60" placeholder="Width" />
+                    <input id="exactHeight" type="number" min="5" max="297" step="1" value="90" placeholder="Height" />
+                </div>
+                <div class="checkbox-row" style="margin-top:8px;">
+                    <input id="lockAspect" type="checkbox" checked />
+                    <span>Auto-match picture's proportions (no white bars)</span>
+                </div>
+            </div>
+
+            <div>
+                <label for="marginSelect">Page margin</label>
+                <select id="marginSelect">
+                    <option value="standard">Standard margin</option>
+                    <option value="small">Small margin</option>
+                    <option value="none">No page margin</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="tightPack">Spacing between images</label>
+                <div class="checkbox-row">
+                    <input id="tightPack" type="checkbox" />
+                    <span>Edge-to-edge (no gap, less to cut)</span>
+                </div>
+            </div>
+
+            <div>
+                <label for="fitMode">Image mode</label>
+                <select id="fitMode">
+                    <option value="fit">Fit entire image</option>
+                    <option value="fill">Fill cell and crop edges</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="exactCopyMode">Exact copy mode</label>
+                <div class="checkbox-row">
+                    <input id="exactCopyMode" type="checkbox" checked />
+                    <span>Never crop image</span>
+                </div>
+            </div>
+
+            <div>
+                <label for="captionMode">Captions</label>
+                <select id="captionMode">
+                    <option value="hide">Hide captions</option>
+                    <option value="show">Show captions</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="cutLineMode">Cutting guides</label>
+                <select id="cutLineMode">
+                    <option value="border">Dashed borders</option>
+                    <option value="marks">Corner cutting marks</option>
+                    <option value="both">Borders and corner marks</option>
+                    <option value="light">Light borders</option>
+                    <option value="none">No cutting guides</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="pageNumberMode">Page numbers</label>
+                <select id="pageNumberMode">
+                    <option value="hide">Hide page numbers</option>
+                    <option value="show">Show page numbers</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="duplicateCount">Repeat each image</label>
+                <select id="duplicateCount">
+                    <option value="1">1 time</option>
+                    <option value="2">2 times</option>
+                    <option value="4">4 times</option>
+                    <option value="6">6 times</option>
+                    <option value="8">8 times</option>
+                    <option value="9">9 times</option>
+                    <option value="12">12 times</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="globalCaption">Default caption</label>
+                <input id="globalCaption" type="text" placeholder="Optional caption for new images" />
+            </div>
+
+            <div><button onclick="generatePages()">Generate Preview</button></div>
+            <div><button class="secondary" onclick="printPages()">Print / Save PDF</button></div>
+            <div><button class="danger" onclick="clearAll()">Clear All</button></div>
+        </div>
+
+        <div id="dropZone" class="drop-zone">
+            Drag images here, paste screenshots with Ctrl + V, or use the file picker above.
+        </div>
+
+        <div class="note">
+            Tip: for fully replicated images, leave Exact Copy Mode enabled. In the browser print dialog choose A4, Portrait, Scale 100%, and disable headers and footers. If your printer cannot print edge to edge, use Small margin instead of No margin.<br />
+            "Exact size" mode lets you type the physical width and height (in mm) you want each printed picture to be, and the tool automatically works out how many fit on the page and arranges them. Turn on "Edge-to-edge" to remove the gap between pictures so there is less blank paper to trim after printing.<br />
+            If the width/height you type don't match your picture's real proportions, Exact Copy Mode will add thin white bars inside each box to avoid cropping - with Edge-to-edge on, those bars from neighbouring pictures add up into a visible white band between them. "Auto-match picture's proportions" keeps the height in sync with the width using your first picture's actual shape, so each box exactly fits the picture with no bars. Turn it off if you want to crop the picture to your own exact size instead (use "Fill cell and crop edges" and turn off Exact Copy Mode for that).
+        </div>
+    </div>
+
+    <div id="imageList" class="image-list"></div>
+    <div id="previewArea" class="preview-area"></div>
+</div>
+
+<script>
+    let images = [];
+
+    const imageInput = document.getElementById("imageInput");
+    const dropZone = document.getElementById("dropZone");
+    const imageList = document.getElementById("imageList");
+    const previewArea = document.getElementById("previewArea");
+
+    imageInput.addEventListener("change", function(event) {
+        handleFiles(event.target.files);
+        imageInput.value = "";
+    });
+
+    dropZone.addEventListener("dragover", function(event) {
+        event.preventDefault();
+        dropZone.classList.add("dragover");
+    });
+
+    dropZone.addEventListener("dragleave", function() {
+        dropZone.classList.remove("dragover");
+    });
+
+    dropZone.addEventListener("drop", function(event) {
+        event.preventDefault();
+        dropZone.classList.remove("dragover");
+        handleFiles(event.dataTransfer.files);
+    });
+
+    document.addEventListener("paste", function(event) {
+        if (!event.clipboardData || !event.clipboardData.items) return;
+        const items = event.clipboardData.items;
+        const files = [];
+
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf("image") !== -1) {
+                const file = items[i].getAsFile();
+                if (file) files.push(file);
+            }
+        }
+
+        if (files.length > 0) handleFiles(files);
+    });
+
+    function createId() {
+        if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+        return "img-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+    }
+
+    function handleFiles(fileList) {
+        const files = Array.from(fileList).filter(file => file.type.startsWith("image/"));
+        files.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const defaultCaption = document.getElementById("globalCaption").value.trim();
+                const record = {
+                    id: createId(),
+                    name: file.name || "Pasted image",
+                    src: event.target.result,
+                    caption: defaultCaption || file.name || "Image",
+                    naturalW: null,
+                    naturalH: null
+                };
+                images.push(record);
+                renderImageList();
+                generatePages();
+
+                const probe = new Image();
+                probe.onload = function() {
+                    record.naturalW = probe.naturalWidth;
+                    record.naturalH = probe.naturalHeight;
+                    if (images[0] === record) generatePages();
+                };
+                probe.src = record.src;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function renderImageList() {
+        imageList.innerHTML = "";
+        images.forEach((image, index) => {
+            const card = document.createElement("div");
+            card.className = "thumb-card";
+
+            const img = document.createElement("img");
+            img.src = image.src;
+
+            const captionInput = document.createElement("input");
+            captionInput.type = "text";
+            captionInput.value = image.caption;
+            captionInput.placeholder = "Caption";
+            captionInput.addEventListener("input", function() {
+                images[index].caption = captionInput.value;
+                generatePages();
+            });
+
+            const actions = document.createElement("div");
+            actions.className = "thumb-actions";
+
+            const duplicateButton = document.createElement("button");
+            duplicateButton.textContent = "Duplicate";
+            duplicateButton.className = "secondary";
+            duplicateButton.onclick = function() {
+                images.splice(index + 1, 0, {
+                    id: createId(),
+                    name: image.name,
+                    src: image.src,
+                    caption: image.caption,
+                    naturalW: image.naturalW,
+                    naturalH: image.naturalH
+                });
+                renderImageList();
+                generatePages();
+            };
+
+            const removeButton = document.createElement("button");
+            removeButton.textContent = "Remove";
+            removeButton.className = "danger";
+            removeButton.onclick = function() {
+                images.splice(index, 1);
+                renderImageList();
+                generatePages();
+            };
+
+            actions.appendChild(duplicateButton);
+            actions.appendChild(removeButton);
+            card.appendChild(img);
+            card.appendChild(captionInput);
+            card.appendChild(actions);
+            imageList.appendChild(card);
+        });
+    }
+
+    function getPageDims() {
+        const orientation = document.getElementById("pageOrientation").value;
+        return orientation === "landscape" ? { w: 297, h: 210 } : { w: 210, h: 297 };
+    }
+
+    function updatePageSizeCss() {
+        const orientation = document.getElementById("pageOrientation").value;
+        document.getElementById("pageSizeStyle").textContent =
+            "@page { size: A4 " + orientation + "; margin: 0; }";
+    }
+
+    function toggleSizingMode() {
+        const mode = document.getElementById("sizingMode").value;
+        document.getElementById("layoutSelectWrap").style.display = mode === "exact" ? "none" : "";
+        document.getElementById("exactSizeWrap").style.display = mode === "exact" ? "" : "none";
+        applyLockAspectState();
+    }
+
+    function applyLockAspectState() {
+        const locked = document.getElementById("lockAspect").checked;
+        const heightField = document.getElementById("exactHeight");
+        heightField.readOnly = locked;
+        heightField.style.background = locked ? "#f3f4f6" : "white";
+    }
+
+    // Works out, in millimetres, how the page should be divided:
+    // - "grid" mode keeps the original fixed 2x2 / 2x3 / 3x3 behaviour
+    // - "exact" mode takes a physical width/height per picture and fits
+    //   as many whole copies as possible on the page, optionally with
+    //   zero gap between them so there is less to cut afterwards.
+    function computeLayout() {
+        const sizingMode = document.getElementById("sizingMode").value;
+        const marginMode = document.getElementById("marginSelect").value;
+        const tightPack = document.getElementById("tightPack").checked;
+
+        const margin = marginMode === "none" ? 0 : marginMode === "small" ? 5 : 10;
+        const gap = tightPack ? 0 : (marginMode === "none" ? 0 : marginMode === "small" ? 4 : 8);
+        const pageDims = getPageDims();
+
+        if (sizingMode === "exact") {
+            const usableW = pageDims.w - margin * 2;
+            const usableH = pageDims.h - margin * 2;
+
+            let w = parseFloat(document.getElementById("exactWidth").value);
+            let h = parseFloat(document.getElementById("exactHeight").value);
+            if (!isFinite(w) || w <= 0) w = usableW;
+            if (!isFinite(h) || h <= 0) h = usableH;
+            w = Math.min(w, usableW);
+            h = Math.min(h, usableH);
+
+            const cols = Math.max(1, Math.floor((usableW + gap) / (w + gap)));
+            const rows = Math.max(1, Math.floor((usableH + gap) / (h + gap)));
+
+            return {
+                cols: cols, rows: rows, perPage: cols * rows,
+                cellW: w, cellH: h, margin: margin, gap: gap, exact: true
+            };
+        }
+
+        const layout = parseInt(document.getElementById("layoutSelect").value, 10);
+        const cols = layout === 9 ? 3 : 2;
+        const rows = layout === 4 ? 2 : (layout === 6 ? 3 : 3);
+
+        return {
+            cols: cols, rows: rows, perPage: layout,
+            cellW: null, cellH: null, margin: margin, gap: gap, exact: false
+        };
+    }
+
+    function getCutClass(cutLineMode) {
+        if (cutLineMode === "border" || cutLineMode === "both") return "cut-border";
+        if (cutLineMode === "light") return "cut-light";
+        return "cut-none";
+    }
+
+    function shouldShowCornerMarks(cutLineMode) {
+        return cutLineMode === "marks" || cutLineMode === "both";
+    }
+
+    function addCornerMarks(cell) {
+        ["tl", "tr", "bl", "br"].forEach(pos => {
+            const mark = document.createElement("div");
+            mark.className = "crop-mark crop-" + pos;
+            cell.appendChild(mark);
+        });
+    }
+
+    // Keeps the "exact height" field matched to the first picture's real
+    // proportions (given the typed width), so Exact Copy Mode never has to
+    // add white letterbox bars inside a box - which is what causes a visible
+    // white band once boxes are placed edge-to-edge.
+    function syncExactHeightFromAspect() {
+        const lock = document.getElementById("lockAspect");
+        if (!lock || !lock.checked) return;
+        if (images.length === 0 || !images[0].naturalW || !images[0].naturalH) return;
+
+        const widthField = document.getElementById("exactWidth");
+        const heightField = document.getElementById("exactHeight");
+        const w = parseFloat(widthField.value);
+        if (!isFinite(w) || w <= 0) return;
+
+        const aspect = images[0].naturalW / images[0].naturalH;
+        heightField.value = (w / aspect).toFixed(1);
+    }
+
+    function generatePages() {
+        previewArea.innerHTML = "";
+        if (document.getElementById("sizingMode").value === "exact") {
+            syncExactHeightFromAspect();
+        }
+        if (images.length === 0) return;
+
+        const gridInfo = computeLayout();
+        const perPage = gridInfo.perPage;
+        let fitMode = document.getElementById("fitMode").value;
+        const exactCopyMode = document.getElementById("exactCopyMode").checked;
+        const captionMode = document.getElementById("captionMode").value;
+        const duplicateCount = parseInt(document.getElementById("duplicateCount").value, 10);
+        const cutLineMode = document.getElementById("cutLineMode").value;
+        const pageNumberMode = document.getElementById("pageNumberMode").value;
+
+        if (exactCopyMode) fitMode = "fit";
+
+        const expandedImages = [];
+        images.forEach(image => {
+            for (let i = 0; i < duplicateCount; i++) expandedImages.push(image);
+        });
+
+        const totalPages = Math.ceil(expandedImages.length / perPage);
+
+        const orientation = document.getElementById("pageOrientation").value;
+
+        for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+            const page = document.createElement("div");
+            page.className = "a4-page orient-" + orientation;
+
+            const inner = document.createElement("div");
+            inner.className = "page-inner " +
+                getCutClass(cutLineMode) + " " +
+                (exactCopyMode ? "exact-copy" : "");
+
+            inner.style.gridTemplateColumns = gridInfo.exact
+                ? "repeat(" + gridInfo.cols + ", " + gridInfo.cellW + "mm)"
+                : "repeat(" + gridInfo.cols + ", 1fr)";
+            inner.style.gridTemplateRows = gridInfo.exact
+                ? "repeat(" + gridInfo.rows + ", " + gridInfo.cellH + "mm)"
+                : "repeat(" + gridInfo.rows + ", 1fr)";
+            inner.style.padding = gridInfo.margin + "mm";
+            inner.style.gap = gridInfo.gap + "mm";
+            if (gridInfo.exact) {
+                inner.style.justifyContent = "start";
+                inner.style.alignContent = "start";
+            }
+
+            const start = pageIndex * perPage;
+            const pageImages = expandedImages.slice(start, start + perPage);
+
+            for (let i = 0; i < perPage; i++) {
+                const cell = document.createElement("div");
+                cell.className = "image-cell";
+
+                if (pageImages[i]) {
+                    const imageBox = document.createElement("div");
+                    imageBox.className = "image-box " + fitMode;
+
+                    const img = document.createElement("img");
+                    img.src = pageImages[i].src;
+                    img.alt = pageImages[i].caption || pageImages[i].name || "Image";
+                    imageBox.appendChild(img);
+
+                    const caption = document.createElement("div");
+                    caption.className = "caption";
+                    if (captionMode === "hide" || exactCopyMode) caption.classList.add("hidden");
+                    caption.textContent = pageImages[i].caption || "";
+
+                    cell.appendChild(imageBox);
+                    cell.appendChild(caption);
+
+                    if (shouldShowCornerMarks(cutLineMode)) addCornerMarks(cell);
+                } else {
+                    cell.classList.add("placeholder");
+                }
+
+                inner.appendChild(cell);
+            }
+
+            const pageNumber = document.createElement("div");
+            pageNumber.className = "page-number";
+            if (pageNumberMode === "hide" || exactCopyMode) pageNumber.classList.add("hidden");
+            pageNumber.textContent = "Page " + (pageIndex + 1) + " of " + totalPages;
+
+            page.appendChild(inner);
+            page.appendChild(pageNumber);
+            previewArea.appendChild(page);
+        }
+    }
+
+    function printPages() {
+        generatePages();
+        window.print();
+    }
+
+    function clearAll() {
+        images = [];
+        imageList.innerHTML = "";
+        previewArea.innerHTML = "";
+    }
+
+    [
+        "layoutSelect", "fitMode", "captionMode", "duplicateCount",
+        "marginSelect", "cutLineMode", "pageNumberMode", "exactCopyMode",
+        "sizingMode", "tightPack"
+    ].forEach(id => {
+        document.getElementById(id).addEventListener("change", generatePages);
+    });
+
+    document.getElementById("pageOrientation").addEventListener("change", function() {
+        updatePageSizeCss();
+        generatePages();
+    });
+
+    ["exactWidth", "exactHeight"].forEach(id => {
+        document.getElementById(id).addEventListener("input", generatePages);
+    });
+
+    document.getElementById("lockAspect").addEventListener("change", function() {
+        applyLockAspectState();
+        generatePages();
+    });
+
+    document.getElementById("sizingMode").addEventListener("change", toggleSizingMode);
+    toggleSizingMode();
+    updatePageSizeCss();
+</script>
+</body>
+</html>
