@@ -8,7 +8,7 @@ title: Welcome
 Pick a tool to get started.
 
 <div class="tool-grid">
-    <a class="tool-btn" href="Tools/My_Kids.html">
+    <a class="tool-btn" href="Tools/Meus_Filhos.html">
     <strong>👧 My Kids</strong>
     <span>Children milestone tracker</span>
   </a>
@@ -47,5 +47,9 @@ Pick a tool to get started.
   <a class="tool-btn" href="Tools/Livro_de_Finalistas.html">
     <strong>📖 Livro dos Finalistas</strong>
     <span>Builder for the finalists' book</span>
+  </a>
+   <a class="tool-btn" href="Tools/Signature_Press.html">
+   <strong>📖 Impressão de livros</strong>
+   <span>Para imprimir como livro</span>
   </a>
 </div>
