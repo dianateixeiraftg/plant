@@ -611,7 +611,7 @@ function render(){
         ${fotoOrPlaceholder(state.alunoFinalista.foto, "aluno-foto-grande", "foto do aluno")}
         <h2>Diploma de Finalista</h2>
         <div class="diploma-nome">${esc(state.alunoFinalista.nome) || "Nome do(a) aluno(a)"}</div>
-        <div class="diploma-sub">Concluiu com sucesso mais uma etapa em ${esc(state.escola.nome)}, na ${esc(state.escola.turma)}, no ano letivo de ${esc(state.escola.anoLetivo)}.</div>
+        <div class="diploma-sub">Concluiu com sucesso mais uma etapa na escola ${esc(state.escola.nome)}, na ${esc(state.escola.turma)}, no ano letivo de ${esc(state.escola.anoLetivo)}.</div>
       </div>
     </div>
   `, "Rosto Personalizado", pageNum++));
