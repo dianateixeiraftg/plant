@@ -26,23 +26,23 @@ Pick a tool to get started.
   </a>
     <a class="tool-btn" href="Tools/little_moments_book_studio_v2.html">
     <strong>Little Moments Book Studio</strong>
-    <span>Roupa com Ciclo</span>
+    <span>Livro de Momentos</span>
   </a>
     <a class="tool-btn" href="Tools/criador_recortes_festa.html">
     <strong>Recortes para Festas</strong>
-    <span>Roupa com Ciclo</span>
+    <span>Criador de Recortes de decoração de festas</span>
   </a>
     <a class="tool-btn" href="Tools/a4_image_replicator_1.html">
     <strong>Image Replicator</strong>
-    <span>Roupa com Ciclo</span>
+    <span>Replicador de imagens</span>
   </a>
     <a class="tool-btn" href="Tools/all-about-my-parents_3.html">
     <strong>Os meus Pais</strong>
-    <span>Roupa com Ciclo</span>
+    <span>Tudo Sobre os Meus Pais</span>
   </a>
     <a class="tool-btn" href="Tools/all-about-school_4.html">
     <strong>A minha escola</strong>
-    <span>Roupa com Ciclo</span>
+    <span>Tudo Sobre a Minha Escola</span>
   </a>
   <a class="tool-btn" href="Tools/Livro_de_Finalistas.html">
     <strong>📖 Livro dos Finalistas</strong>
