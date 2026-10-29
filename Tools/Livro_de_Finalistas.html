@@ -18,6 +18,21 @@
     --ink-soft:#5B584F;
     --line:#E4D9BE;
     --card:#FFFFFF;
+
+    /* cores dos menus (editáveis em Definições) */
+    --m-head:#f4b740;
+    --m-head-text:#2b2a26;
+    --m-editor-bg:#ffffff;
+    --m-border:#2b2a26;
+    --m-tab-bg:#fbf5e6;
+    --m-tab-text:#2b2a26;
+    --m-tab-active:#e8615a;
+    --m-tab-active-text:#ffffff;
+    --m-toolbar:#2b2a26;
+    --m-toolbar-text:#ffffff;
+    --m-btn:#f4b740;
+    --m-btn-text:#3a2c05;
+    --m-add:#4c8fbd;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:#EFE7D2;color:var(--ink);font-family:'Karla',sans-serif;}
@@ -28,19 +43,19 @@
   /* ---------- App shell ---------- */
   .app{display:flex;min-height:100vh;}
   .editor{
-    width:400px;flex:0 0 400px;background:var(--card);border-right:3px solid var(--ink);
+    width:400px;flex:0 0 400px;background:var(--m-editor-bg);border-right:3px solid var(--m-border);
     display:flex;flex-direction:column;height:100vh;position:sticky;top:0;
   }
-  .editor-head{padding:18px 20px 12px;border-bottom:3px solid var(--ink);background:var(--sun);}
+  .editor-head{padding:18px 20px 12px;border-bottom:3px solid var(--m-border);background:var(--m-head);color:var(--m-head-text);}
   .editor-head h1{font-size:1.35rem;line-height:1.15;}
-  .editor-head p{margin:.3em 0 0;font-size:.85rem;color:#4a3c0f;}
+  .editor-head p{margin:.3em 0 0;font-size:.85rem;color:var(--m-head-text);opacity:.85;}
 
   .tabs{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;border-bottom:2px solid var(--line);}
-  .tab-btn{
-    border:2px solid var(--ink);background:var(--paper);border-radius:999px;padding:6px 12px;
-    font-size:.78rem;font-weight:600;color:var(--ink);
+  .tab-btn,.set-tab{
+    border:2px solid var(--m-border);background:var(--m-tab-bg);border-radius:999px;padding:6px 12px;
+    font-size:.78rem;font-weight:600;color:var(--m-tab-text);
   }
-  .tab-btn.active{background:var(--coral);color:#fff;}
+  .tab-btn.active,.set-tab.active{background:var(--m-tab-active);color:var(--m-tab-active-text);}
 
   .tab-panels{flex:1;overflow-y:auto;padding:18px 20px 60px;}
   .panel{display:none;}
@@ -77,7 +92,7 @@
 
   .add-row{display:flex;justify-content:center;margin-top:6px;}
   .add-row button{
-    background:var(--sky);color:#fff;border:2px solid var(--ink);border-radius:999px;padding:8px 18px;font-weight:700;font-size:.85rem;
+    background:var(--m-add);color:#fff;border:2px solid var(--m-border);border-radius:999px;padding:8px 18px;font-weight:700;font-size:.85rem;
   }
 
   .gallery-thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
@@ -93,23 +108,23 @@
   .switch-row input{transform:scale(1.3);}
 
   /* ---------- Stage ---------- */
-  .stage{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .stage{flex:1;display:flex;flex-direction:column;min-width:0;height:100vh;}
   .toolbar{
-    position:sticky;top:0;z-index:5;background:var(--ink);color:#fff;padding:12px 24px;
-    display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:3px solid var(--sun);
+    position:sticky;top:0;z-index:5;background:var(--m-toolbar);color:var(--m-toolbar-text);padding:10px 16px;
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:3px solid var(--m-btn);
   }
   .toolbar .brand{font-family:'Baloo 2';font-weight:700;font-size:1.05rem;margin-right:auto;}
   .toolbar button{
-    border:2px solid #fff;background:transparent;color:#fff;border-radius:999px;padding:8px 16px;font-weight:700;font-size:.82rem;
+    border:2px solid var(--m-toolbar-text);background:transparent;color:var(--m-toolbar-text);border-radius:999px;padding:7px 12px;font-weight:700;font-size:.8rem;white-space:nowrap;
   }
-  .toolbar button.filled{background:var(--sun);border-color:var(--sun);color:#3a2c05;}
+  .toolbar button.filled{background:var(--m-btn);border-color:var(--m-btn);color:var(--m-btn-text);}
   .toolbar input[type=file]{display:none;}
-  .mode-pill{display:flex;align-items:center;gap:8px;background:#40392c;border-radius:999px;padding:6px 12px;font-size:.8rem;}
-  .mode-pill select{background:transparent;color:#fff;border:none;font-weight:700;}
+  .mode-pill{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border-radius:999px;padding:6px 12px;font-size:.8rem;}
+  .mode-pill select{background:transparent;color:var(--m-toolbar-text);border:none;font-weight:700;}
   .mode-pill select option{color:#000;}
 
   .pages{
-    flex:1;overflow-y:auto;padding:36px;display:flex;flex-direction:column;align-items:center;gap:34px;background:
+    flex:1;min-height:0;overflow-y:auto;padding:36px;display:flex;flex-direction:column;align-items:center;gap:34px;background:
       radial-gradient(circle at 20% 20%, #f5edd7 0, #EFE7D2 55%);
   }
 
@@ -168,20 +183,34 @@
   .equipa-card .eq-cargo{font-size:.74rem;color:var(--ink-soft);}
 
   /* ---- Colegas ---- */
-  .colegas-page{height:100%;display:flex;flex-direction:column;gap:14mm;justify-content:flex-start;}
-  .colega-card{
-    display:flex;gap:16px;background:#fff;border:2px solid var(--line);border-radius:16px;padding:16px;flex:1;align-items:flex-start;
+  .colegas-wrap{display:flex;flex-direction:column;height:265mm;}
+  .colegas-page{flex:1;min-height:0;display:grid;gap:5mm;grid-template-columns:repeat(var(--cols,1),1fr);grid-template-rows:repeat(var(--rows,1),1fr);}
+  .colega-card{container:colega / size;min-width:0;min-height:0;background:#fff;border:2px solid var(--line);border-radius:3mm;overflow:hidden;}
+  .colega-in{
+    --pad:4cqmin;width:100%;height:100%;padding:var(--pad);display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:calc(var(--pad)*.7);font-size:min(5.6cqw,4.4cqh,3.8mm);text-align:center;
   }
-  .colega-foto{width:100px;height:120px;border-radius:10px;object-fit:cover;border:4px solid var(--sun);background:#EDE7D4;flex:0 0 100px;display:flex;align-items:center;justify-content:center;color:#9c927a;font-size:.7rem;text-align:center;}
-  .colega-info .col-nome{font-size:1.15rem;color:var(--coral);}
-  .colega-info .col-alcunha{font-size:.78rem;color:var(--ink-soft);margin-bottom:6px;}
-  .colega-info .col-q{font-size:.78rem;margin-top:6px;}
+  .colega-foto{
+    flex:none;width:min(70cqw,calc(40cqh*.8333));aspect-ratio:5/6;height:auto;border-radius:.7em;object-fit:cover;
+    border:.25em solid var(--sun);background:#EDE7D4;display:flex;align-items:center;justify-content:center;color:#9c927a;font-size:.8em;text-align:center;
+  }
+  .colega-info{min-width:0;width:100%;}
+  .colega-info .col-nome{font-size:1.3em;line-height:1.1;font-weight:700;color:var(--coral);}
+  .colega-info .col-alcunha{font-size:.8em;color:var(--ink-soft);margin-bottom:.4em;}
+  .colega-info .col-q{font-size:.85em;margin-top:.4em;line-height:1.2;}
   .colega-info .col-q b{color:var(--sky);}
+  @container colega (min-aspect-ratio: 6/5){
+    .colega-in{flex-direction:row;justify-content:flex-start;text-align:left;font-size:min(3.4cqw,5.6cqh,3.8mm);}
+    .colega-foto{width:min(40cqw,calc((100cqh - 2*var(--pad))*.8333));}
+    .colega-info{flex:1;width:auto;}
+  }
 
   /* ---- Galeria / mural ---- */
   .galeria-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:56mm;gap:8px;margin-top:10px;}
   .galeria-grid img,.galeria-grid .g-empty{width:100%;height:100%;object-fit:cover;border-radius:10px;border:3px solid #fff;box-shadow:0 3px 8px rgba(0,0,0,.15);}
   .galeria-grid .g-empty{background:#EDE7D4;display:flex;align-items:center;justify-content:center;color:#9c927a;font-size:.7rem;}
+  .galeria-grid .g-item{position:relative;width:100%;height:100%;min-height:0;}
+  .g-date{position:absolute;right:9px;bottom:9px;background:rgba(43,42,38,.78);color:#fff;font-size:.62rem;font-weight:700;letter-spacing:.02em;padding:2px 8px;border-radius:999px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 
   .foto-grupo-page{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
   .foto-grupo-img{width:100%;height:220mm;object-fit:cover;border-radius:14px;border:6px solid var(--ink);background:#EDE7D4;display:flex;align-items:center;justify-content:center;color:#9c927a;}
@@ -198,36 +227,73 @@
 
   @media print{
     body{background:#fff;}
-    .editor,.toolbar{display:none !important;}
-    .pages{padding:0;gap:0;background:none;}
+    .editor,.toolbar,.modal-overlay,.toast{display:none !important;}
+    .app{display:block;}
+    .stage{height:auto;display:block;}
+    .pages{padding:0;gap:0;background:none;overflow:visible;display:block;}
     .pagina{box-shadow:none;border-radius:0;page-break-after:always;margin:0;}
     .pagina:last-child{page-break-after:auto;}
   }
+  .capa,.diploma-wrap,.escola-page,.foto-grupo-page,.autografos-page{min-height:265mm;}
   @page{size:A4;margin:0;}
 
-  @media (max-width:900px){
+  @media screen and (max-width:900px){
     .editor{position:relative;width:100%;flex:none;height:auto;}
     .app{flex-direction:column;}
+    .stage{height:auto;}
     .pagina{width:100%;min-height:auto;padding:6vw;}
+    .capa,.diploma-wrap,.escola-page,.colegas-page,.foto-grupo-page,.autografos-page{min-height:0;}
+    .colegas-wrap{height:auto;}
+    .colegas-page{grid-template-rows:none;grid-auto-rows:calc(110vw / var(--cols,1));}
     .foto-grupo-img{height:110vw;}
   }
+
+  /* ---------- Drag & drop de fotos ---------- */
+  .photo-drop.drag-over{border-color:var(--sky);background:#EAF3FA;border-style:solid;}
+  .dz-text{font-size:.78rem;line-height:1.45;color:var(--ink-soft);}
+  .dz-text input[type=file]{margin-top:4px;font-size:.72rem;max-width:200px;}
+  .gallery-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;margin-bottom:6px;}
+  .gt-item{display:flex;align-items:center;gap:8px;border:2px solid var(--line);border-radius:10px;padding:6px;background:#fff;}
+  .gt-item img{width:56px;height:56px;object-fit:cover;border-radius:6px;flex:none;}
+  .gt-meta{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;}
+  .gt-meta input[type=date]{border:2px solid var(--line);border-radius:8px;padding:3px 6px;font-size:.8rem;width:100%;}
+  .gt-show{font-size:.72rem;color:var(--ink-soft);display:flex;align-items:center;gap:6px;}
+  .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#2b2a26;color:#fff;padding:10px 18px;border-radius:999px;font-size:.85rem;z-index:300;max-width:90vw;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.3);}
+  .toast[hidden]{display:none;}
+
+  /* ---------- Definições (janela) ---------- */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;}
+  .modal-overlay[hidden]{display:none;}
+  .modal{background:#fff;border:3px solid var(--m-border);border-radius:16px;width:min(680px,100%);max-height:92vh;display:flex;flex-direction:column;overflow:hidden;}
+  .modal-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:var(--m-head);color:var(--m-head-text);border-bottom:3px solid var(--m-border);}
+  .modal-head h2{margin:0;font-size:1.25rem;}
+  .modal-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:12px 18px;border-bottom:2px solid var(--line);background:var(--m-editor-bg);}
+  .modal-body{flex:1;overflow-y:auto;padding:16px 18px 24px;}
+  .modal-foot{display:flex;justify-content:space-between;gap:8px;padding:12px 18px;border-top:2px solid var(--line);}
+  .modal-foot .small-btn{padding:7px 14px;font-size:.8rem;}
+  .set-intro{font-size:.82rem;color:var(--ink-soft);margin:0 0 14px;line-height:1.45;}
+  .set-group{margin:20px 0 8px;font-size:1rem;color:var(--grass);border-bottom:2px solid var(--line);padding-bottom:2px;}
+  .set-group:first-of-type{margin-top:4px;}
+  .color-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .color-row{display:flex;align-items:center;gap:8px;border:2px solid var(--line);border-radius:10px;padding:6px 8px;background:#FCFAF2;}
+  .color-row .c-label{flex:1;font-size:.78rem;font-weight:700;color:var(--ink-soft);line-height:1.25;}
+  .color-row input[type=color]{width:42px;height:30px;border:2px solid var(--ink);border-radius:6px;padding:0;background:none;cursor:pointer;}
+  .set-label{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.78rem;font-weight:700;color:var(--ink-soft);margin-bottom:4px;}
+  .set-label .hint{font-weight:500;margin:0;}
+  .set-label .small-btn{padding:1px 7px;font-size:.8rem;flex:none;}
+  .modal .field textarea{min-height:48px;}
+  @media (max-width:600px){ .color-grid{grid-template-columns:1fr;} }
 </style>
 </head>
 <body>
-<a href="../" class="home-btn">← Home</a>
-<style>
-.home-btn{position:fixed;top:12px;left:12px;z-index:9999;padding:8px 14px;border-radius:999px;background:#267cb9;color:#fff;font:600 14px/1 system-ui,sans-serif;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.25)}
-.home-btn:hover{background:#1d5f8e}
-@media print{.home-btn{display:none}}
-</style>
 
 <div class="app">
 
   <!-- ============ EDITOR ============ -->
   <aside class="editor">
     <div class="editor-head">
-      <h1>📖 Livro dos Finalistas</h1>
-      <p>Preenche os campos e vê o livro a ganhar vida no lado direito. No fim, exporta em PDF.</p>
+      <h1 data-lbl="head_title">📖 Livro dos Finalistas</h1>
+      <p data-lbl="head_sub">Preenche os campos e vê o livro a ganhar vida no lado direito. No fim, exporta em PDF.</p>
     </div>
 
     <div class="tabs" id="tabs"></div>
@@ -237,25 +303,49 @@
   <!-- ============ STAGE ============ -->
   <main class="stage">
     <div class="toolbar">
-      <div class="brand">🎓 Pré-visualização</div>
+      <div class="brand" data-lbl="brand">🎓 Pré-visualização</div>
 
       <div class="mode-pill">
-        <span>Versão:</span>
+        <span data-lbl="mode_label">Versão:</span>
         <select id="modoSelect">
-          <option value="coletiva">Coletiva (igual p/ turma)</option>
-          <option value="individual">Premium (individualizada)</option>
+          <option value="coletiva" data-lbl="mode_col">Coletiva (igual p/ turma)</option>
+          <option value="individual" data-lbl="mode_ind">Premium (individualizada)</option>
         </select>
       </div>
 
-      <button id="btnPrint" class="filled">🖨️ Exportar / Imprimir PDF</button>
-      <button id="btnSave">💾 Guardar progresso</button>
-      <button id="btnLoadTrigger">📂 Abrir progresso</button>
+      <button id="btnPrint" class="filled" data-lbl="btn_print">🖨️ Exportar / Imprimir PDF</button>
+      <button id="btnSave" data-lbl="btn_save">💾 Guardar progresso</button>
+      <button id="btnLoadTrigger" data-lbl="btn_load">📂 Abrir progresso</button>
+      <button id="btnSettings" data-lbl="btn_settings">⚙️ Definições</button>
       <input type="file" id="btnLoad" accept="application/json">
     </div>
 
     <div class="pages" id="pages"></div>
   </main>
 
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<!-- ============ DEFINIÇÕES ============ -->
+<div class="modal-overlay" id="settingsOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modal-head">
+      <h2 id="settingsTitle">⚙️ Definições</h2>
+      <button class="small-btn" id="settingsClose" aria-label="Fechar">✕</button>
+    </div>
+    <div class="modal-tabs" id="settingsTabs">
+      <button class="set-tab active" data-sec="colors">🎨 Cores dos menus</button>
+      <button class="set-tab" data-sec="labels">🏷️ Nomes dos botões</button>
+      <button class="set-tab" data-sec="texts">✏️ Textos predefinidos</button>
+      <button class="set-tab" data-sec="layout">📐 Colegas</button>
+    </div>
+    <div class="modal-body" id="settingsBody"></div>
+    <div class="modal-foot">
+      <button class="small-btn danger" id="settingsResetSec">↺ Repor esta secção</button>
+      <button class="small-btn primary" id="settingsDone">Concluído</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -274,7 +364,8 @@ let state = {
   mensagemProfessor: { texto:"", assinatura:"A vossa professora" },
   dedicatoriaPais: { texto:"", assinatura:"A Associação de Pais" },
   alunoFinalista: { foto:null, nome:"" },
-  modo: "coletiva"
+  modo: "coletiva",
+  settings: { colors:{}, labels:{}, texts:{} }   // personalizações (ver Definições)
 };
 
 const $ = sel => document.querySelector(sel);
@@ -303,7 +394,7 @@ const TABS = [
 
 function buildTabs(){
   const tabsEl = $("#tabs"), panelsEl = $("#panels");
-  tabsEl.innerHTML = TABS.map((t,i)=>`<button class="tab-btn${i===0?' active':''}" data-tab="${t.id}">${t.label}</button>`).join("");
+  tabsEl.innerHTML = TABS.map((t,i)=>`<button class="tab-btn${i===0?' active':''}" data-tab="${t.id}" data-lbl="tab_${t.id}">${t.label}</button>`).join("");
   panelsEl.innerHTML = TABS.map((t,i)=>`<div class="panel${i===0?' active':''}" data-panel="${t.id}"></div>`).join("");
   tabsEl.addEventListener("click", e=>{
     const btn = e.target.closest(".tab-btn"); if(!btn) return;
@@ -419,7 +510,7 @@ function renderColegasPanel(){
   const p = panel("colegas");
   p.innerHTML = `
     <h3>👥 Os Meus Colegas de Turma</h3>
-    <p class="hint">Um perfil por aluno (2 por página no livro final).</p>
+    <p class="hint">Um perfil por aluno (${colegasLayout().perPage} por página no livro final — podes mudar em ${esc(labelVal("btn_settings"))}).</p>
     <div id="colegasList"></div>
     <div class="add-row"><button id="addColega">+ Adicionar colega</button></div>
   `;
@@ -474,17 +565,19 @@ function galleryEditor(containerId, arrKey, label){
     <h3>${label}</h3>
     <div class="photo-drop">
       <div class="thumb">📸</div>
-      <input type="file" accept="image/*" multiple id="${containerId}_input">
+      <div class="dz-text"><b>Arrasta as fotos para aqui</b><br>(do computador ou do Google Fotos)<br>
+        <input type="file" accept="image/*" multiple id="${containerId}_input"></div>
     </div>
-    <div class="gallery-thumbs" id="${containerId}_thumbs"></div>
+    <div class="gallery-list" id="${containerId}_thumbs"></div>
   `;
+}
+async function addPhotos(arrKey, files){
+  for(const f of files){ state[arrKey].push(await photoFromFile(f)); }
 }
 function bindGallery(containerId, arrKey){
   $(`#${containerId}_input`).onchange = async e=>{
-    for(const file of e.target.files){
-      state[arrKey].push(await fileToDataURL(file));
-    }
-    e.target.value="";
+    const files = [...e.target.files]; e.target.value = "";
+    await addPhotos(arrKey, files);
     render(); renderGalleryThumbs(containerId, arrKey);
   };
   renderGalleryThumbs(containerId, arrKey);
@@ -492,14 +585,27 @@ function bindGallery(containerId, arrKey){
 function renderGalleryThumbs(containerId, arrKey){
   const wrap = $(`#${containerId}_thumbs`);
   if(!wrap) return;
-  wrap.innerHTML = state[arrKey].map((src,i)=>`
-    <div class="g-thumb"><img src="${src}"><button data-idx="${i}" data-arr="${arrKey}">×</button></div>
-  `).join("");
-  wrap.querySelectorAll("button").forEach(b=>b.onclick=e=>{
-    const arr = e.target.dataset.arr, idx = +e.target.dataset.idx;
-    state[arr].splice(idx,1);
-    render(); renderGalleryThumbs(containerId, arr);
-  });
+  wrap.innerHTML = state[arrKey].map(ph=>`
+    <div class="gt-item" data-id="${ph.id}">
+      <img src="${ph.src}" alt="">
+      <div class="gt-meta">
+        <input type="date" data-act="date" value="${attr(ph.date||"")}" title="Data da foto">
+        <label class="gt-show"><input type="checkbox" data-act="show" ${ph.showDate!==false?"checked":""}> mostrar data no livro</label>
+      </div>
+      <button class="small-btn danger" data-act="del" title="Remover foto">×</button>
+    </div>`).join("") || `<p class="hint">Ainda sem fotos.</p>`;
+  wrap.oninput = e=>{
+    const it = e.target.closest(".gt-item"); if(!it) return;
+    const ph = findById(state[arrKey], it.dataset.id); if(!ph) return;
+    if(e.target.dataset.act==="date"){ ph.date = e.target.value; render(); }
+    if(e.target.dataset.act==="show"){ ph.showDate = e.target.checked; render(); }
+  };
+  wrap.onclick = e=>{
+    const b = e.target.closest('[data-act="del"]'); if(!b) return;
+    const id = b.closest(".gt-item").dataset.id;
+    state[arrKey] = state[arrKey].filter(p=>p.id!==id);
+    render(); renderGalleryThumbs(containerId, arrKey);
+  };
 }
 function renderDiaPanel(){
   const p = panel("dia");
@@ -564,7 +670,7 @@ function dotStrip(top){
 }
 
 function paginaWrap(innerHtml, tag, num){
-  return `<div class="pagina">${dotStrip(true)}<div class="pg-tag">${tag}</div>${innerHtml}<div class="pg-num">Pág. ${num}</div>${dotStrip(false)}</div>`;
+  return `<div class="pagina">${dotStrip(true)}${innerHtml}<div class="pg-num">${T("pg_label")} ${num}</div>${dotStrip(false)}</div>`;
 }
 
 function fotoOrPlaceholder(src, cls, placeholderText){
@@ -575,7 +681,13 @@ function galeriaGrid(arr, minSlots){
   const slots = Math.max(arr.length, minSlots||6);
   let html = '<div class="galeria-grid">';
   for(let i=0;i<slots;i++){
-    html += arr[i] ? `<img src="${arr[i]}">` : `<div class="g-empty">foto</div>`;
+    const ph = arr[i];
+    if(ph){
+      const d = (ph.showDate!==false && ph.date) ? fmtDate(ph.date) : "";
+      html += `<div class="g-item"><img src="${ph.src}">${d?`<span class="g-date">${d}</span>`:""}</div>`;
+    } else {
+      html += `<div class="g-empty">${T("ph_photo")}</div>`;
+    }
   }
   html += '</div>';
   return html;
@@ -591,132 +703,140 @@ function render(){
   let pageNum = 1;
   const pages = [];
   const individual = state.modo === "individual";
+  const v = {
+    escola: state.escola.nome, turma: state.escola.turma,
+    ano: state.escola.anoLetivo, nome: state.alunoFinalista.nome
+  };
+  const tag = () => "";   // etiquetas pequenas removidas
 
   /* ---- Página 1: Capa ---- */
   pages.push(paginaWrap(`
     <div class="capa">
-      <div class="ano-letivo">Ano Letivo ${esc(state.escola.anoLetivo)}</div>
+      <div class="ano-letivo">${T("cover_year", v)}</div>
       <div class="escola-nome">${esc(state.escola.nome)}</div>
-      <div class="mascote">🌟🎈📚🖍️🌈</div>
-      <div class="titulo-livro">Livro dos<br>Finalistas</div>
+      <div class="mascote">${T("cover_mascot")}</div>
+      <div class="titulo-livro">${T("cover_title")}</div>
       <div class="turma-nome">${esc(state.escola.turma)}</div>
-      ${individual && state.alunoFinalista.nome ? `<div class="buyer-line">Exemplar de ${esc(state.alunoFinalista.nome)}</div>` : ``}
+      ${individual && state.alunoFinalista.nome ? `<div class="buyer-line">${T("cover_buyer", v)}</div>` : ``}
     </div>
-  `, "Capa", pageNum++));
+  `, tag("tag_capa"), pageNum++));
 
   /* ---- Página 2: Diploma ---- */
   pages.push(paginaWrap(`
     <div class="diploma-wrap">
       <div class="diploma-frame">
-        ${fotoOrPlaceholder(state.alunoFinalista.foto, "aluno-foto-grande", "foto do aluno")}
-        <h2>Diploma de Finalista</h2>
-        <div class="diploma-nome">${esc(state.alunoFinalista.nome) || "Nome do(a) aluno(a)"}</div>
-        <div class="diploma-sub">Concluiu com sucesso mais uma etapa na escola ${esc(state.escola.nome)}, na ${esc(state.escola.turma)}, no ano letivo de ${esc(state.escola.anoLetivo)}.</div>
+        ${fotoOrPlaceholder(state.alunoFinalista.foto, "aluno-foto-grande", T("dip_photo_ph"))}
+        <h2>${T("dip_title")}</h2>
+        <div class="diploma-nome">${esc(state.alunoFinalista.nome) || T("dip_name_ph")}</div>
+        <div class="diploma-sub">${T("dip_sub", v)}</div>
       </div>
     </div>
-  `, "Rosto Personalizado", pageNum++));
+  `, tag("dip_title"), pageNum++));
 
   /* ---- Página 3: A Nossa Escola ---- */
   pages.push(paginaWrap(`
     <div class="escola-page">
-      <h2 class="titulo-secao">A Nossa Escola</h2>
-      ${fotoOrPlaceholder(state.escolaFoto, "escola-foto", "foto da fachada da escola")}
-      <div class="escola-morada">${esc(state.escola.morada) || "Morada da escola"}</div>
-      <div class="escola-msg">${esc(state.escola.diretorMsg) || "Mensagem de despedida do Diretor/Coordenador..."}<div class="assinatura">— Direção / Coordenação</div></div>
+      <h2 class="titulo-secao">${T("esc_title")}</h2>
+      ${fotoOrPlaceholder(state.escolaFoto, "escola-foto", T("esc_photo_ph"))}
+      <div class="escola-morada">${esc(state.escola.morada) || T("esc_addr_ph")}</div>
+      <div class="escola-msg">${esc(state.escola.diretorMsg) || T("esc_msg_ph")}<div class="assinatura">${T("esc_sign")}</div></div>
     </div>
-  `, "A Nossa Escola", pageNum++));
+  `, tag("esc_title"), pageNum++));
 
   /* ---- Página 4: Equipa ---- */
   pages.push(paginaWrap(`
-    <h2 class="titulo-secao">A Equipa Maravilha</h2>
-    <p class="subtitulo-secao">Quem caminhou ao nosso lado este ano</p>
+    <h2 class="titulo-secao">${T("eq_title")}</h2>
+    <p class="subtitulo-secao">${T("eq_sub")}</p>
     <div class="equipa-grid">
       ${(state.equipa.length? state.equipa : [{},{},{}]).map(m=>`
         <div class="equipa-card">
-          ${fotoOrPlaceholder(m.foto, "equipa-foto", "foto")}
-          <div class="eq-nome">${esc(m.nome)||"Nome"}</div>
-          <div class="eq-cargo">${esc(m.cargo)||"Cargo"}</div>
+          ${fotoOrPlaceholder(m.foto, "equipa-foto", T("ph_photo"))}
+          <div class="eq-nome">${esc(m.nome)||T("eq_name_ph")}</div>
+          <div class="eq-cargo">${esc(m.cargo)||T("eq_role_ph")}</div>
         </div>
       `).join("")}
     </div>
-  `, "A Equipa Maravilha", pageNum++));
+  `, tag("eq_title"), pageNum++));
 
-  /* ---- Colegas: 2 por página ---- */
-  const grupos = chunk(state.colegas.length ? state.colegas : [{},{}], 2);
-  grupos.forEach(g=>{
+  /* ---- Colegas: nº por página e por linha definidos em Definições ---- */
+  const CL = colegasLayout();
+  const listaColegas = state.colegas.length ? state.colegas : Array.from({length:CL.perPage}, ()=>({}));
+  chunk(listaColegas, CL.perPage).forEach(g=>{
     pages.push(paginaWrap(`
-      <h2 class="titulo-secao">Os Meus Colegas de Turma</h2>
-      <div class="colegas-page">
-        ${g.map(c=>`
-          <div class="colega-card">
-            ${fotoOrPlaceholder(c.foto, "colega-foto", "foto")}
-            <div class="colega-info">
-              <div class="col-nome">${esc(c.nome)||"Nome do(a) colega"}</div>
-              <div class="col-alcunha">também conhecido(a) por... 😉</div>
-              <div class="col-q"><b>Quer ser:</b> ${esc(c.queresSer)||"—"}</div>
-              <div class="col-q"><b>Comida preferida da cantina:</b> ${esc(c.comida)||"—"}</div>
-              <div class="col-q"><b>Vai ter saudades de:</b> ${esc(c.saudades)||"—"}</div>
-            </div>
-          </div>
-        `).join("")}
+      <div class="colegas-wrap">
+        <h2 class="titulo-secao">${T("col_title")}</h2>
+        <div class="colegas-page" style="--cols:${CL.perRow};--rows:${CL.rows}">
+          ${g.map(c=>`
+            <div class="colega-card"><div class="colega-in">
+              ${fotoOrPlaceholder(c.foto, "colega-foto", T("ph_photo"))}
+              <div class="colega-info">
+                <div class="col-nome">${esc(c.nome)||T("col_name_ph")}</div>
+                <div class="col-alcunha">${T("col_nick")}</div>
+                <div class="col-q"><b>${T("col_q1")}</b> ${esc(c.queresSer)||T("col_empty")}</div>
+                <div class="col-q"><b>${T("col_q2")}</b> ${esc(c.comida)||T("col_empty")}</div>
+                <div class="col-q"><b>${T("col_q3")}</b> ${esc(c.saudades)||T("col_empty")}</div>
+              </div>
+            </div></div>
+          `).join("")}
+        </div>
       </div>
-    `, "Os Meus Colegas", pageNum++));
+    `, tag("col_title"), pageNum++));
   });
 
   /* ---- Sala de aula: 2 páginas ---- */
   const salaChunks = chunk(state.fotosSala, 6);
   (salaChunks.length? salaChunks : [[]]).slice(0,2).forEach((c,i)=>{
     pages.push(paginaWrap(`
-      <h2 class="titulo-secao">Na Sala de Aula</h2>
-      <p class="subtitulo-secao">Momentos espontâneos a trabalhar, pintar e criar</p>
+      <h2 class="titulo-secao">${T("sala_title")}</h2>
+      <p class="subtitulo-secao">${T("sala_sub")}</p>
       ${galeriaGrid(c, 6)}
-    `, `Sala de Aula ${i+1}`, pageNum++));
+    `, tag("sala_title", " "+(i+1)), pageNum++));
   });
   /* ---- Recreio e visitas: 2 páginas ---- */
   const recreioChunks = chunk(state.fotosRecreio, 6);
   (recreioChunks.length? recreioChunks : [[]]).slice(0,2).forEach((c,i)=>{
     pages.push(paginaWrap(`
-      <h2 class="titulo-secao">Hora do Recreio & Visitas de Estudo</h2>
-      <p class="subtitulo-secao">Intervalos, jogos no pátio e passeios do ano</p>
+      <h2 class="titulo-secao">${T("rec_title")}</h2>
+      <p class="subtitulo-secao">${T("rec_sub")}</p>
       ${galeriaGrid(c, 6)}
-    `, `Recreio & Visitas ${i+1}`, pageNum++));
+    `, tag("rec_title", " "+(i+1)), pageNum++));
   });
 
   /* ---- Festas: 1 página ---- */
   pages.push(paginaWrap(`
-    <h2 class="titulo-secao">Momentos Festivos</h2>
-    <p class="subtitulo-secao">Magusto · Festa de Natal · Carnaval · Dia da Criança</p>
+    <h2 class="titulo-secao">${T("fest_title")}</h2>
+    <p class="subtitulo-secao">${T("fest_sub")}</p>
     ${galeriaGrid(state.fotosFestas, 6)}
-  `, "Momentos Festivos", pageNum++));
+  `, tag("fest_title"), pageNum++));
 
   /* ---- Foto de grupo ---- */
   pages.push(paginaWrap(`
     <div class="foto-grupo-page">
-      <h2 class="titulo-secao">A Grande Foto de Grupo</h2>
-      ${fotoOrPlaceholder(state.fotoGrupo, "foto-grupo-img", "foto de grupo da turma")}
+      <h2 class="titulo-secao">${T("grp_title")}</h2>
+      ${fotoOrPlaceholder(state.fotoGrupo, "foto-grupo-img", T("grp_ph"))}
     </div>
-  `, "Foto de Grupo", pageNum++));
+  `, tag("grp_title"), pageNum++));
 
   /* ---- Mensagem do professor ---- */
   pages.push(paginaWrap(`
-    <h2 class="titulo-secao">Mensagem do(a) Professor(a)</h2>
-    <div class="msg-page-body">${esc(state.mensagemProfessor.texto)||"Escreve aqui a tua mensagem para o futuro dos teus alunos..."}<div class="assinatura">— ${esc(state.mensagemProfessor.assinatura)||"A vossa professora"}</div></div>
-  `, "Mensagem do(a) Professor(a)", pageNum++));
+    <h2 class="titulo-secao">${T("prof_title")}</h2>
+    <div class="msg-page-body">${esc(state.mensagemProfessor.texto)||T("prof_ph")}<div class="assinatura">— ${esc(state.mensagemProfessor.assinatura)||T("prof_sign_fb")}</div></div>
+  `, tag("prof_title"), pageNum++));
 
   /* ---- Dedicatória dos pais ---- */
   pages.push(paginaWrap(`
-    <h2 class="titulo-secao">Dedicatória dos Pais</h2>
-    <div class="msg-page-body">${esc(state.dedicatoriaPais.texto)||"Espaço para a associação/comissão de pais deixar uma mensagem coletiva de orgulho..."}<div class="assinatura">— ${esc(state.dedicatoriaPais.assinatura)||"A Associação de Pais"}</div></div>
-  `, "Dedicatória dos Pais", pageNum++));
+    <h2 class="titulo-secao">${T("pais_title")}</h2>
+    <div class="msg-page-body">${esc(state.dedicatoriaPais.texto)||T("pais_ph")}<div class="assinatura">— ${esc(state.dedicatoriaPais.assinatura)||T("pais_sign_fb")}</div></div>
+  `, tag("pais_title"), pageNum++));
 
   /* ---- Autógrafos ---- */
   pages.push(paginaWrap(`
     <div class="autografos-page">
-      <h2 class="titulo-secao">Espaço para Autógrafos</h2>
-      <p class="subtitulo-secao">${individual && state.alunoFinalista.nome ? `Álbum de recordações de ${esc(state.alunoFinalista.nome)} — deixem aqui a vossa marca!` : "Deixem aqui a vossa marca! ✏️🎨"}</p>
+      <h2 class="titulo-secao">${T("aut_title")}</h2>
+      <p class="subtitulo-secao">${individual && state.alunoFinalista.nome ? T("aut_sub_ind", v) : T("aut_sub")}</p>
       <div class="autografos-grid">${"<div></div>".repeat(8)}</div>
     </div>
-  `, "Autógrafos", pageNum++));
+  `, tag("aut_title"), pageNum++));
 
   $("#pages").innerHTML = pages.join("");
 }
@@ -747,6 +867,7 @@ function bindToolbar(){
         const loaded = JSON.parse(reader.result);
         state = Object.assign(state, loaded);
         $("#modoSelect").value = state.modo || "coletiva";
+        normSettings(); normPhotos(); persistSettings(); applyColors(); applyLabels();
         render(); renderAllPanels();
       }catch(err){ alert("Não foi possível abrir este ficheiro."); }
     };
@@ -755,11 +876,440 @@ function bindToolbar(){
 }
 
 /* =========================================================
+   DEFINIÇÕES: cores dos menus, nomes dos botões, textos
+========================================================= */
+const SETTINGS_KEY = "livroFinalistas_definicoes_v1";
+
+const COLOR_DEFS = [
+  {key:"m-head",            css:"--m-head",            group:"Painel lateral", label:"Cabeçalho (fundo)",              def:"#f4b740"},
+  {key:"m-head-text",       css:"--m-head-text",       group:"Painel lateral", label:"Cabeçalho (texto)",              def:"#2b2a26"},
+  {key:"m-editor-bg",       css:"--m-editor-bg",       group:"Painel lateral", label:"Fundo do painel",                def:"#ffffff"},
+  {key:"m-border",          css:"--m-border",          group:"Painel lateral", label:"Contornos dos menus",            def:"#2b2a26"},
+  {key:"m-tab-bg",          css:"--m-tab-bg",          group:"Separadores",    label:"Separador (fundo)",              def:"#fbf5e6"},
+  {key:"m-tab-text",        css:"--m-tab-text",        group:"Separadores",    label:"Separador (texto)",              def:"#2b2a26"},
+  {key:"m-tab-active",      css:"--m-tab-active",      group:"Separadores",    label:"Separador ativo (fundo)",        def:"#e8615a"},
+  {key:"m-tab-active-text", css:"--m-tab-active-text", group:"Separadores",    label:"Separador ativo (texto)",        def:"#ffffff"},
+  {key:"m-toolbar",         css:"--m-toolbar",         group:"Barra superior", label:"Barra (fundo)",                  def:"#2b2a26"},
+  {key:"m-toolbar-text",    css:"--m-toolbar-text",    group:"Barra superior", label:"Barra (texto e contornos)",      def:"#ffffff"},
+  {key:"m-btn",             css:"--m-btn",             group:"Botões",         label:"Botão principal (fundo)",        def:"#f4b740"},
+  {key:"m-btn-text",        css:"--m-btn-text",        group:"Botões",         label:"Botão principal (texto)",        def:"#3a2c05"},
+  {key:"m-add",             css:"--m-add",             group:"Botões",         label:"Botões “+ Adicionar”",           def:"#4c8fbd"},
+];
+
+const LABEL_DEFS = [
+  {key:"head_title",   group:"Painel lateral", label:"Título do painel",          def:"📖 Livro dos Finalistas"},
+  {key:"head_sub",     group:"Painel lateral", label:"Texto de ajuda do painel",  def:"Preenche os campos e vê o livro a ganhar vida no lado direito. No fim, exporta em PDF.", multi:true},
+  {key:"tab_capa",       group:"Separadores", label:"Separador 1", def:"Capa & Escola"},
+  {key:"tab_finalista",  group:"Separadores", label:"Separador 2", def:"Aluno Finalista"},
+  {key:"tab_equipa",     group:"Separadores", label:"Separador 3", def:"Equipa"},
+  {key:"tab_colegas",    group:"Separadores", label:"Separador 4", def:"Colegas"},
+  {key:"tab_dia",        group:"Separadores", label:"Separador 5", def:"Dia a Dia"},
+  {key:"tab_mensagens",  group:"Separadores", label:"Separador 6", def:"Mensagens"},
+  {key:"brand",        group:"Barra superior", label:"Título da barra",           def:"🎓 Pré-visualização"},
+  {key:"mode_label",   group:"Barra superior", label:"Rótulo “Versão”",           def:"Versão:"},
+  {key:"mode_col",     group:"Barra superior", label:"Opção de versão 1",         def:"Coletiva (igual p/ turma)"},
+  {key:"mode_ind",     group:"Barra superior", label:"Opção de versão 2",         def:"Premium (individualizada)"},
+  {key:"btn_print",    group:"Barra superior", label:"Botão de exportar",         def:"🖨️ Exportar / Imprimir PDF"},
+  {key:"btn_save",     group:"Barra superior", label:"Botão de guardar",          def:"💾 Guardar progresso"},
+  {key:"btn_load",     group:"Barra superior", label:"Botão de abrir",            def:"📂 Abrir progresso"},
+  {key:"btn_settings", group:"Barra superior", label:"Botão de definições",       def:"⚙️ Definições"},
+];
+
+const TEXT_DEFS = [
+  // Capa
+  {key:"cover_year",   group:"Capa", label:"Linha do ano letivo", def:"Ano Letivo {ano}", vars:"{ano}"},
+  {key:"cover_mascot", group:"Capa", label:"Emojis da capa", def:"🌟🎈📚🖍️🌈"},
+  {key:"cover_title",  group:"Capa", label:"Título do livro (Enter = nova linha)", def:"Livro dos\nFinalistas", multi:true},
+  {key:"cover_buyer",  group:"Capa", label:"Linha do exemplar (versão Premium)", def:"Exemplar de {nome}", vars:"{nome}"},
+  // Diploma
+  {key:"dip_title",    group:"Página 2 — Diploma", label:"Título do diploma", def:"Diploma de Finalista"},
+  {key:"dip_sub",      group:"Página 2 — Diploma", label:"Texto do diploma", def:"Concluiu com sucesso mais uma etapa em {escola}, na {turma}, no ano letivo de {ano}.", vars:"{escola} {turma} {ano}", multi:true},
+  {key:"dip_name_ph",  group:"Página 2 — Diploma", label:"Nome (enquanto estiver vazio)", def:"Nome do(a) aluno(a)"},
+  {key:"dip_photo_ph", group:"Página 2 — Diploma", label:"Caixa de foto vazia", def:"foto do aluno"},
+  // Escola
+  {key:"esc_title",    group:"Página 3 — A Nossa Escola", label:"Título", def:"A Nossa Escola"},
+  {key:"esc_photo_ph", group:"Página 3 — A Nossa Escola", label:"Caixa de foto vazia", def:"foto da fachada da escola"},
+  {key:"esc_addr_ph",  group:"Página 3 — A Nossa Escola", label:"Morada (enquanto estiver vazia)", def:"Morada da escola"},
+  {key:"esc_msg_ph",   group:"Página 3 — A Nossa Escola", label:"Mensagem do Diretor (enquanto estiver vazia)", def:"Mensagem de despedida do Diretor/Coordenador...", multi:true},
+  {key:"esc_sign",     group:"Página 3 — A Nossa Escola", label:"Assinatura", def:"— Direção / Coordenação"},
+  // Equipa
+  {key:"eq_title",     group:"Página 4 — Equipa", label:"Título", def:"A Equipa Maravilha"},
+  {key:"eq_sub",       group:"Página 4 — Equipa", label:"Subtítulo", def:"Quem caminhou ao nosso lado este ano"},
+  {key:"eq_name_ph",   group:"Página 4 — Equipa", label:"Nome (enquanto estiver vazio)", def:"Nome"},
+  {key:"eq_role_ph",   group:"Página 4 — Equipa", label:"Cargo (enquanto estiver vazio)", def:"Cargo"},
+  // Colegas
+  {key:"col_title",    group:"Colegas", label:"Título", def:"Os Meus Colegas de Turma"},
+  {key:"col_name_ph",  group:"Colegas", label:"Nome (enquanto estiver vazio)", def:"Nome do(a) colega"},
+  {key:"col_nick",     group:"Colegas", label:"Linha da alcunha", def:"também conhecido(a) por... 😉"},
+  {key:"col_q1",       group:"Colegas", label:"Pergunta 1", def:"Quer ser:"},
+  {key:"col_q2",       group:"Colegas", label:"Pergunta 2", def:"Comida preferida da cantina:"},
+  {key:"col_q3",       group:"Colegas", label:"Pergunta 3", def:"Vai ter saudades de:"},
+  {key:"col_empty",    group:"Colegas", label:"Resposta em branco", def:"—"},
+  // Dia a dia
+  {key:"sala_title",   group:"Dia a Dia", label:"Sala de aula — título", def:"Na Sala de Aula"},
+  {key:"sala_sub",     group:"Dia a Dia", label:"Sala de aula — subtítulo", def:"Momentos espontâneos a trabalhar, pintar e criar"},
+  {key:"rec_title",    group:"Dia a Dia", label:"Recreio — título", def:"Hora do Recreio & Visitas de Estudo"},
+  {key:"rec_sub",      group:"Dia a Dia", label:"Recreio — subtítulo", def:"Intervalos, jogos no pátio e passeios do ano"},
+  {key:"fest_title",   group:"Dia a Dia", label:"Festas — título", def:"Momentos Festivos"},
+  {key:"fest_sub",     group:"Dia a Dia", label:"Festas — subtítulo", def:"Magusto · Festa de Natal · Carnaval · Dia da Criança"},
+  {key:"grp_title",    group:"Dia a Dia", label:"Foto de grupo — título", def:"A Grande Foto de Grupo"},
+  {key:"grp_ph",       group:"Dia a Dia", label:"Foto de grupo — caixa vazia", def:"foto de grupo da turma"},
+  // Mensagens
+  {key:"prof_title",   group:"Mensagens", label:"Professor(a) — título", def:"Mensagem do(a) Professor(a)"},
+  {key:"prof_ph",      group:"Mensagens", label:"Professor(a) — texto (enquanto estiver vazio)", def:"Escreve aqui a tua mensagem para o futuro dos teus alunos...", multi:true},
+  {key:"prof_sign_fb", group:"Mensagens", label:"Professor(a) — assinatura (se vazia)", def:"A vossa professora"},
+  {key:"pais_title",   group:"Mensagens", label:"Pais — título", def:"Dedicatória dos Pais"},
+  {key:"pais_ph",      group:"Mensagens", label:"Pais — texto (enquanto estiver vazio)", def:"Espaço para a associação/comissão de pais deixar uma mensagem coletiva de orgulho...", multi:true},
+  {key:"pais_sign_fb", group:"Mensagens", label:"Pais — assinatura (se vazia)", def:"A Associação de Pais"},
+  // Autógrafos
+  {key:"aut_title",    group:"Autógrafos", label:"Título", def:"Espaço para Autógrafos"},
+  {key:"aut_sub",      group:"Autógrafos", label:"Subtítulo (versão coletiva)", def:"Deixem aqui a vossa marca! ✏️🎨"},
+  {key:"aut_sub_ind",  group:"Autógrafos", label:"Subtítulo (versão Premium)", def:"Álbum de recordações de {nome} — deixem aqui a vossa marca!", vars:"{nome}"},
+  // Geral
+  {key:"pg_label",     group:"Geral", label:"Número de página (antes do número)", def:"Pág."},
+  {key:"ph_photo",     group:"Geral", label:"Caixas de foto vazias (equipa, colegas, galerias)", def:"foto"},
+];
+
+const LAYOUT_DEFS = [
+  {key:"colegasPorPagina", label:"Colegas por página", def:6, min:1, max:12},
+  {key:"colegasPorLinha",  label:"Colegas por linha",  def:2, min:1, max:4},
+];
+const DEFS = {colors:COLOR_DEFS, labels:LABEL_DEFS, texts:TEXT_DEFS, layout:LAYOUT_DEFS};
+const DEF_MAP = {};
+Object.keys(DEFS).forEach(k=>{ DEF_MAP[k] = Object.fromEntries(DEFS[k].map(d=>[d.key,d])); });
+
+function normSettings(){
+  const st = state.settings || {};
+  state.settings = {colors:st.colors||{}, labels:st.labels||{}, texts:st.texts||{}, layout:st.layout||{}};
+}
+function loadSettings(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "null");
+    if(saved) state.settings = saved;
+  }catch(e){}
+  normSettings();
+}
+function persistSettings(){
+  try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings)); }catch(e){}
+}
+
+function layoutNum(k){
+  const d = DEF_MAP.layout[k];
+  let n = parseInt((state.settings.layout||{})[k], 10);
+  if(!(n >= d.min)) n = d.def;
+  return Math.min(d.max, Math.max(d.min, n));
+}
+function colegasLayout(){
+  const perPage = layoutNum("colegasPorPagina");
+  const perRow = Math.min(layoutNum("colegasPorLinha"), perPage);
+  return {perPage, perRow, rows: Math.ceil(perPage/perRow)};
+}
+function layoutSummary(){
+  const L = colegasLayout();
+  return `${L.perPage} cartão(ões) por página, em ${L.rows} linha(s) de até ${L.perRow}.`;
+}
+
+function raw(k){
+  const v = state.settings.texts[k];
+  return (v !== undefined && v !== null) ? v : DEF_MAP.texts[k].def;
+}
+/* Texto editável -> HTML seguro. {variáveis} são substituídas; Enter vira <br> */
+function T(k, vars){
+  let t = raw(k);
+  if(vars) t = t.replace(/\{(\w+)\}/g, (m,n)=> (n in vars) ? (vars[n]||"") : m);
+  return esc(t).replace(/\n/g,"<br>");
+}
+function labelVal(k){
+  const v = state.settings.labels[k];
+  return (v !== undefined && v !== null) ? v : DEF_MAP.labels[k].def;
+}
+
+function applyColors(){
+  const root = document.documentElement.style;
+  COLOR_DEFS.forEach(d=>{
+    const v = state.settings.colors[d.key];
+    if(v) root.setProperty(d.css, v); else root.removeProperty(d.css);
+  });
+}
+function applyLabels(){
+  document.querySelectorAll("[data-lbl]").forEach(el=>{
+    const k = el.dataset.lbl;
+    if(DEF_MAP.labels[k]) el.textContent = labelVal(k);
+  });
+}
+
+/* ---------- Janela de definições ---------- */
+let settingsSec = "colors";
+const attr = s => String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+
+function currentVal(kind, d){
+  const v = state.settings[kind][d.key];
+  return (v !== undefined && v !== null) ? v : d.def;
+}
+function groupBy(defs){
+  const out = [];
+  defs.forEach(d=>{
+    let g = out.find(x=>x.name===d.group);
+    if(!g){ g = {name:d.group, items:[]}; out.push(g); }
+    g.items.push(d);
+  });
+  return out;
+}
+function resetBtn(kind, key){
+  return `<button type="button" class="small-btn" data-reset="${kind}" data-key="${key}" title="Repor predefinição">↺</button>`;
+}
+function fieldHtml(kind, d){
+  const cur = attr(currentVal(kind, d));
+  const input = d.multi
+    ? `<textarea rows="2" data-kind="${kind}" data-key="${d.key}">${cur}</textarea>`
+    : `<input type="text" data-kind="${kind}" data-key="${d.key}" value="${cur}">`;
+  return `<div class="field">
+    <div class="set-label"><span>${d.label}${d.vars?` <span class="hint">(podes usar ${d.vars})</span>`:""}</span>${resetBtn(kind,d.key)}</div>
+    ${input}
+  </div>`;
+}
+
+function renderSettings(){
+  const body = $("#settingsBody");
+  document.querySelectorAll(".set-tab").forEach(b=>b.classList.toggle("active", b.dataset.sec===settingsSec));
+  let html = "";
+  if(settingsSec==="colors"){
+    html += `<p class="set-intro">Escolhe as cores dos menus (painel lateral, separadores, barra superior e botões). As alterações aparecem logo. As cores das páginas do livro não mudam.</p>`;
+    groupBy(COLOR_DEFS).forEach(g=>{
+      html += `<h4 class="set-group">${g.name}</h4><div class="color-grid">` + g.items.map(d=>`
+        <div class="color-row">
+          <span class="c-label">${d.label}</span>
+          <input type="color" data-kind="colors" data-key="${d.key}" value="${currentVal("colors",d)}">
+          ${resetBtn("colors", d.key)}
+        </div>`).join("") + `</div>`;
+    });
+  } else if(settingsSec==="labels"){
+    html += `<p class="set-intro">Muda o nome dos botões e separadores. Podes incluir emojis.</p>`;
+    groupBy(LABEL_DEFS).forEach(g=>{
+      html += `<h4 class="set-group">${g.name}</h4>` + g.items.map(d=>fieldHtml("labels", d)).join("");
+    });
+  } else if(settingsSec==="layout"){
+    html += `<p class="set-intro">Define quantos cartões de colegas aparecem em cada página e em cada linha. Os cartões e o texto ajustam o tamanho automaticamente.</p>`;
+    html += LAYOUT_DEFS.map(d=>{
+      let opts = "";
+      for(let n=d.min;n<=d.max;n++) opts += `<option value="${n}"${n===layoutNum(d.key)?" selected":""}>${n}</option>`;
+      return `<div class="field"><div class="set-label"><span>${d.label}</span>${resetBtn("layout", d.key)}</div><select data-kind="layout" data-key="${d.key}">${opts}</select></div>`;
+    }).join("");
+    html += `<p class="set-intro" id="layoutSummary">${layoutSummary()}</p>`;
+  } else {
+    html += `<p class="set-intro">Edita os textos fixos que aparecem nas páginas do livro. Os textos “enquanto estiver vazio” só aparecem quando o campo correspondente no editor não está preenchido. Onde vires <b>{chavetas}</b>, o valor é preenchido automaticamente.</p>`;
+    groupBy(TEXT_DEFS).forEach(g=>{
+      html += `<h4 class="set-group">${g.name}</h4>` + g.items.map(d=>fieldHtml("texts", d)).join("");
+    });
+  }
+  body.innerHTML = html;
+}
+
+function afterSettingChange(kind){
+  if(kind==="colors") applyColors();
+  else if(kind==="labels") applyLabels();
+  else if(kind==="layout"){ render(); renderColegasPanel(); const sm = $("#layoutSummary"); if(sm) sm.textContent = layoutSummary(); }
+  else render();
+  persistSettings();
+}
+
+function openSettings(){ $("#settingsOverlay").hidden = false; renderSettings(); }
+function closeSettings(){ $("#settingsOverlay").hidden = true; }
+
+function bindSettings(){
+  $("#btnSettings").onclick = openSettings;
+  $("#settingsClose").onclick = closeSettings;
+  $("#settingsDone").onclick = closeSettings;
+  $("#settingsOverlay").addEventListener("mousedown", e=>{ if(e.target.id==="settingsOverlay") closeSettings(); });
+  document.addEventListener("keydown", e=>{ if(e.key==="Escape" && !$("#settingsOverlay").hidden) closeSettings(); });
+
+  $("#settingsTabs").addEventListener("click", e=>{
+    const b = e.target.closest(".set-tab"); if(!b) return;
+    settingsSec = b.dataset.sec; renderSettings();
+  });
+
+  const body = $("#settingsBody");
+  body.addEventListener("input", e=>{
+    const t = e.target, kind = t.dataset.kind; if(!kind) return;
+    state.settings[kind][t.dataset.key] = t.value;
+    afterSettingChange(kind);
+  });
+  body.addEventListener("click", e=>{
+    const b = e.target.closest("[data-reset]"); if(!b) return;
+    const kind = b.dataset.reset, key = b.dataset.key;
+    delete state.settings[kind][key];
+    const inp = body.querySelector(`[data-kind="${kind}"][data-key="${key}"]`);
+    if(inp) inp.value = DEF_MAP[kind][key].def;
+    afterSettingChange(kind);
+  });
+
+  $("#settingsResetSec").onclick = ()=>{
+    const nomes = {colors:"as cores", labels:"os nomes dos botões", texts:"os textos", layout:"o layout dos colegas"};
+    if(!confirm(`Repor ${nomes[settingsSec]} para os valores originais?`)) return;
+    state.settings[settingsSec] = {};
+    afterSettingChange(settingsSec);
+    renderSettings();
+  };
+}
+
+/* =========================================================
+   FOTOS: datas originais (EXIF), drag & drop, Google Fotos
+========================================================= */
+const pad2 = n => String(n).padStart(2,"0");
+function isoFromMs(ms){ const d = new Date(ms); return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+function fmtDate(iso){ const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso||""); return m ? `${m[3]}/${m[2]}/${m[1]}` : ""; }
+
+/* fotos antigas (texto) -> objetos {id, src, date, showDate} */
+function normPhotos(){
+  ["fotosSala","fotosRecreio","fotosFestas"].forEach(k=>{
+    state[k] = (state[k]||[]).map(p=> typeof p === "string"
+      ? {id:uid(), src:p, date:"", showDate:true}
+      : Object.assign({id:uid(), date:"", showDate:true}, p));
+  });
+}
+
+/* Lê a data original (EXIF) de um JPEG: devolve "AAAA-MM-DD" ou "" */
+async function readExifDate(blob){
+  try{
+    const v = new DataView(await blob.slice(0, 262144).arrayBuffer());
+    if(v.getUint16(0) !== 0xFFD8) return "";
+    let off = 2;
+    while(off < v.byteLength - 4){
+      if(v.getUint8(off) !== 0xFF) break;
+      const marker = v.getUint8(off+1), len = v.getUint16(off+2);
+      if(marker === 0xE1 && v.getUint32(off+4) === 0x45786966) return exifDateFromTiff(v, off+10);
+      if(marker === 0xDA) break;
+      off += 2 + len;
+    }
+  }catch(e){}
+  return "";
+}
+function exifDateFromTiff(v, t){
+  const le = v.getUint16(t) === 0x4949;
+  const u16 = o => v.getUint16(o, le), u32 = o => v.getUint32(o, le);
+  if(u16(t+2) !== 42) return "";
+  const readIfd = ifd => {
+    const n = u16(ifd), out = {};
+    for(let i=0;i<n;i++){ const e = ifd + 2 + i*12; out[u16(e)] = {count:u32(e+4), valOff:e+8}; }
+    return out;
+  };
+  const str = ent => {
+    const o = ent.count > 4 ? t + u32(ent.valOff) : ent.valOff;
+    let r = ""; for(let i=0;i<ent.count-1;i++) r += String.fromCharCode(v.getUint8(o+i));
+    return r;
+  };
+  const ifd0 = readIfd(t + u32(t+4));
+  const exif = ifd0[0x8769] ? readIfd(t + u32(ifd0[0x8769].valOff)) : {};
+  const s = (exif[0x9003] && str(exif[0x9003])) || (exif[0x9004] && str(exif[0x9004])) || (ifd0[0x0132] && str(ifd0[0x0132])) || "";
+  const m = /^(\d{4}):(\d{2}):(\d{2})/.exec(s);
+  return (m && m[1] !== "0000") ? `${m[1]}-${m[2]}-${m[3]}` : "";
+}
+
+/* Foto -> {src, date}. Data: EXIF; se não houver, data de modificação do ficheiro */
+async function photoFromFile(file){
+  const [src, exif] = await Promise.all([fileToDataURL(file), readExifDate(file)]);
+  const date = exif || (file.lastModified > 86400000 ? isoFromMs(file.lastModified) : "");
+  return {id:uid(), src, date, showDate:true};
+}
+
+/* ---------- Importar a partir de um endereço (ex.: Google Fotos) ---------- */
+function urlCandidates(u){
+  try{
+    const host = new URL(u).hostname;
+    if(/(^|\.)googleusercontent\.com$/.test(host) || /(^|\.)ggpht\.com$/.test(host)){
+      const base = u.replace(/=[^=\/?#]*$/, "");
+      return [base + "=d", base + "=w2400-h2400", u];   // original (com EXIF) -> grande -> tal como veio
+    }
+  }catch(e){}
+  return [u];
+}
+async function fetchImageFile(url){
+  let lastErr;
+  for(const u of urlCandidates(url)){
+    try{
+      const r = await fetch(u, {mode:"cors", credentials:"omit"});
+      if(!r.ok) throw new Error("HTTP " + r.status);
+      const blob = await r.blob();
+      if(!/^image\//.test(blob.type)) throw new Error("não é uma imagem");
+      return new File([blob], "foto." + (blob.type.split("/")[1]||"jpg").replace("jpeg","jpg"), {type:blob.type, lastModified:0});
+    }catch(e){ lastErr = e; }
+  }
+  throw lastErr || new Error("falhou");
+}
+function collectUrls(uris, html, text){
+  const ok = u => /^(https?:|data:image|blob:)/i.test(u);
+  let list = (uris||"").split(/\r?\n/).map(x=>x.trim()).filter(x=>x && !x.startsWith("#") && ok(x));
+  if(!list.length && html){
+    try{ list = [...new DOMParser().parseFromString(html,"text/html").querySelectorAll("img[src]")].map(i=>i.getAttribute("src")).filter(ok); }catch(e){}
+  }
+  if(!list.length && text && ok(text.trim())) list = [text.trim()];
+  return [...new Set(list)];
+}
+const isImageFile = f => /^image\//.test(f.type) || /\.(jpe?g|png|gif|webp|bmp|avif|heic)$/i.test(f.name||"");
+
+let toastTimer;
+function toast(msg, ms){
+  const t = $("#toast"); if(!t) return;
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>{ t.hidden = true; }, ms || 3500);
+}
+
+async function handleDrop(zone, p){
+  const input = zone.querySelector("input[type=file]"); if(!input) return;
+  toast("A importar…", 60000);
+  let files = p.files.filter(isImageFile), failed = 0;
+  if(!files.length){
+    for(const u of collectUrls(p.uris, p.html, p.text)){
+      try{ files.push(await fetchImageFile(u)); }catch(err){ failed++; }
+    }
+  }
+  if(!files.length){
+    toast(failed
+      ? "Não consegui importar esta foto diretamente (o site de origem não o permite). Descarrega a foto para o computador e arrasta o ficheiro."
+      : "Não encontrei nenhuma imagem nesse arrastar.", 8000);
+    return;
+  }
+  const dtx = new DataTransfer();
+  (input.multiple ? files : files.slice(0,1)).forEach(f=>dtx.items.add(f));
+  input.files = dtx.files;
+  input.dispatchEvent(new Event("change", {bubbles:true}));
+  toast(`${input.multiple ? files.length : 1} foto(s) importada(s)` + (failed ? ` — ${failed} não foi/foram possível.` : "."), 3500);
+}
+
+function bindDrop(){
+  const zoneOf = e => (e.target && e.target.closest) ? e.target.closest(".photo-drop") : null;
+  const clear = () => document.querySelectorAll(".photo-drop.drag-over").forEach(z=>z.classList.remove("drag-over"));
+  const wants = dt => !!dt && [...dt.types].some(t => t === "Files" || t === "text/uri-list");
+  ["dragenter","dragover"].forEach(ev=>document.addEventListener(ev, e=>{
+    if(!wants(e.dataTransfer)) return;
+    e.preventDefault();                       // evita que o navegador abra a foto e se perca o trabalho
+    const z = zoneOf(e); clear();
+    if(z){ z.classList.add("drag-over"); e.dataTransfer.dropEffect = "copy"; }
+    else e.dataTransfer.dropEffect = "none";
+  }));
+  document.addEventListener("dragleave", e=>{ if(!e.relatedTarget) clear(); });
+  document.addEventListener("drop", e=>{
+    if(!wants(e.dataTransfer)) return;
+    e.preventDefault(); clear();
+    const z = zoneOf(e);
+    if(!z){ toast("Larga as fotos dentro de uma caixa de fotos do painel à esquerda."); return; }
+    const dt = e.dataTransfer;                // os dados só existem durante o evento
+    handleDrop(z, {files:[...dt.files], uris:dt.getData("text/uri-list"), html:dt.getData("text/html"), text:dt.getData("text/plain")});
+  });
+}
+
+/* =========================================================
    INIT
 ========================================================= */
+loadSettings();
+normPhotos();
 buildTabs();
+applyColors();
+applyLabels();
 renderAllPanels();
 bindToolbar();
+bindSettings();
+bindDrop();
 render();
 </script>
 </body>
