@@ -36,11 +36,11 @@ Pick a tool to get started.
     <strong>Image Replicator</strong>
     <span>Replicador de imagens</span>
   </a>
-    <a class="tool-btn" href="Tools/all-about-my-parents_3.html">
+    <a class="tool-btn" href="Tools/all-about-my-parents.html">
     <strong>Os meus Pais</strong>
     <span>Tudo Sobre os Meus Pais</span>
   </a>
-    <a class="tool-btn" href="Tools/all-about-school_4.html">
+    <a class="tool-btn" href="Tools/all-about-school.html">
     <strong>A minha escola</strong>
     <span>Tudo Sobre a Minha Escola</span>
   </a>
