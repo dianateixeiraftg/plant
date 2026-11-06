@@ -48,6 +48,10 @@ Pick a tool to get started.
     <strong>📖 Livro dos Finalistas</strong>
     <span>Builder for the finalists' book</span>
   </a>
+    <a class="tool-btn" href="Tools/Anuario_da_Sala.html">
+    <strong>📖 Anuário</strong>
+    <span>Builder for the year book</span>
+  </a>
    <a class="tool-btn" href="Tools/Signature_Press.html">
    <strong>📖 Impressão de livros</strong>
    <span>Para imprimir como livro</span>
