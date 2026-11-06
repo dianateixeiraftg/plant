@@ -151,7 +151,7 @@
     gap:8px;
     flex-wrap:wrap;
   }
-  .field label{
+  .field .q{
     font-weight:600;
     font-size:14px;
     white-space:nowrap;
@@ -191,7 +191,7 @@
   .hint{ margin:0; font-size:13px; font-weight:600; color:#6b5f52; text-align:center; }
 
   .field{ align-items:flex-start; }
-  .field label{ line-height:var(--row); }
+  .field .q{ line-height:var(--row); }
   .field textarea.blank{
     box-sizing:content-box;
     flex:1;
@@ -265,6 +265,8 @@
   }
   body.editing .ribbon[contenteditable="true"]{ background:var(--accent, var(--school)); }
 
+  body.editing .field .q{ white-space:normal; }
+
   .del{
     display:none;
     flex:none; align-self:center;
@@ -308,7 +310,7 @@
 <p class="hint">Type your answers right on the page, or print it blank and write by hand.</p>
 
 <div class="edit-banner" id="editBanner">
-  <span>Editing: click any text to change it. ✕ removes a question, ＋ adds one.</span>
+  <span>Editing: click any text to change it. Use ✕ to remove a question and ＋ to add one.</span>
   <button id="btnDone">Done</button>
 </div>
 
@@ -325,7 +327,7 @@
   <div class="card">
     <div class="top-row">
       <div class="top-fields">
-        <div class="field"><label>My school is called</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+        <div class="field"><span class="q">My school is called</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
       </div>
       <div class="draw-box">
         <div class="box"></div>
@@ -333,21 +335,21 @@
       </div>
     </div>
     <div class="fields">
-      <div class="field"><label>School is a place where</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field"><label>School is for</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field"><label>My teacher's name is</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field"><label>My teacher helps me by</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field"><label>My favorite subject is</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field"><label>My favorite thing about school is</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field"><label>At school I like to</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field"><label>My best friend at school is</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field"><label>When I grow up I want to be</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">School is a place where</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">School is for</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">My teacher's name is</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">My teacher helps me by</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">My favorite subject is</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">My favorite thing about school is</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">At school I like to</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">My best friend at school is</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">When I grow up I want to be</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
     </div>
     <div class="footer-row">
-      <div class="field"><label>Love,</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field age"><label>Age:</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">Love,</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field age"><span class="q">Age:</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
     </div>
-    <div class="field date-row"><label>Date:</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+    <div class="field date-row"><span class="q">Date:</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
   </div>
 </div>
 
@@ -357,7 +359,7 @@
   <div class="card">
     <div class="top-row">
       <div class="top-fields">
-        <div class="field"><label>A minha escola chama-se</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+        <div class="field"><span class="q">A minha escola chama-se</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
       </div>
       <div class="draw-box">
         <div class="box"></div>
@@ -365,21 +367,21 @@
       </div>
     </div>
     <div class="fields">
-      <div class="field"><label>A escola é um lugar onde</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field"><label>A escola serve para</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field"><label>A pessoa que me ensina chama-se</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field"><label>O(a) meu(minha) professor(a) ajuda-me a</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field"><label>A minha disciplina favorita é</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field"><label>A coisa de que mais gosto na escola é</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field"><label>Na escola gosto de</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field"><label>O meu melhor amigo na escola é</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field"><label>Quando crescer quero ser</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">A escola é um lugar onde</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">A escola serve para</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">A pessoa que me ensina chama-se</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">O(a) meu(minha) professor(a) ajuda-me a</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">A minha disciplina favorita é</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">A coisa de que mais gosto na escola é</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">Na escola gosto de</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">O meu melhor amigo na escola é</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">Quando crescer quero ser</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
     </div>
     <div class="footer-row">
-      <div class="field"><label>Com amor,</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
-      <div class="field age"><label>Idade:</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field"><span class="q">Com amor,</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+      <div class="field age"><span class="q">Idade:</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
     </div>
-    <div class="field date-row"><label>Data:</label><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
+    <div class="field date-row"><span class="q">Data:</span><textarea class="blank" rows="1" spellcheck="false"></textarea></div>
   </div>
 </div>
 
@@ -388,13 +390,21 @@
 (function(){
   const KEY = 'allabout-school-v1';
   const wraps = [...document.querySelectorAll('.card-wrap')];
+  const EDIT_SEL = '.ribbon, .draw-box span, .card .q';
   let editing = false, saveTimer = null;
 
   const readStore = () => { try { return JSON.parse(localStorage.getItem(KEY)); } catch(e){ return null; } };
   const writeStore = v => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch(e){} };
 
-  const staticEls = w => [...w.querySelectorAll('.ribbon, .draw-box span, .card label')].filter(e => !e.closest('.fields'));
+  const staticEls = w => [...w.querySelectorAll(EDIT_SEL)].filter(e => !e.closest('.fields'));
   const staticAns = w => [...w.querySelectorAll('textarea.blank')].filter(t => !t.closest('.fields'));
+  const toObj = a => Array.isArray(a) ? Object.fromEntries(a.map((v, i) => [i, v])) : (a || {});
+
+  function newDelBtn(){
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'del'; b.title = 'Remove this question'; b.textContent = '✕';
+    return b;
+  }
 
   function autosize(t){
     if (!t.offsetWidth) return;
@@ -407,31 +417,61 @@
   function makeRow(q, a){
     const d = document.createElement('div');
     d.className = 'field';
-    d.innerHTML = '<label></label><textarea class="blank" rows="1" spellcheck="false"></textarea>' +
-                  '<button class="del" type="button" title="Remove this question">✕</button>';
-    d.querySelector('label').textContent = q;
+    d.innerHTML = '<span class="q"></span><textarea class="blank" rows="1" spellcheck="false"></textarea>';
+    d.appendChild(newDelBtn());
+    d.querySelector('.q').textContent = q;
     d.querySelector('textarea').value = a || '';
     return d;
   }
 
+  /* give the fixed parts stable ids so edits and removals survive reloads */
+  wraps.forEach(w => {
+    staticEls(w).forEach((e, i) => { e.dataset.sid = i; });
+    staticAns(w).forEach((t, i) => { t.dataset.aid = i; });
+    const top = w.querySelector('.top-fields');
+    if (top){
+      const fields = [...top.querySelectorAll('.field')];
+      fields.forEach((f, i) => { f.dataset.fid = i; f.appendChild(newDelBtn()); });
+      w._topCount = fields.length;
+      w._topHTML = top.innerHTML;
+    }
+    const box = w.querySelector('.fields');
+    if (box){
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'add-q'; b.textContent = '＋ Add a question';
+      box.insertAdjacentElement('afterend', b);
+    }
+  });
+
   function snapshot(){
-    return wraps.map(w => ({
-      texts: staticEls(w).map(e => e.textContent),
-      ans: staticAns(w).map(t => t.value),
-      rows: [...w.querySelectorAll('.fields .field')].map(f => ({
-        q: f.querySelector('label').textContent,
+    return wraps.map(w => {
+      const texts = {}, ans = {};
+      staticEls(w).forEach(e => { texts[e.dataset.sid] = e.textContent; });
+      staticAns(w).forEach(t => { ans[t.dataset.aid] = t.value; });
+      const kept = new Set([...w.querySelectorAll('.top-fields .field')].map(f => f.dataset.fid));
+      const removedTop = [];
+      for (let i = 0; i < (w._topCount || 0); i++) if (!kept.has(String(i))) removedTop.push(i);
+      const rows = [...w.querySelectorAll('.fields .field')].map(f => ({
+        q: f.querySelector('.q').textContent,
         a: f.querySelector('textarea').value
-      }))
-    }));
+      }));
+      return { texts, ans, removedTop, rows };
+    });
   }
 
   function applyState(state){
     if (!Array.isArray(state) || state.length !== wraps.length) return false;
     wraps.forEach((w, i) => {
       const s = state[i] || {};
-      const els = staticEls(w), ans = staticAns(w);
-      if (Array.isArray(s.texts) && s.texts.length === els.length) els.forEach((e, j) => e.textContent = s.texts[j]);
-      if (Array.isArray(s.ans) && s.ans.length === ans.length) ans.forEach((t, j) => t.value = s.ans[j]);
+      const top = w.querySelector('.top-fields');
+      if (top && w._topHTML != null) top.innerHTML = w._topHTML;
+      const texts = toObj(s.texts), ans = toObj(s.ans);
+      staticEls(w).forEach(e => { if (texts[e.dataset.sid] != null) e.textContent = texts[e.dataset.sid]; });
+      staticAns(w).forEach(t => { t.value = ans[t.dataset.aid] || ''; });
+      (s.removedTop || []).forEach(id => {
+        const f = w.querySelector('.top-fields .field[data-fid="' + id + '"]');
+        if (f) f.remove();
+      });
       const box = w.querySelector('.fields');
       if (box && Array.isArray(s.rows)){
         box.innerHTML = '';
@@ -447,7 +487,7 @@
   function queueSave(){ clearTimeout(saveTimer); saveTimer = setTimeout(save, 250); }
 
   function setEditable(on){
-    document.querySelectorAll('.ribbon, .draw-box span, .card label').forEach(e => {
+    document.querySelectorAll(EDIT_SEL).forEach(e => {
       if (on) e.setAttribute('contenteditable', 'true'); else e.removeAttribute('contenteditable');
     });
   }
@@ -458,14 +498,6 @@
     if (!on) save();
   }
 
-  /* init: add "+ add question" buttons, then load saved state (or defaults) */
-  wraps.forEach(w => {
-    const box = w.querySelector('.fields');
-    if (!box) return;
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'add-q'; b.textContent = '＋ Add a question';
-    box.insertAdjacentElement('afterend', b);
-  });
   const defaults = snapshot();
   if (!applyState(readStore())) applyState(defaults);
 
@@ -497,7 +529,7 @@
       add.previousElementSibling.appendChild(row);
       setEditable(true);
       autosize(row.querySelector('textarea'));
-      const l = row.querySelector('label');
+      const l = row.querySelector('.q');
       l.focus();
       document.getSelection().selectAllChildren(l);
       save();
@@ -512,9 +544,9 @@
   document.getElementById('btnDone').addEventListener('click', () => toggleEdit(false));
   document.getElementById('btnReset').addEventListener('click', () => {
     panel.classList.remove('open');
-    if (!confirm('Reset all questions to the original ones? Typed answers in the question list will be cleared too.')) return;
+    if (!confirm('Reset all questions to the original ones (including removed ones)? Answers typed on the extra list questions will be cleared too.')) return;
     const cur = snapshot();
-    applyState(defaults.map((d, i) => ({ texts: d.texts, ans: cur[i].ans, rows: d.rows })));
+    applyState(defaults.map((d, i) => ({ texts: d.texts, ans: cur[i].ans, removedTop: [], rows: d.rows })));
     save();
   });
   document.getElementById('btnClear').addEventListener('click', () => {
