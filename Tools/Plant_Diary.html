@@ -66,7 +66,8 @@
   .hidden { display: none !important; }
   .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
 
-  .app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+  /* Fixed-height shell: the sidebar (with "Plantas do Passado") stays on screen and only the diary panel scrolls */
+  .app-shell { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
 
   .topbar {
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
