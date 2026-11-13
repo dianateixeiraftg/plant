@@ -24,6 +24,10 @@ Pick a tool to get started.
     <strong>Roupa</strong>
     <span>Roupa com Ciclo</span>
   </a>
+    <a class="tool-btn" href="Tools/expiry-watch-paste-settings.html">
+    <strong>Prazos de Validade</strong>
+    <span>Verificar prazos dos alimentos</span>
+  </a>
     <a class="tool-btn" href="Tools/little_moments_book_studio_v2.html">
     <strong>Little Moments Book Studio</strong>
     <span>Livro de Momentos</span>
