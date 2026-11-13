@@ -24,7 +24,7 @@ Pick a tool to get started.
     <strong>Roupa</strong>
     <span>Roupa com Ciclo</span>
   </a>
-    <a class="tool-btn" href="Tools/expiry-watch-paste-settings.html">
+    <a class="tool-btn" href="Tools/expiry-watch-gemini-vision.html">
     <strong>Prazos de Validade</strong>
     <span>Verificar prazos dos alimentos</span>
   </a>
