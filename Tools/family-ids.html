@@ -50,6 +50,8 @@ button.copied{background:var(--ok);border-color:var(--ok);color:#fff}
 <h1>Documentos da família</h1>
 <p class="sub">Guarda os números de cada pessoa e copia com um clique.</p>
 
+<div class="card" id="nojs" style="border-color:var(--bad)">Esta página precisa de JavaScript para funcionar. Se vês esta mensagem, descarrega o ficheiro e abre-o diretamente no navegador (Chrome, Safari ou Firefox), em vez de usares a pré-visualização.</div>
+
 <div class="bar">
   <input id="newPerson" placeholder="Nome da pessoa" aria-label="Nome da pessoa" style="width:180px">
   <button class="p" id="addPerson">Adicionar pessoa</button>
@@ -151,10 +153,11 @@ function renderAll(){$("allView").hidden=S.sel!==ALL;if(S.sel!==ALL)return;
 function render(){renderTabs();renderPerson();renderAll();$("vis").textContent=S.show?"Ocultar valores":"Mostrar valores";$("vis").setAttribute("aria-pressed",S.show)}
 
 function init(){
+  $("nojs").hidden=true;
   load();
   PRESETS.forEach(function(p){$("type").appendChild(h("option",{value:p,text:p}))});
   $("type").onchange=function(){var o=$("type").value==="Outro…";$("custom").hidden=!o;if(o)$("custom").focus()};
-  function addPerson(){var n=$("newPerson").value.trim();if(!n)return;var p={id:uid(),name:n,items:[]};S.people.push(p);S.sel=p.id;$("newPerson").value="";save();render()}
+  function addPerson(){var n=$("newPerson").value.trim();if(!n){toast("Escreve primeiro o nome da pessoa");$("newPerson").focus();return}var p={id:uid(),name:n,items:[]};S.people.push(p);S.sel=p.id;$("newPerson").value="";save();render();toast(n+" adicionado(a)");$("value").focus()}
   $("addPerson").onclick=addPerson;$("newPerson").onkeydown=function(e){if(e.key==="Enter")addPerson()};
   function addItem(){var p=person();if(!p)return;var type=$("type").value;if(type==="Outro…")type=$("custom").value.trim();
     var v=$("value").value.trim();if(!type){toast("Escreve o nome do item");return}if(!v){toast("Escreve o valor");return}
