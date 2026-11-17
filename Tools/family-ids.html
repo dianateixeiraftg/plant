@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentos da família</title>
+<style>
+:root{--bg:#eef1f4;--card:#fff;--ink:#1d2733;--mute:#64707d;--line:#d5dbe2;--acc:#2f5d8a;--acc-ink:#fff;--ok:#2e7d5b;--bad:#b3392f}
+@media (prefers-color-scheme:dark){:root{--bg:#14181d;--card:#1c222a;--ink:#e6eaee;--mute:#93a0ad;--line:#2f3844;--acc:#6aa3d6;--acc-ink:#10151a;--ok:#5cc29a;--bad:#e5736a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.5rem;margin:0 0 4px}
+.sub{color:var(--mute);margin:0 0 18px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.bar .grow{flex:1}
+button,input,select{font:inherit;color:inherit}
+button{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 12px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.p{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+button.d{color:var(--bad)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+input,select{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:8px 10px;min-width:0}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tab{border-radius:999px;padding:6px 14px}
+.tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.card h2{font-size:1.05rem;margin:0 0 10px}
+.add{display:grid;grid-template-columns:200px 1fr auto;gap:8px}
+.add .custom{grid-column:1/-1}
+@media(max-width:620px){.add{grid-template-columns:1fr}}
+.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.lab{width:170px;flex:none;color:var(--mute);font-size:.92rem}
+.val{flex:1;min-width:0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;font-size:1.02rem}
+.val.hid{letter-spacing:.15em;color:var(--mute)}
+.act{display:flex;gap:4px;flex:none}
+.act button{padding:5px 9px;font-size:.88rem}
+button.copied{background:var(--ok);border-color:var(--ok);color:#fff}
+@media(max-width:620px){.row{flex-wrap:wrap}.lab{width:100%}}
+.empty{color:var(--mute);padding:6px 0}
+.who{display:inline-block;min-width:90px;font-weight:600}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+.note{color:var(--mute);font-size:.88rem;margin-top:18px}
+</style>
+</head>
+<body>
+<main>
+<h1>Documentos da família</h1>
+<p class="sub">Guarda os números de cada pessoa e copia com um clique.</p>
+
+<div class="bar">
+  <input id="newPerson" placeholder="Nome da pessoa" aria-label="Nome da pessoa" style="width:180px">
+  <button class="p" id="addPerson">Adicionar pessoa</button>
+  <span class="grow"></span>
+  <button id="vis" aria-pressed="false">Mostrar valores</button>
+</div>
+
+<div class="tabs" id="tabs" role="tablist"></div>
+
+<div id="personView">
+  <div class="card">
+    <h2 id="addTitle">Adicionar item</h2>
+    <div class="add">
+      <select id="type" aria-label="Tipo de item"></select>
+      <input id="value" placeholder="Valor" aria-label="Valor" autocomplete="off">
+      <button class="p" id="addItem">Guardar</button>
+      <input id="custom" class="custom" placeholder="Nome do item (ex.: Cartão do ginásio)" aria-label="Nome do item" hidden>
+    </div>
+  </div>
+  <div class="card">
+    <h2 id="listTitle">Itens</h2>
+    <div id="items"></div>
+    <div class="bar" style="margin:12px 0 0">
+      <button id="renamePerson">Mudar nome</button>
+      <button class="d" id="delPerson">Apagar pessoa</button>
+    </div>
+  </div>
+</div>
+
+<div id="allView" hidden>
+  <div class="card">
+    <h2>Todos, por tipo de item</h2>
+    <input id="q" placeholder="Pesquisar (ex.: NIF)" aria-label="Pesquisar" style="width:100%;margin-bottom:8px">
+    <div id="groups"></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Cópia de segurança</h2>
+  <div class="bar" style="margin:0">
+    <button id="export">Exportar ficheiro</button>
+    <button id="import">Importar ficheiro</button>
+    <input type="file" id="file" accept=".json" hidden>
+  </div>
+  <p class="note">Os dados ficam só neste navegador, neste dispositivo. Exporta de vez em quando e guarda o ficheiro num local seguro, porque limpar os dados do navegador apaga tudo.</p>
+</div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+var PRESETS=["NIF","NISS (Segurança Social)","Cartão de Cidadão","Nº de utente (SNS)","Passaporte","Carta de condução","IBAN","Telemóvel","Email","Data de nascimento","Morada","Matrícula","Nº de aluno","Nº de sócio","Outro…"];
+var KEY="documentos-familia-v1",ALL="__all__";
+var S={people:[],sel:null,show:false};
+
+function load(){try{var r=localStorage.getItem(KEY);if(r){var d=JSON.parse(r);if(d&&Array.isArray(d.people))S.people=d.people}}catch(e){}
+  S.sel=S.people.length?S.people[0].id:ALL}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({people:S.people}))}catch(e){toast("Não foi possível guardar neste navegador")}}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function $(i){return document.getElementById(i)}
+function h(tag,props,kids){var e=document.createElement(tag);for(var k in (props||{})){if(k==="text")e.textContent=props[k];else if(k==="on")for(var ev in props.on)e.addEventListener(ev,props.on[ev]);else e.setAttribute(k,props[k])}
+  (kids||[]).forEach(function(c){e.appendChild(c)});return e}
+function person(){return S.people.find(function(p){return p.id===S.sel})}
+var tt;function toast(m){var t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(function(){t.classList.remove("on")},1600)}
+
+function copy(text,btn){
+  function done(){toast("Copiado");if(btn){var o=btn.textContent;btn.textContent="Copiado";btn.classList.add("copied");setTimeout(function(){btn.textContent=o;btn.classList.remove("copied")},1200)}}
+  function fb(){var t=document.createElement("textarea");t.value=text;t.style.position="fixed";t.style.opacity="0";document.body.appendChild(t);t.select();try{document.execCommand("copy");done()}catch(e){toast("Não foi possível copiar")}document.body.removeChild(t)}
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(done,fb);else fb()}
+
+function valEl(v){var s=h("div",{"class":"val"+(S.show?"":" hid"),text:S.show?v:"••••••••"});return s}
+
+function renderTabs(){var t=$("tabs");t.innerHTML="";
+  S.people.forEach(function(p){t.appendChild(h("button",{"class":"tab"+(S.sel===p.id?" on":""),role:"tab",text:p.name,on:{click:function(){S.sel=p.id;render()}}}))});
+  t.appendChild(h("button",{"class":"tab"+(S.sel===ALL?" on":""),role:"tab",text:"Ver todos",on:{click:function(){S.sel=ALL;render()}}}))}
+
+function renderPerson(){var p=person();$("personView").hidden=!p;if(!p)return;
+  $("addTitle").textContent="Adicionar item a "+p.name;$("listTitle").textContent="Itens de "+p.name;
+  var box=$("items");box.innerHTML="";
+  if(!p.items.length){box.appendChild(h("div",{"class":"empty",text:"Ainda sem itens. Escolhe um tipo acima e guarda o primeiro valor."}));return}
+  p.items.forEach(function(it){
+    var act=h("div",{"class":"act"},[
+      h("button",{"class":"p",text:"Copiar",on:{click:function(e){copy(it.value,e.currentTarget)}}}),
+      h("button",{text:"Editar","aria-label":"Editar "+it.type,on:{click:function(){var n=prompt(it.type,it.value);if(n!==null&&n.trim()){it.value=n.trim();save();render()}}}}),
+      h("button",{"class":"d",text:"Apagar","aria-label":"Apagar "+it.type,on:{click:function(){if(confirm("Apagar "+it.type+" de "+p.name+"?")){p.items=p.items.filter(function(x){return x!==it});save();render()}}}})]);
+    box.appendChild(h("div",{"class":"row"},[h("div",{"class":"lab",text:it.type}),valEl(it.value),act]))})}
+
+function renderAll(){$("allView").hidden=S.sel!==ALL;if(S.sel!==ALL)return;
+  var q=$("q").value.trim().toLowerCase(),map={},order=[];
+  S.people.forEach(function(p){p.items.forEach(function(it){
+    if(q&&(it.type+" "+p.name).toLowerCase().indexOf(q)<0)return;
+    if(!map[it.type]){map[it.type]=[];order.push(it.type)}map[it.type].push({n:p.name,v:it.value})})});
+  var g=$("groups");g.innerHTML="";
+  if(!order.length){g.appendChild(h("div",{"class":"empty",text:S.people.length?"Nada encontrado.":"Adiciona uma pessoa para começar."}));return}
+  order.forEach(function(type){
+    g.appendChild(h("div",{"class":"lab",style:"width:auto;margin:12px 0 2px;font-weight:600;color:var(--ink)",text:type}));
+    map[type].forEach(function(r){g.appendChild(h("div",{"class":"row"},[h("div",{"class":"lab",text:r.n}),valEl(r.v),
+      h("div",{"class":"act"},[h("button",{"class":"p",text:"Copiar",on:{click:function(e){copy(r.v,e.currentTarget)}}})])]))})})}
+
+function render(){renderTabs();renderPerson();renderAll();$("vis").textContent=S.show?"Ocultar valores":"Mostrar valores";$("vis").setAttribute("aria-pressed",S.show)}
+
+function init(){
+  load();
+  PRESETS.forEach(function(p){$("type").appendChild(h("option",{value:p,text:p}))});
+  $("type").onchange=function(){var o=$("type").value==="Outro…";$("custom").hidden=!o;if(o)$("custom").focus()};
+  function addPerson(){var n=$("newPerson").value.trim();if(!n)return;var p={id:uid(),name:n,items:[]};S.people.push(p);S.sel=p.id;$("newPerson").value="";save();render()}
+  $("addPerson").onclick=addPerson;$("newPerson").onkeydown=function(e){if(e.key==="Enter")addPerson()};
+  function addItem(){var p=person();if(!p)return;var type=$("type").value;if(type==="Outro…")type=$("custom").value.trim();
+    var v=$("value").value.trim();if(!type){toast("Escreve o nome do item");return}if(!v){toast("Escreve o valor");return}
+    p.items.push({id:uid(),type:type,value:v});$("value").value="";save();render();$("value").focus()}
+  $("addItem").onclick=addItem;$("value").onkeydown=function(e){if(e.key==="Enter")addItem()};
+  $("renamePerson").onclick=function(){var p=person();if(!p)return;var n=prompt("Novo nome",p.name);if(n&&n.trim()){p.name=n.trim();save();render()}};
+  $("delPerson").onclick=function(){var p=person();if(!p)return;if(confirm("Apagar "+p.name+" e todos os seus itens?")){S.people=S.people.filter(function(x){return x!==p});S.sel=S.people.length?S.people[0].id:ALL;save();render()}};
+  $("vis").onclick=function(){S.show=!S.show;render()};
+  $("q").oninput=renderAll;
+  $("export").onclick=function(){var b=new Blob([JSON.stringify({people:S.people},null,2)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="documentos-familia-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)};
+  $("import").onclick=function(){$("file").click()};
+  $("file").onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var d=JSON.parse(r.result);if(!d||!Array.isArray(d.people))throw 0;
+    if(confirm("Isto substitui os dados atuais. Continuar?")){S.people=d.people;S.sel=S.people.length?S.people[0].id:ALL;save();render();toast("Importado")}}catch(e){toast("Ficheiro inválido")}};r.readAsText(f);this.value=""};
+  render()}
+init();
+</script>
+</body>
+</html>
