@@ -12,6 +12,10 @@ Pick a tool to get started.
     <strong>👧 My Kids</strong>
     <span>Children milestone tracker</span>
   </a>
+   <a class="tool-btn" href="Tools/family_ids.html">
+    <strong>ℹ️ Nós</strong>
+    <span>detalhes</span>
+  </a>
   <a class="tool-btn" href="Tools/Plant_Diary.html">
     <strong>🌱 Caderno de Campo</strong>
     <span>Plant diary, one diary per plant</span>
