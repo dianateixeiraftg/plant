@@ -12,7 +12,7 @@ Pick a tool to get started.
     <strong>👧 My Kids</strong>
     <span>Children milestone tracker</span>
   </a>
-   <a class="tool-btn" href="Tools/family_ids.html">
+   <a class="tool-btn" href="Tools/family-ids.html">
     <strong>ℹ️ Nós</strong>
     <span>detalhes</span>
   </a>
