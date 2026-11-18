@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photo Sheet Maker – 10×15</title>
+<style>
+:root{
+  --bg:#e9ecef; --panel:#ffffff; --ink:#16202b; --mut:#5d6b79; --line:#cfd6dd;
+  --acc:#1f4e79; --accInk:#ffffff; --bench:#2a2f36; --bad:#a82b1c; --ok:#1d6b45;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#15181c;--panel:#1f242a;--ink:#e8edf2;--mut:#93a1af;--line:#343c45;--acc:#6aa7dd;--accInk:#0c1722;--bench:#0f1215;--bad:#ff8c7a;--ok:#6fd0a0}
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 "Avenir Next","Segoe UI",system-ui,sans-serif}
+header{padding:18px 22px 6px}
+h1{margin:0;font-size:22px;font-weight:650;letter-spacing:-.01em}
+header p{margin:4px 0 0;color:var(--mut);max-width:70ch}
+main{display:grid;grid-template-columns:minmax(300px,440px) 1fr;gap:18px;padding:14px 22px 30px;align-items:start}
+@media(max-width:860px){main{grid-template-columns:1fr}}
+section.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+h2{margin:0 0 10px;font-size:15px;font-weight:650}
+.drop{display:block;border:2px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;color:var(--mut)}
+.drop.over,.drop:hover{border-color:var(--acc);color:var(--ink)}
+.drop b{color:var(--acc)}
+.drop input{display:none}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mut)}
+select,input[type=number]{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 7px;min-width:0}
+input[type=number]{width:72px}
+button{font:inherit;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:6px 11px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);color:var(--accInk);border-color:var(--acc);font-weight:600}
+button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-within{outline:2px solid var(--acc);outline-offset:2px}
+.chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mut);margin-top:12px}
+#list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.item{display:flex;gap:10px;border:1px solid var(--line);border-radius:8px;padding:8px}
+.item .th{width:76px;height:76px;object-fit:cover;border-radius:5px;flex:none;background:var(--bg)}
+.item .fields{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;min-width:0}
+.item .nm{flex-basis:100%;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mut)}
+.cust{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--mut)}
+.cust[hidden]{display:none}
+.item .acts{display:flex;gap:6px;flex-basis:100%}
+.item .acts button{padding:3px 9px;font-size:13px}
+.item .acts .del{margin-left:auto}
+.bench{background:var(--bench);border-radius:8px;padding:18px;min-height:300px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.bar .sum{color:#c9d3dd;font-size:13px;flex:1;min-width:180px}
+.bar button{background:transparent;color:#e8edf2;border-color:#566170}
+.bar button.primary{background:var(--acc);color:var(--accInk);border-color:var(--acc)}
+.sheets{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start}
+.sheet figure{margin:0}
+.sheet canvas{display:block;background:#fff;box-shadow:0 3px 14px rgba(0,0,0,.55);max-width:100%;height:auto}
+.sheet.p canvas{width:min(100%,340px)}
+.sheet.l canvas{width:min(100%,510px)}
+.sheet figcaption{margin-top:8px;color:#c9d3dd;font-size:13px}
+.empty{color:#a9b6c3;padding:40px 10px;text-align:center}
+.warn{color:var(--bad);font-size:13px;margin-top:10px;background:rgba(255,120,100,.12);padding:7px 10px;border-radius:6px}
+.bench .warn{color:#ffb3a6}
+.hint{font-size:12.5px;color:var(--mut);margin-top:10px}
+#printArea{display:none}
+@media print{
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block}
+  html,body{background:#fff!important}
+  #printArea img:last-child{page-break-after:auto!important}
+}
+</style>
+<style id="pageStyle"></style>
+</head>
+<body>
+<header>
+  <h1>Photo Sheet Maker</h1>
+  <p>Add photos, choose a print size for each one, and they are packed together on a 10×15 cm sheet using as much of the paper as possible.</p>
+</header>
+
+<main>
+  <div>
+    <section class="panel">
+      <h2>Photos</h2>
+      <label class="drop" id="drop">
+        <input type="file" id="file" accept="image/*" multiple>
+        <b>Choose photos</b> or drop them here
+      </label>
+      <div id="list"></div>
+    </section>
+
+    <section class="panel" style="margin-top:14px">
+      <h2>Sheet</h2>
+      <div class="row" style="margin-top:0">
+        <label class="f">Paper
+          <select id="orient">
+            <option value="p">10 × 15 cm portrait</option>
+            <option value="l">15 × 10 cm landscape</option>
+          </select>
+        </label>
+        <label class="f">Edge margin (mm)
+          <input type="number" id="margin" value="3" min="0" max="15" step="0.5">
+        </label>
+        <label class="f">Gap between photos (mm)
+          <input type="number" id="gap" value="1.5" min="0" max="10" step="0.5">
+        </label>
+      </div>
+      <label class="chk"><input type="checkbox" id="cut" checked> Draw a thin cutting line around each photo</label>
+      <p class="hint">The JPG is 1181 × 1772 px at 300 dpi (10 × 15 cm). SELPHY printers trim a little at the paper edge, so keep a few mm of margin.</p>
+    </section>
+  </div>
+
+  <div class="bench">
+    <div class="bar">
+      <div class="sum" id="sum">No photos yet</div>
+      <button id="dl" class="primary">Download JPG</button>
+      <button id="pr">Print</button>
+    </div>
+    <div id="sheets" class="sheets"></div>
+    <div id="warn"></div>
+  </div>
+</main>
+
+<div id="printArea"></div>
+
+<script>
+"use strict";
+const DPI = 300, MM = DPI / 25.4, EPS = 1e-6;
+const PRESETS = [
+  ["2.5x3.5", "2.5 × 3.5 cm"],
+  ["3x4", "3 × 4 cm"],
+  ["3.5x4.5", "3.5 × 4.5 cm (passport)"],
+  ["4x6", "4 × 6 cm"],
+  ["5x5", "5 × 5 cm (square)"],
+  ["5x7", "5 × 7 cm"],
+  ["6x9", "6 × 9 cm"],
+  ["7.5x10", "7.5 × 10 cm"],
+  ["10x10", "10 × 10 cm (square)"],
+  ["custom", "Custom…"]
+];
+const $ = id => document.getElementById(id);
+let photos = [], uid = 0, canvases = [];
+
+/* ---------- adding photos ---------- */
+function addFiles(files) {
+  [...files].filter(f => f.type.startsWith("image/")).forEach(f => {
+    const url = URL.createObjectURL(f), img = new Image();
+    img.onload = () => {
+      photos.push({ id: ++uid, name: f.name, url, img, size: "5x7", cw: 5, ch: 7, copies: 1, fit: "fill" });
+      buildList(); render();
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); alert("“" + f.name + "” could not be opened as an image."); };
+    img.src = url;
+  });
+}
+$("file").addEventListener("change", e => { addFiles(e.target.files); e.target.value = ""; });
+const drop = $("drop");
+["dragenter", "dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => addFiles(e.dataTransfer.files));
+
+/* ---------- photo list ---------- */
+function buildList() {
+  $("list").innerHTML = photos.map(p => `
+    <div class="item" data-id="${p.id}">
+      <img class="th" src="${p.url}" alt="">
+      <div class="fields">
+        <div class="nm" title="${esc(p.name)}">${esc(p.name)}</div>
+        <label class="f">Print size
+          <select data-k="size">${PRESETS.map(([v, l]) => `<option value="${v}"${v === p.size ? " selected" : ""}>${l}</option>`).join("")}</select>
+        </label>
+        <span class="cust" ${p.size === "custom" ? "" : "hidden"}>
+          <input type="number" data-k="cw" value="${p.cw}" min="1" max="15" step="0.1" aria-label="Width in cm"> ×
+          <input type="number" data-k="ch" value="${p.ch}" min="1" max="15" step="0.1" aria-label="Height in cm"> cm
+        </span>
+        <label class="f">Copies
+          <input type="number" data-k="copies" value="${p.copies}" min="1" max="99">
+        </label>
+        <label class="f">Crop
+          <select data-k="fit">
+            <option value="fill"${p.fit === "fill" ? " selected" : ""}>Fill the frame</option>
+            <option value="fit"${p.fit === "fit" ? " selected" : ""}>Whole photo</option>
+          </select>
+        </label>
+        <div class="acts">
+          <button data-act="fill" title="Add copies until the sheet is full">Fill the sheet</button>
+          <button data-act="del" class="del">Remove</button>
+        </div>
+      </div>
+    </div>`).join("");
+}
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+$("list").addEventListener("input", onField);
+$("list").addEventListener("change", onField);
+function onField(e) {
+  const k = e.target.dataset.k; if (!k) return;
+  const card = e.target.closest(".item"), p = photos.find(x => x.id == card.dataset.id);
+  if (["cw", "ch", "copies"].includes(k)) {
+    let v = parseFloat(e.target.value); if (!(v > 0)) return;
+    p[k] = k === "copies" ? Math.min(99, Math.round(v)) : Math.min(15, v);
+  } else p[k] = e.target.value;
+  if (k === "size") card.querySelector(".cust").hidden = p.size !== "custom";
+  render();
+}
+$("list").addEventListener("click", e => {
+  const act = e.target.dataset.act; if (!act) return;
+  const id = e.target.closest(".item").dataset.id, p = photos.find(x => x.id == id);
+  if (act === "del") { URL.revokeObjectURL(p.url); photos = photos.filter(x => x !== p); }
+  if (act === "fill") fillSheet(p);
+  buildList(); render();
+});
+["orient", "margin", "gap", "cut"].forEach(id => $(id).addEventListener("input", render));
+
+/* ---------- geometry ---------- */
+function sheetMM() { return $("orient").value === "l" ? [150, 100] : [100, 150]; }
+function settings() {
+  const [W, H] = sheetMM();
+  const m = Math.max(0, parseFloat($("margin").value) || 0), g = Math.max(0, parseFloat($("gap").value) || 0);
+  return { W, H, m, g, uw: W - 2 * m, uh: H - 2 * m };
+}
+function dimsMM(p) {
+  let a, b;
+  if (p.size === "custom") { a = p.cw * 10; b = p.ch * 10; }
+  else [a, b] = p.size.split("x").map(v => parseFloat(v) * 10);
+  const s = Math.min(a, b), l = Math.max(a, b);
+  return p.img.naturalWidth > p.img.naturalHeight ? [l, s] : [s, l]; // follows the photo's orientation
+}
+function buildItems() {
+  const items = [];
+  photos.forEach(p => { const [w, h] = dimsMM(p); for (let i = 0; i < p.copies; i++) items.push({ p, w, h }); });
+  return items;
+}
+
+/* ---------- packing (MaxRects, best short side fit, rotation allowed) ---------- */
+const inside = (a, b) => a.x >= b.x - EPS && a.y >= b.y - EPS && a.x + a.w <= b.x + b.w + EPS && a.y + a.h <= b.y + b.h + EPS;
+class Bin {
+  constructor(w, h) { this.free = [{ x: 0, y: 0, w, h }]; this.placed = []; this.area = 0; }
+  find(w, h) {
+    let best = null;
+    for (const r of this.free) for (const rot of [false, true]) {
+      const ww = rot ? h : w, hh = rot ? w : h;
+      if (ww <= r.w + EPS && hh <= r.h + EPS) {
+        const s1 = Math.min(r.w - ww, r.h - hh), s2 = Math.max(r.w - ww, r.h - hh);
+        if (!best || s1 < best.s1 - EPS || (Math.abs(s1 - best.s1) <= EPS && s2 < best.s2)) best = { x: r.x, y: r.y, w: ww, h: hh, rot, s1, s2 };
+      }
+    }
+    return best;
+  }
+  place(r) {
+    const nf = [];
+    for (const f of this.free) {
+      if (r.x >= f.x + f.w - EPS || r.x + r.w <= f.x + EPS || r.y >= f.y + f.h - EPS || r.y + r.h <= f.y + EPS) { nf.push(f); continue; }
+      if (r.x > f.x + EPS) nf.push({ x: f.x, y: f.y, w: r.x - f.x, h: f.h });
+      if (r.x + r.w < f.x + f.w - EPS) nf.push({ x: r.x + r.w, y: f.y, w: f.x + f.w - r.x - r.w, h: f.h });
+      if (r.y > f.y + EPS) nf.push({ x: f.x, y: f.y, w: f.w, h: r.y - f.y });
+      if (r.y + r.h < f.y + f.h - EPS) nf.push({ x: f.x, y: r.y + r.h, w: f.w, h: f.y + f.h - r.y - r.h });
+    }
+    this.free = nf.filter((a, i) => !nf.some((b, j) => j !== i && inside(a, b) && (!inside(b, a) || j < i)));
+    this.placed.push(r); this.area += r.w * r.h;
+  }
+}
+function runOrder(order, S) {
+  const bw = S.uw + S.g, bh = S.uh + S.g, bins = [], lost = [];
+  for (const it of order) {
+    const pw = it.w + S.g, ph = it.h + S.g;
+    if (!((pw <= bw + EPS && ph <= bh + EPS) || (ph <= bw + EPS && pw <= bh + EPS))) { lost.push(it); continue; }
+    let done = false;
+    for (const b of bins) { const f = b.find(pw, ph); if (f) { f.it = it; b.place(f); done = true; break; } }
+    if (!done) { const b = new Bin(bw, bh); const f = b.find(pw, ph); f.it = it; b.place(f); bins.push(b); }
+  }
+  return { bins, lost, score: bins.reduce((s, b) => s + b.area * b.area, 0) };
+}
+function pack(items, S, tries) {
+  const sorts = [
+    (a, b) => b.w * b.h - a.w * a.h,
+    (a, b) => Math.max(b.w, b.h) - Math.max(a.w, a.h),
+    (a, b) => b.h - a.h || b.w - a.w,
+    (a, b) => b.w - a.w || b.h - a.h
+  ];
+  const orders = sorts.map(f => items.slice().sort(f));
+  for (let t = 0; t < tries; t++) {
+    const a = items.slice();
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    orders.push(a);
+  }
+  let best = null;
+  for (const o of orders) {
+    const r = runOrder(o, S);
+    if (!best || r.bins.length < best.bins.length || (r.bins.length === best.bins.length && r.score > best.score)) best = r;
+  }
+  return best;
+}
+function fillSheet(p) {
+  const S = settings();
+  for (let n = 0; n < 98; n++) {
+    p.copies++;
+    const r = pack(buildItems(), S, 0);
+    if (r.bins.length > 1 || r.lost.length) { p.copies--; break; }
+  }
+}
+
+/* ---------- drawing ---------- */
+function drawSheet(bin, S) {
+  const c = document.createElement("canvas");
+  c.width = Math.round(S.W * MM); c.height = Math.round(S.H * MM);
+  const x = c.getContext("2d");
+  x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);
+  x.imageSmoothingQuality = "high";
+  for (const r of bin.placed) {
+    const w = r.w - S.g, h = r.h - S.g, px = (S.m + r.x) * MM, py = (S.m + r.y) * MM, pw = w * MM, ph = h * MM;
+    const img = r.it.p.img, iw = img.naturalWidth, ih = img.naturalHeight;
+    x.save();
+    x.beginPath(); x.rect(px, py, pw, ph); x.clip();
+    x.translate(px + pw / 2, py + ph / 2);
+    if (r.rot) x.rotate(Math.PI / 2);
+    const bw = r.rot ? ph : pw, bh = r.rot ? pw : ph;
+    if (r.it.p.fit === "fit") {
+      const s = Math.min(bw / iw, bh / ih);
+      x.drawImage(img, -iw * s / 2, -ih * s / 2, iw * s, ih * s);
+    } else {
+      const s = Math.max(bw / iw, bh / ih), sw = bw / s, sh = bh / s;
+      x.drawImage(img, (iw - sw) / 2, (ih - sh) / 2, sw, sh, -bw / 2, -bh / 2, bw, bh);
+    }
+    x.restore();
+    if ($("cut").checked) {
+      x.strokeStyle = "rgba(0,0,0,.35)"; x.lineWidth = Math.max(1, 0.15 * MM);
+      x.strokeRect(px, py, pw, ph);
+    }
+  }
+  return c;
+}
+
+/* ---------- render ---------- */
+function render() {
+  const S = settings(), sheets = $("sheets"), warn = $("warn");
+  sheets.innerHTML = ""; warn.innerHTML = ""; canvases = [];
+  const items = buildItems();
+  if (!items.length) { sheets.innerHTML = '<div class="empty">Add a photo to see your sheet.</div>'; $("sum").textContent = "No photos yet"; return; }
+  const r = pack(items, S, 120);
+  r.bins.forEach((b, i) => {
+    const c = drawSheet(b, S); canvases.push(c);
+    const used = b.placed.reduce((s, q) => s + (q.w - S.g) * (q.h - S.g), 0) / (S.W * S.H) * 100;
+    const fig = document.createElement("figure");
+    fig.appendChild(c);
+    const cap = document.createElement("figcaption");
+    cap.textContent = "Sheet " + (i + 1) + ": " + b.placed.length + (b.placed.length === 1 ? " photo, " : " photos, ") + Math.round(used) + "% of the paper used";
+    fig.appendChild(cap);
+    const d = document.createElement("div"); d.className = "sheet " + $("orient").value; d.appendChild(fig);
+    sheets.appendChild(d);
+  });
+  const placed = items.length - r.lost.length;
+  $("sum").textContent = placed + (placed === 1 ? " photo on " : " photos on ") + r.bins.length + (r.bins.length === 1 ? " sheet" : " sheets");
+  if (r.lost.length) {
+    const names = [...new Set(r.lost.map(i => i.p.name))].join(", ");
+    warn.innerHTML = '<div class="warn">Too large for the sheet and left out: ' + esc(names) + '. Pick a smaller size or reduce the margin.</div>';
+  }
+}
+
+/* ---------- output ---------- */
+/* Standard JPG with 300 dpi stored in the file header, so printers and apps read it as a 10×15 cm photo */
+function setJpegDpi(buf, dpi) {
+  const u = new Uint8Array(buf);
+  if (u[0] !== 0xFF || u[1] !== 0xD8) return buf;
+  const dens = [1, dpi >> 8, dpi & 255, dpi >> 8, dpi & 255];
+  if (u[2] === 0xFF && u[3] === 0xE0 && u[6] === 0x4A && u[7] === 0x46) { // existing JFIF header: patch it
+    u.set(dens, 13); return u.buffer;
+  }
+  const app0 = new Uint8Array([0xFF, 0xE0, 0, 16, 0x4A, 0x46, 0x49, 0x46, 0, 1, 1, ...dens, 0, 0]);
+  const out = new Uint8Array(u.length + app0.length);
+  out.set(u.subarray(0, 2), 0); out.set(app0, 2); out.set(u.subarray(2), 2 + app0.length);
+  return out.buffer;
+}
+$("dl").addEventListener("click", () => {
+  const S = settings(), tag = S.W + "x" + S.H;
+  canvases.forEach((c, i) => setTimeout(() => c.toBlob(async b => {
+    const buf = setJpegDpi(await b.arrayBuffer(), DPI);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([buf], { type: "image/jpeg" }));
+    a.download = "photo-sheet-" + (i + 1) + "-" + tag + "mm-300dpi.jpg";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }, "image/jpeg", 0.95), i * 400));
+});
+$("pr").addEventListener("click", () => {
+  if (!canvases.length) return;
+  const S = settings(), pa = $("printArea");
+  pa.innerHTML = "";
+  $("pageStyle").textContent = "@page{size:" + S.W + "mm " + S.H + "mm;margin:0}";
+  canvases.forEach(c => {
+    const im = new Image(); im.src = c.toDataURL("image/jpeg", 0.95);
+    im.style.cssText = "width:" + S.W + "mm;height:" + S.H + "mm;display:block;page-break-after:always";
+    pa.appendChild(im);
+  });
+  setTimeout(() => window.print(), 350);
+});
+
+render();
+</script>
+</body>
+</html>
