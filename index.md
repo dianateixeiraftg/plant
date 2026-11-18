@@ -45,8 +45,8 @@ Pick a tool to get started.
     <span>Replicador de imagens</span>
   </a>
      <a class="tool-btn" href="Tools/photo-sheet-maker.html">
-    <strong>várias imagens pequenas numa foto</strong>
-    <span>para imagens mais pequenas</span>
+    <strong>Colagens</strong>
+    <span>várias imagens</span>
   </a>
     <a class="tool-btn" href="Tools/all-about-my-parents.html">
     <strong>Os meus Pais</strong>
