@@ -3,26 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Photo Sheet Maker – 10×15</title>
+<title>Photo Sheet &amp; Collage Maker – 10×15</title>
 <style>
-:root{
-  --bg:#e9ecef; --panel:#ffffff; --ink:#16202b; --mut:#5d6b79; --line:#cfd6dd;
-  --acc:#1f4e79; --accInk:#ffffff; --bench:#2a2f36; --bad:#a82b1c; --ok:#1d6b45;
-}
-@media (prefers-color-scheme:dark){
-  :root{--bg:#15181c;--panel:#1f242a;--ink:#e8edf2;--mut:#93a1af;--line:#343c45;--acc:#6aa7dd;--accInk:#0c1722;--bench:#0f1215;--bad:#ff8c7a;--ok:#6fd0a0}
-}
+:root{--bg:#e9ecef;--panel:#fff;--ink:#16202b;--mut:#5d6b79;--line:#cfd6dd;--acc:#1f4e79;--accInk:#fff;--bench:#2a2f36;--bad:#a82b1c}
+@media (prefers-color-scheme:dark){:root{--bg:#15181c;--panel:#1f242a;--ink:#e8edf2;--mut:#93a1af;--line:#343c45;--acc:#6aa7dd;--accInk:#0c1722;--bench:#0f1215;--bad:#ff8c7a}}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:15px/1.45 "Avenir Next","Segoe UI",system-ui,sans-serif}
-header{padding:18px 22px 6px}
+header{padding:16px 22px 4px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center}
 h1{margin:0;font-size:22px;font-weight:650;letter-spacing:-.01em}
-header p{margin:4px 0 0;color:var(--mut);max-width:70ch}
-main{display:grid;grid-template-columns:minmax(300px,440px) 1fr;gap:18px;padding:14px 22px 30px;align-items:start}
+.tabs{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.tabs button{border:0;border-radius:0;padding:8px 16px;background:transparent}
+.tabs button[aria-pressed=true]{background:var(--acc);color:var(--accInk);font-weight:600}
+#msg{padding:0 22px;color:var(--acc);min-height:22px;font-size:13.5px}
+main{display:grid;grid-template-columns:minmax(300px,450px) 1fr;gap:18px;padding:8px 22px 30px;align-items:start}
 @media(max-width:860px){main{grid-template-columns:1fr}}
-section.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+section.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:14px}
 h2{margin:0 0 10px;font-size:15px;font-weight:650}
-.drop{display:block;border:2px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;color:var(--mut)}
+.drop{display:block;border:2px dashed var(--line);border-radius:8px;padding:16px;text-align:center;cursor:pointer;color:var(--mut)}
 .drop.over,.drop:hover{border-color:var(--acc);color:var(--ink)}
 .drop b{color:var(--acc)}
 .drop input{display:none}
@@ -30,12 +28,15 @@ h2{margin:0 0 10px;font-size:15px;font-weight:650}
 label.f{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mut)}
 select,input[type=number]{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 7px;min-width:0}
 input[type=number]{width:72px}
+input[type=color]{width:48px;height:32px;padding:1px;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
 button{font:inherit;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:6px 11px;cursor:pointer}
 button:hover{border-color:var(--acc)}
 button.primary{background:var(--acc);color:var(--accInk);border-color:var(--acc);font-weight:600}
 button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-within{outline:2px solid var(--acc);outline-offset:2px}
-.chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mut);margin-top:12px}
+.chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mut);margin-top:10px}
+.hint{font-size:12.5px;color:var(--mut);margin:10px 0 0}
 #list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+#list.tray{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px}
 .item{display:flex;gap:10px;border:1px solid var(--line);border-radius:8px;padding:8px}
 .item .th{width:76px;height:76px;object-fit:cover;border-radius:5px;flex:none;background:var(--bg)}
 .item .fields{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;min-width:0}
@@ -45,6 +46,16 @@ button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-within
 .item .acts{display:flex;gap:6px;flex-basis:100%}
 .item .acts button{padding:3px 9px;font-size:13px}
 .item .acts .del{margin-left:auto}
+.ti{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;border:2px solid var(--line);cursor:pointer}
+.ti img{width:100%;height:100%;object-fit:cover;display:block}
+.ti.used{border-color:var(--acc)}
+.ti .x{position:absolute;top:2px;right:2px;width:20px;height:20px;padding:0;line-height:1;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;border:0}
+.ti .ok{position:absolute;left:3px;bottom:3px;background:var(--acc);color:var(--accInk);border-radius:4px;font-size:11px;padding:0 5px}
+.tpls{display:flex;flex-wrap:wrap;gap:8px}
+.tpls button{padding:4px;border-width:2px}
+.tpls button[aria-pressed=true]{border-color:var(--acc)}
+.mini{position:relative;background:var(--line);display:block}
+.mini i{position:absolute;background:var(--mut);opacity:.75}
 .bench{background:var(--bench);border-radius:8px;padding:18px;min-height:300px}
 .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
 .bar .sum{color:#c9d3dd;font-size:13px;flex:1;min-width:180px}
@@ -52,59 +63,71 @@ button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-within
 .bar button.primary{background:var(--acc);color:var(--accInk);border-color:var(--acc)}
 .sheets{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start}
 .sheet figure{margin:0}
-.sheet canvas{display:block;background:#fff;box-shadow:0 3px 14px rgba(0,0,0,.55);max-width:100%;height:auto}
-.sheet.p canvas{width:min(100%,340px)}
-.sheet.l canvas{width:min(100%,510px)}
+.wrap{position:relative;box-shadow:0 3px 14px rgba(0,0,0,.55);background:#fff}
+.sheet.p .wrap{width:min(100%,340px)}
+.sheet.l .wrap{width:min(100%,510px)}
+.wrap canvas{display:block;width:100%;height:auto}
+.slot{position:absolute;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px;color:#6b7785;border:3px solid transparent}
+.slot.empty{border:2px dashed rgba(0,0,0,.4);background:rgba(120,130,140,.12)}
+.slot.active{border:3px solid #3b8ee0}
+.slot.over{background:rgba(59,142,224,.3)}
 .sheet figcaption{margin-top:8px;color:#c9d3dd;font-size:13px}
-.empty{color:#a9b6c3;padding:40px 10px;text-align:center}
-.warn{color:var(--bad);font-size:13px;margin-top:10px;background:rgba(255,120,100,.12);padding:7px 10px;border-radius:6px}
-.bench .warn{color:#ffb3a6}
-.hint{font-size:12.5px;color:var(--mut);margin-top:10px}
+.empty-msg{color:#a9b6c3;padding:40px 10px;text-align:center}
+.warn{color:#ffb3a6;font-size:13px;margin-top:10px;background:rgba(255,120,100,.14);padding:7px 10px;border-radius:6px}
+[hidden]{display:none!important}
 #printArea{display:none}
-@media print{
-  body>*:not(#printArea){display:none!important}
-  #printArea{display:block}
-  html,body{background:#fff!important}
-  #printArea img:last-child{page-break-after:auto!important}
-}
+@media print{body>*:not(#printArea){display:none!important}#printArea{display:block}html,body{background:#fff!important}#printArea img:last-child{page-break-after:auto!important}}
 </style>
 <style id="pageStyle"></style>
 </head>
 <body>
 <header>
-  <h1>Photo Sheet Maker</h1>
-  <p>Add photos, choose a print size for each one, and they are packed together on a 10×15 cm sheet using as much of the paper as possible.</p>
+  <h1>Photo Sheet &amp; Collage Maker</h1>
+  <div class="tabs" role="group" aria-label="Mode">
+    <button id="tSheet" aria-pressed="true">Photo sheet</button>
+    <button id="tCollage" aria-pressed="false">Collage</button>
+  </div>
 </header>
+<div id="msg" role="status"></div>
 
 <main>
   <div>
     <section class="panel">
-      <h2>Photos</h2>
+      <h2 id="hPhotos">Photos</h2>
       <label class="drop" id="drop">
         <input type="file" id="file" accept="image/*" multiple>
-        <b>Choose photos</b> or drop them here
+        <b>Choose photos</b> or drop them anywhere on this page, including from Google Photos
       </label>
       <div id="list"></div>
+      <p class="hint" id="hintSheet">Give each photo a print size and a number of copies. They are packed onto the sheet to waste as little paper as possible.</p>
     </section>
 
-    <section class="panel" style="margin-top:14px">
+    <section class="panel" id="collagePanel" hidden>
+      <h2>Collage template</h2>
+      <div class="tpls" id="tpls"></div>
+      <div class="row">
+        <button id="auto">Auto-fill slots</button>
+        <button id="clear">Clear slots</button>
+        <label class="f">Crop
+          <select id="cfit"><option value="fill">Fill the frame</option><option value="fit">Whole photo</option></select>
+        </label>
+      </div>
+      <p class="hint">Click a slot on the preview, then click a photo to put it there. You can also drag a photo (or a file) onto a slot.</p>
+    </section>
+
+    <section class="panel">
       <h2>Sheet</h2>
       <div class="row" style="margin-top:0">
         <label class="f">Paper
-          <select id="orient">
-            <option value="p">10 × 15 cm portrait</option>
-            <option value="l">15 × 10 cm landscape</option>
-          </select>
+          <select id="orient"><option value="p">10 × 15 cm portrait</option><option value="l">15 × 10 cm landscape</option></select>
         </label>
-        <label class="f">Edge margin (mm)
-          <input type="number" id="margin" value="3" min="0" max="15" step="0.5">
-        </label>
-        <label class="f">Gap between photos (mm)
-          <input type="number" id="gap" value="1.5" min="0" max="10" step="0.5">
-        </label>
+        <label class="f">Edge margin (mm)<input type="number" id="margin" value="3" min="0" max="15" step="0.5"></label>
+        <label class="f">Gap (mm)<input type="number" id="gap" value="1.5" min="0" max="10" step="0.5"></label>
+        <label class="f">Background<input type="color" id="bg" value="#ffffff"></label>
       </div>
-      <label class="chk"><input type="checkbox" id="cut" checked> Draw a thin cutting line around each photo</label>
-      <p class="hint">The JPG is 1181 × 1772 px at 300 dpi (10 × 15 cm). SELPHY printers trim a little at the paper edge, so keep a few mm of margin.</p>
+      <label class="chk"><input type="checkbox" id="cut"> Thin border around each photo</label>
+      <label class="chk"><input type="checkbox" id="meta" checked> Keep original photo metadata (date, camera, location)</label>
+      <p class="hint">Metadata is copied from the first photo on each sheet, and only from JPEG originals. The JPG is 1181 × 1772 px at 300 dpi.</p>
     </section>
   </div>
 
@@ -118,48 +141,165 @@ button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-within
     <div id="warn"></div>
   </div>
 </main>
-
 <div id="printArea"></div>
 
 <script>
 "use strict";
 const DPI = 300, MM = DPI / 25.4, EPS = 1e-6;
-const PRESETS = [
-  ["2.5x3.5", "2.5 × 3.5 cm"],
-  ["3x4", "3 × 4 cm"],
-  ["3.5x4.5", "3.5 × 4.5 cm (passport)"],
-  ["4x6", "4 × 6 cm"],
-  ["5x5", "5 × 5 cm (square)"],
-  ["5x7", "5 × 7 cm"],
-  ["6x9", "6 × 9 cm"],
-  ["7.5x10", "7.5 × 10 cm"],
-  ["10x10", "10 × 10 cm (square)"],
-  ["custom", "Custom…"]
+const PRESETS = [["2.5x3.5","2.5 × 3.5 cm"],["3x4","3 × 4 cm"],["3.5x4.5","3.5 × 4.5 cm (passport)"],["4x6","4 × 6 cm"],["5x5","5 × 5 cm (square)"],["5x7","5 × 7 cm"],["6x9","6 × 9 cm"],["7.5x10","7.5 × 10 cm"],["10x10","10 × 10 cm (square)"],["custom","Custom…"]];
+const grid = (c, r) => { const a = []; for (let j = 0; j < r; j++) for (let i = 0; i < c; i++) a.push([i / c, j / r, 1 / c, 1 / r]); return a; };
+const TPLS = [
+  ["2 stacked", grid(1, 2)], ["2 side by side", grid(2, 1)], ["3 stacked", grid(1, 3)], ["2 × 2", grid(2, 2)],
+  ["Big + 2", [[0,0,1,.6],[0,.6,.5,.4],[.5,.6,.5,.4]]],
+  ["Big + 3", [[0,0,1,.65],[0,.65,1/3,.35],[1/3,.65,1/3,.35],[2/3,.65,1/3,.35]]],
+  ["Left big + 2", [[0,0,.6,1],[.6,0,.4,.5],[.6,.5,.4,.5]]],
+  ["Mosaic 5", [[0,0,.5,.4],[.5,0,.5,.4],[0,.4,1,.3],[0,.7,.5,.3],[.5,.7,.5,.3]]],
+  ["2 × 3", grid(2, 3)], ["2 × 4", grid(2, 4)]
 ];
 const $ = id => document.getElementById(id);
-let photos = [], uid = 0, canvases = [];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let mode = "sheet", photos = [], uid = 0, canvases = [], metas = [], tpl = 3, slots = [null, null, null, null], active = 0;
+const byId = id => photos.find(p => p.id == id);
+function toast(t) { $("msg").textContent = t || ""; }
 
-/* ---------- adding photos ---------- */
-function addFiles(files) {
-  [...files].filter(f => f.type.startsWith("image/")).forEach(f => {
-    const url = URL.createObjectURL(f), img = new Image();
+/* ---------- metadata (EXIF) ---------- */
+function findExif(u) {
+  if (u[0] !== 0xFF || u[1] !== 0xD8) return null;
+  let i = 2;
+  while (i + 4 < u.length && u[i] === 0xFF) {
+    const m = u[i + 1], l = (u[i + 2] << 8) | u[i + 3];
+    if (m === 0xDA) break;
+    if (m === 0xE1 && u[i + 4] === 0x45 && u[i + 5] === 0x78 && u[i + 6] === 0x69 && u[i + 7] === 0x66 && i + 2 + l <= u.length) return u.slice(i, i + 2 + l);
+    i += 2 + l;
+  }
+  return null;
+}
+function fixExif(seg, w, h) { // the canvas is already upright and new-sized: reset orientation and pixel size
+  const dv = new DataView(seg.buffer, seg.byteOffset, seg.byteLength), t = 10, le = dv.getUint16(t) === 0x4949;
+  const g16 = o => dv.getUint16(o, le), g32 = o => dv.getUint32(o, le);
+  const entry = (ifd, tag) => {
+    if (ifd < 8 || t + ifd + 2 > seg.length) return -1;
+    const n = g16(t + ifd);
+    for (let k = 0; k < n; k++) { const e = t + ifd + 2 + k * 12; if (e + 12 > seg.length) return -1; if (g16(e) === tag) return e; }
+    return -1;
+  };
+  const set = (e, v) => { if (e < 0) return; const ty = g16(e + 2); if (ty === 3) dv.setUint16(e + 8, v, le); else if (ty === 4) dv.setUint32(e + 8, v, le); };
+  try {
+    const ifd0 = g32(t + 4);
+    set(entry(ifd0, 0x112), 1);
+    const p = entry(ifd0, 0x8769);
+    if (p >= 0) { const ex = g32(p + 8); set(entry(ex, 0xA002), w); set(entry(ex, 0xA003), h); }
+  } catch (e) {}
+}
+function finishJpeg(buf, exif, w, h) {
+  const u = new Uint8Array(buf);
+  const rest = (u[2] === 0xFF && u[3] === 0xE0) ? u.subarray(4 + ((u[4] << 8) | u[5])) : u.subarray(2);
+  const jf = new Uint8Array([0xFF,0xE0,0,16,0x4A,0x46,0x49,0x46,0,1,1,1,DPI>>8,DPI&255,DPI>>8,DPI&255,0,0]);
+  let ex = new Uint8Array(0);
+  if (exif) { ex = exif.slice(); fixExif(ex, w, h); }
+  const out = new Uint8Array(2 + jf.length + ex.length + rest.length);
+  out.set([0xFF, 0xD8]); out.set(jf, 2); out.set(ex, 2 + jf.length); out.set(rest, 2 + jf.length + ex.length);
+  return out;
+}
+
+/* ---------- adding photos: files, drag & drop, Google Photos, paste ---------- */
+function addBlob(blob, name, preferred) {
+  return new Promise(async res => {
+    let exif = null;
+    try { exif = findExif(new Uint8Array(await blob.slice(0, 262144).arrayBuffer())); } catch (e) {}
+    const url = URL.createObjectURL(blob), img = new Image();
     img.onload = () => {
-      photos.push({ id: ++uid, name: f.name, url, img, size: "5x7", cw: 5, ch: 7, copies: 1, fit: "fill" });
-      buildList(); render();
+      const p = { id: ++uid, name, url, img, exif, size: "5x7", cw: 5, ch: 7, copies: 1, fit: "fill" };
+      photos.push(p);
+      if (mode === "collage") {
+        if (preferred != null) { slots[preferred] = p.id; active = preferred; }
+        else { const e = slots.findIndex(s => !s); if (e >= 0) { slots[e] = p.id; active = e; } }
+      }
+      buildList(); render(); res(true);
     };
-    img.onerror = () => { URL.revokeObjectURL(url); alert("“" + f.name + "” could not be opened as an image."); };
+    img.onerror = () => { URL.revokeObjectURL(url); toast("“" + name + "” could not be opened as an image."); res(false); };
     img.src = url;
   });
 }
-$("file").addEventListener("change", e => { addFiles(e.target.files); e.target.value = ""; });
-const drop = $("drop");
-["dragenter", "dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
-["dragleave", "drop"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); }));
-drop.addEventListener("drop", e => addFiles(e.dataTransfer.files));
+async function addRemote(url, preferred) {
+  const isG = /googleusercontent\.com/.test(url), base = url.replace(/=[^\/=?]*$/, "");
+  const tries = isG ? [base + "=d", base + "=s0", url] : [url];
+  for (const u of tries) {
+    try {
+      const r = await fetch(u); if (!r.ok) continue;
+      const b = await r.blob();
+      if (b.type.startsWith("image/")) return addBlob(b, "google-photo-" + (uid + 1) + ".jpg", preferred);
+    } catch (e) {}
+  }
+  toast("That image could not be read straight from the website. Download it first, then drop the file here.");
+  return false;
+}
+function dropUrls(dt) {
+  const out = [], html = dt.getData("text/html");
+  if (html) new DOMParser().parseFromString(html, "text/html").querySelectorAll("img").forEach(i => out.push(i.src));
+  (dt.getData("text/uri-list") || "").split(/\r?\n/).forEach(l => { l = l.trim(); if (l && l[0] !== "#" && !/photos\.google\.com/.test(l)) out.push(l); });
+  return [...new Set(out)].filter(u => /^https?:/.test(u));
+}
+async function handleDrop(e, pref) {
+  e.preventDefault(); $("drop").classList.remove("over");
+  const dt = e.dataTransfer, pid = dt.getData("text/x-photo-id");
+  if (pid && pref != null) { slots[pref] = +pid; active = pref; buildList(); render(); return; }
+  const files = [...dt.files].filter(f => f.type.startsWith("image/")), urls = files.length ? [] : dropUrls(dt);
+  if (files.length) { files.forEach((f, i) => addBlob(f, f.name, i ? null : pref)); return; }
+  if (!urls.length) { toast("Nothing to add. Drop image files, or photos from another web page."); return; }
+  toast("Loading…");
+  let first = true;
+  for (const u of urls) { await addRemote(u, first ? pref : null); first = false; }
+  if ($("msg").textContent === "Loading…") toast("");
+}
+$("file").addEventListener("change", e => { [...e.target.files].forEach(f => addBlob(f, f.name, null)); e.target.value = ""; });
+window.addEventListener("dragover", e => { e.preventDefault(); $("drop").classList.add("over"); });
+window.addEventListener("dragleave", e => { if (!e.relatedTarget) $("drop").classList.remove("over"); });
+window.addEventListener("drop", e => handleDrop(e, null));
+window.addEventListener("paste", e => { [...(e.clipboardData?.files || [])].filter(f => f.type.startsWith("image/")).forEach(f => addBlob(f, f.name || "pasted.png", null)); });
+
+/* ---------- mode, templates ---------- */
+function setMode(m) {
+  mode = m;
+  $("tSheet").setAttribute("aria-pressed", m === "sheet"); $("tCollage").setAttribute("aria-pressed", m === "collage");
+  $("collagePanel").hidden = m !== "collage"; $("hintSheet").hidden = m !== "sheet";
+  if (m === "collage" && !slots.some(Boolean)) autoFill();
+  buildList(); render();
+}
+$("tSheet").onclick = () => setMode("sheet"); $("tCollage").onclick = () => setMode("collage");
+const cellsOf = () => TPLS[tpl][1].map(c => $("orient").value === "l" ? [c[1], c[0], c[3], c[2]] : c);
+function buildTpls() {
+  const L = $("orient").value === "l", bw = L ? 54 : 36, bh = L ? 36 : 54;
+  $("tpls").innerHTML = TPLS.map((t, i) => `<button data-t="${i}" aria-pressed="${i === tpl}" title="${t[0]}"><span class="mini" style="width:${bw}px;height:${bh}px">${
+    cellsOf2(t[1]).map(c => `<i style="left:${c[0] * 100}%;top:${c[1] * 100}%;width:${c[2] * 100}%;height:${c[3] * 100}%;border:1px solid var(--panel)"></i>`).join("")}</span></button>`).join("");
+}
+const cellsOf2 = cs => cs.map(c => $("orient").value === "l" ? [c[1], c[0], c[3], c[2]] : c);
+$("tpls").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  tpl = +b.dataset.t; const n = TPLS[tpl][1].length;
+  slots = Array.from({ length: n }, (_, i) => slots[i] || null); active = Math.min(active, n - 1);
+  buildTpls(); buildList(); render();
+});
+function autoFill() {
+  const used = new Set(slots.filter(Boolean));
+  const free = photos.filter(p => !used.has(p.id));
+  slots = slots.map(s => s || (free.length ? free.shift().id : null));
+}
+$("auto").onclick = () => { autoFill(); buildList(); render(); };
+$("clear").onclick = () => { slots = slots.map(() => null); active = 0; buildList(); render(); };
+$("cfit").addEventListener("change", render);
 
 /* ---------- photo list ---------- */
 function buildList() {
-  $("list").innerHTML = photos.map(p => `
+  const L = $("list");
+  if (mode === "collage") {
+    L.className = "tray";
+    L.innerHTML = photos.map(p => `<div class="ti${slots.includes(p.id) ? " used" : ""}" draggable="true" data-id="${p.id}" data-act="use" title="${esc(p.name)}">
+      <img src="${p.url}" alt="${esc(p.name)}" draggable="false">${slots.includes(p.id) ? '<span class="ok">✓</span>' : ""}<button class="x" data-act="del" aria-label="Remove">×</button></div>`).join("");
+    return;
+  }
+  L.className = "";
+  L.innerHTML = photos.map(p => `
     <div class="item" data-id="${p.id}">
       <img class="th" src="${p.url}" alt="">
       <div class="fields">
@@ -171,14 +311,9 @@ function buildList() {
           <input type="number" data-k="cw" value="${p.cw}" min="1" max="15" step="0.1" aria-label="Width in cm"> ×
           <input type="number" data-k="ch" value="${p.ch}" min="1" max="15" step="0.1" aria-label="Height in cm"> cm
         </span>
-        <label class="f">Copies
-          <input type="number" data-k="copies" value="${p.copies}" min="1" max="99">
-        </label>
+        <label class="f">Copies<input type="number" data-k="copies" value="${p.copies}" min="1" max="99"></label>
         <label class="f">Crop
-          <select data-k="fit">
-            <option value="fill"${p.fit === "fill" ? " selected" : ""}>Fill the frame</option>
-            <option value="fit"${p.fit === "fit" ? " selected" : ""}>Whole photo</option>
-          </select>
+          <select data-k="fit"><option value="fill"${p.fit === "fill" ? " selected" : ""}>Fill the frame</option><option value="fit"${p.fit === "fit" ? " selected" : ""}>Whole photo</option></select>
         </label>
         <div class="acts">
           <button data-act="fill" title="Add copies until the sheet is full">Fill the sheet</button>
@@ -187,50 +322,54 @@ function buildList() {
       </div>
     </div>`).join("");
 }
-const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-
 $("list").addEventListener("input", onField);
 $("list").addEventListener("change", onField);
 function onField(e) {
   const k = e.target.dataset.k; if (!k) return;
-  const card = e.target.closest(".item"), p = photos.find(x => x.id == card.dataset.id);
+  const card = e.target.closest(".item"), p = byId(card.dataset.id);
   if (["cw", "ch", "copies"].includes(k)) {
-    let v = parseFloat(e.target.value); if (!(v > 0)) return;
+    const v = parseFloat(e.target.value); if (!(v > 0)) return;
     p[k] = k === "copies" ? Math.min(99, Math.round(v)) : Math.min(15, v);
   } else p[k] = e.target.value;
   if (k === "size") card.querySelector(".cust").hidden = p.size !== "custom";
   render();
 }
 $("list").addEventListener("click", e => {
-  const act = e.target.dataset.act; if (!act) return;
-  const id = e.target.closest(".item").dataset.id, p = photos.find(x => x.id == id);
-  if (act === "del") { URL.revokeObjectURL(p.url); photos = photos.filter(x => x !== p); }
-  if (act === "fill") fillSheet(p);
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  const id = el.closest("[data-id]").dataset.id, p = byId(id), act = el.dataset.act;
+  if (act === "del") { URL.revokeObjectURL(p.url); photos = photos.filter(x => x !== p); slots = slots.map(s => s === p.id ? null : s); }
+  else if (act === "fill") fillSheet(p);
+  else if (act === "use") {
+    slots[active] = p.id;
+    const n = slots.findIndex((s, i) => !s && i !== active); if (n >= 0) active = n;
+  }
   buildList(); render();
 });
-["orient", "margin", "gap", "cut"].forEach(id => $(id).addEventListener("input", render));
+$("list").addEventListener("dragstart", e => { const t = e.target.closest(".ti"); if (t) e.dataTransfer.setData("text/x-photo-id", t.dataset.id); });
+["orient", "margin", "gap", "cut", "bg"].forEach(id => $(id).addEventListener("input", () => { if (id === "orient") buildTpls(); render(); }));
 
 /* ---------- geometry ---------- */
-function sheetMM() { return $("orient").value === "l" ? [150, 100] : [100, 150]; }
 function settings() {
-  const [W, H] = sheetMM();
+  const L = $("orient").value === "l", W = L ? 150 : 100, H = L ? 100 : 150;
   const m = Math.max(0, parseFloat($("margin").value) || 0), g = Math.max(0, parseFloat($("gap").value) || 0);
   return { W, H, m, g, uw: W - 2 * m, uh: H - 2 * m };
 }
 function dimsMM(p) {
   let a, b;
-  if (p.size === "custom") { a = p.cw * 10; b = p.ch * 10; }
-  else [a, b] = p.size.split("x").map(v => parseFloat(v) * 10);
+  if (p.size === "custom") { a = p.cw * 10; b = p.ch * 10; } else [a, b] = p.size.split("x").map(v => parseFloat(v) * 10);
   const s = Math.min(a, b), l = Math.max(a, b);
-  return p.img.naturalWidth > p.img.naturalHeight ? [l, s] : [s, l]; // follows the photo's orientation
+  return p.img.naturalWidth > p.img.naturalHeight ? [l, s] : [s, l];
 }
-function buildItems() {
-  const items = [];
-  photos.forEach(p => { const [w, h] = dimsMM(p); for (let i = 0; i < p.copies; i++) items.push({ p, w, h }); });
-  return items;
+function buildItems() { const it = []; photos.forEach(p => { const [w, h] = dimsMM(p); for (let i = 0; i < p.copies; i++) it.push({ p, w, h }); }); return it; }
+function cellRects(S) {
+  const g = S.g / 2;
+  return cellsOf().map(([x, y, w, h]) => {
+    const l = x < EPS ? 0 : g, t = y < EPS ? 0 : g, r = x + w > 1 - EPS ? 0 : g, b = y + h > 1 - EPS ? 0 : g;
+    return { x: S.m + x * S.uw + l, y: S.m + y * S.uh + t, w: w * S.uw - l - r, h: h * S.uh - t - b };
+  });
 }
 
-/* ---------- packing (MaxRects, best short side fit, rotation allowed) ---------- */
+/* ---------- packing (MaxRects, rotation allowed) ---------- */
 const inside = (a, b) => a.x >= b.x - EPS && a.y >= b.y - EPS && a.x + a.w <= b.x + b.w + EPS && a.y + a.h <= b.y + b.h + EPS;
 class Bin {
   constructor(w, h) { this.free = [{ x: 0, y: 0, w, h }]; this.placed = []; this.area = 0; }
@@ -265,17 +404,12 @@ function runOrder(order, S) {
     if (!((pw <= bw + EPS && ph <= bh + EPS) || (ph <= bw + EPS && pw <= bh + EPS))) { lost.push(it); continue; }
     let done = false;
     for (const b of bins) { const f = b.find(pw, ph); if (f) { f.it = it; b.place(f); done = true; break; } }
-    if (!done) { const b = new Bin(bw, bh); const f = b.find(pw, ph); f.it = it; b.place(f); bins.push(b); }
+    if (!done) { const b = new Bin(bw, bh), f = b.find(pw, ph); f.it = it; b.place(f); bins.push(b); }
   }
   return { bins, lost, score: bins.reduce((s, b) => s + b.area * b.area, 0) };
 }
 function pack(items, S, tries) {
-  const sorts = [
-    (a, b) => b.w * b.h - a.w * a.h,
-    (a, b) => Math.max(b.w, b.h) - Math.max(a.w, a.h),
-    (a, b) => b.h - a.h || b.w - a.w,
-    (a, b) => b.w - a.w || b.h - a.h
-  ];
+  const sorts = [(a, b) => b.w * b.h - a.w * a.h, (a, b) => Math.max(b.w, b.h) - Math.max(a.w, a.h), (a, b) => b.h - a.h || b.w - a.w, (a, b) => b.w - a.w || b.h - a.h];
   const orders = sorts.map(f => items.slice().sort(f));
   for (let t = 0; t < tries; t++) {
     const a = items.slice();
@@ -283,117 +417,100 @@ function pack(items, S, tries) {
     orders.push(a);
   }
   let best = null;
-  for (const o of orders) {
-    const r = runOrder(o, S);
-    if (!best || r.bins.length < best.bins.length || (r.bins.length === best.bins.length && r.score > best.score)) best = r;
-  }
+  for (const o of orders) { const r = runOrder(o, S); if (!best || r.bins.length < best.bins.length || (r.bins.length === best.bins.length && r.score > best.score)) best = r; }
   return best;
 }
 function fillSheet(p) {
   const S = settings();
-  for (let n = 0; n < 98; n++) {
-    p.copies++;
-    const r = pack(buildItems(), S, 0);
-    if (r.bins.length > 1 || r.lost.length) { p.copies--; break; }
-  }
+  for (let n = 0; n < 98; n++) { p.copies++; const r = pack(buildItems(), S, 0); if (r.bins.length > 1 || r.lost.length) { p.copies--; break; } }
 }
 
 /* ---------- drawing ---------- */
-function drawSheet(bin, S) {
-  const c = document.createElement("canvas");
-  c.width = Math.round(S.W * MM); c.height = Math.round(S.H * MM);
-  const x = c.getContext("2d");
-  x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);
-  x.imageSmoothingQuality = "high";
-  for (const r of bin.placed) {
-    const w = r.w - S.g, h = r.h - S.g, px = (S.m + r.x) * MM, py = (S.m + r.y) * MM, pw = w * MM, ph = h * MM;
-    const img = r.it.p.img, iw = img.naturalWidth, ih = img.naturalHeight;
-    x.save();
-    x.beginPath(); x.rect(px, py, pw, ph); x.clip();
-    x.translate(px + pw / 2, py + ph / 2);
-    if (r.rot) x.rotate(Math.PI / 2);
-    const bw = r.rot ? ph : pw, bh = r.rot ? pw : ph;
-    if (r.it.p.fit === "fit") {
-      const s = Math.min(bw / iw, bh / ih);
-      x.drawImage(img, -iw * s / 2, -ih * s / 2, iw * s, ih * s);
-    } else {
-      const s = Math.max(bw / iw, bh / ih), sw = bw / s, sh = bh / s;
-      x.drawImage(img, (iw - sw) / 2, (ih - sh) / 2, sw, sh, -bw / 2, -bh / 2, bw, bh);
-    }
-    x.restore();
-    if ($("cut").checked) {
-      x.strokeStyle = "rgba(0,0,0,.35)"; x.lineWidth = Math.max(1, 0.15 * MM);
-      x.strokeRect(px, py, pw, ph);
-    }
-  }
-  return c;
+function newCanvas(S) {
+  const c = document.createElement("canvas"); c.width = Math.round(S.W * MM); c.height = Math.round(S.H * MM);
+  const x = c.getContext("2d"); x.fillStyle = $("bg").value; x.fillRect(0, 0, c.width, c.height); x.imageSmoothingQuality = "high";
+  return [c, x];
+}
+function drawPhoto(x, img, mx, my, mw, mh, rot, fit) { // mm rectangle
+  const px = mx * MM, py = my * MM, pw = mw * MM, ph = mh * MM, iw = img.naturalWidth, ih = img.naturalHeight;
+  x.save(); x.beginPath(); x.rect(px, py, pw, ph); x.clip();
+  x.translate(px + pw / 2, py + ph / 2); if (rot) x.rotate(Math.PI / 2);
+  const bw = rot ? ph : pw, bh = rot ? pw : ph;
+  if (fit === "fit") { const s = Math.min(bw / iw, bh / ih); x.drawImage(img, -iw * s / 2, -ih * s / 2, iw * s, ih * s); }
+  else { const s = Math.max(bw / iw, bh / ih), sw = bw / s, sh = bh / s; x.drawImage(img, (iw - sw) / 2, (ih - sh) / 2, sw, sh, -bw / 2, -bh / 2, bw, bh); }
+  x.restore();
+  if ($("cut").checked) { x.strokeStyle = "rgba(0,0,0,.35)"; x.lineWidth = Math.max(1, .15 * MM); x.strokeRect(px, py, pw, ph); }
+}
+function addSheetEl(c, S, caption, overlays) {
+  const fig = document.createElement("figure"), wrap = document.createElement("div"); wrap.className = "wrap";
+  wrap.appendChild(c); (overlays || []).forEach(o => wrap.appendChild(o)); fig.appendChild(wrap);
+  const cap = document.createElement("figcaption"); cap.textContent = caption; fig.appendChild(cap);
+  const d = document.createElement("div"); d.className = "sheet " + $("orient").value; d.appendChild(fig); $("sheets").appendChild(d);
 }
 
 /* ---------- render ---------- */
 function render() {
-  const S = settings(), sheets = $("sheets"), warn = $("warn");
-  sheets.innerHTML = ""; warn.innerHTML = ""; canvases = [];
+  const S = settings(); $("sheets").innerHTML = ""; $("warn").innerHTML = ""; canvases = []; metas = [];
+  if (mode === "sheet") renderSheet(S); else renderCollage(S);
+  $("dl").disabled = $("pr").disabled = !canvases.length;
+}
+function renderSheet(S) {
   const items = buildItems();
-  if (!items.length) { sheets.innerHTML = '<div class="empty">Add a photo to see your sheet.</div>'; $("sum").textContent = "No photos yet"; return; }
+  if (!items.length) { $("sheets").innerHTML = '<div class="empty-msg">Add a photo to see your sheet.</div>'; $("sum").textContent = "No photos yet"; return; }
   const r = pack(items, S, 120);
   r.bins.forEach((b, i) => {
-    const c = drawSheet(b, S); canvases.push(c);
+    const [c, x] = newCanvas(S); canvases.push(c); metas.push(b.placed[0].it.p);
+    for (const q of b.placed) drawPhoto(x, q.it.p.img, S.m + q.x, S.m + q.y, q.w - S.g, q.h - S.g, q.rot, q.it.p.fit);
     const used = b.placed.reduce((s, q) => s + (q.w - S.g) * (q.h - S.g), 0) / (S.W * S.H) * 100;
-    const fig = document.createElement("figure");
-    fig.appendChild(c);
-    const cap = document.createElement("figcaption");
-    cap.textContent = "Sheet " + (i + 1) + ": " + b.placed.length + (b.placed.length === 1 ? " photo, " : " photos, ") + Math.round(used) + "% of the paper used";
-    fig.appendChild(cap);
-    const d = document.createElement("div"); d.className = "sheet " + $("orient").value; d.appendChild(fig);
-    sheets.appendChild(d);
+    addSheetEl(c, S, "Sheet " + (i + 1) + ": " + b.placed.length + (b.placed.length === 1 ? " photo, " : " photos, ") + Math.round(used) + "% of the paper used");
   });
-  const placed = items.length - r.lost.length;
-  $("sum").textContent = placed + (placed === 1 ? " photo on " : " photos on ") + r.bins.length + (r.bins.length === 1 ? " sheet" : " sheets");
-  if (r.lost.length) {
-    const names = [...new Set(r.lost.map(i => i.p.name))].join(", ");
-    warn.innerHTML = '<div class="warn">Too large for the sheet and left out: ' + esc(names) + '. Pick a smaller size or reduce the margin.</div>';
-  }
+  const n = items.length - r.lost.length;
+  $("sum").textContent = n + (n === 1 ? " photo on " : " photos on ") + r.bins.length + (r.bins.length === 1 ? " sheet" : " sheets");
+  if (r.lost.length) $("warn").innerHTML = '<div class="warn">Too large for the sheet and left out: ' + esc([...new Set(r.lost.map(i => i.p.name))].join(", ")) + '. Pick a smaller size or reduce the margin.</div>';
+}
+function renderCollage(S) {
+  const rects = cellRects(S), [c, x] = newCanvas(S), ov = [];
+  rects.forEach((q, i) => {
+    const p = byId(slots[i]);
+    if (p) drawPhoto(x, p.img, q.x, q.y, q.w, q.h, false, $("cfit").value);
+    const d = document.createElement("div");
+    d.className = "slot" + (p ? "" : " empty") + (i === active ? " active" : ""); d.dataset.i = i;
+    d.style.cssText = `left:${q.x / S.W * 100}%;top:${q.y / S.H * 100}%;width:${q.w / S.W * 100}%;height:${q.h / S.H * 100}%`;
+    if (!p) d.textContent = "+";
+    d.onclick = () => { active = i; document.querySelectorAll(".slot").forEach(s => s.classList.toggle("active", +s.dataset.i === active)); if (!photos.length) $("file").click(); };
+    d.ondragover = e => { e.preventDefault(); e.stopPropagation(); d.classList.add("over"); };
+    d.ondragleave = () => d.classList.remove("over");
+    d.ondrop = e => { e.stopPropagation(); handleDrop(e, i); };
+    ov.push(d);
+  });
+  const filled = slots.filter(Boolean).length;
+  if (filled) { canvases.push(c); metas.push(byId(slots.find(Boolean))); }
+  addSheetEl(c, S, filled + " of " + slots.length + " slots filled", ov);
+  $("sum").textContent = photos.length ? filled + " of " + slots.length + " slots filled" : "Add photos, then click a slot to place them";
 }
 
 /* ---------- output ---------- */
-/* Standard JPG with 300 dpi stored in the file header, so printers and apps read it as a 10×15 cm photo */
-function setJpegDpi(buf, dpi) {
-  const u = new Uint8Array(buf);
-  if (u[0] !== 0xFF || u[1] !== 0xD8) return buf;
-  const dens = [1, dpi >> 8, dpi & 255, dpi >> 8, dpi & 255];
-  if (u[2] === 0xFF && u[3] === 0xE0 && u[6] === 0x4A && u[7] === 0x46) { // existing JFIF header: patch it
-    u.set(dens, 13); return u.buffer;
-  }
-  const app0 = new Uint8Array([0xFF, 0xE0, 0, 16, 0x4A, 0x46, 0x49, 0x46, 0, 1, 1, ...dens, 0, 0]);
-  const out = new Uint8Array(u.length + app0.length);
-  out.set(u.subarray(0, 2), 0); out.set(app0, 2); out.set(u.subarray(2), 2 + app0.length);
-  return out.buffer;
-}
 $("dl").addEventListener("click", () => {
-  const S = settings(), tag = S.W + "x" + S.H;
+  const S = settings();
   canvases.forEach((c, i) => setTimeout(() => c.toBlob(async b => {
-    const buf = setJpegDpi(await b.arrayBuffer(), DPI);
+    const exif = $("meta").checked && metas[i] ? metas[i].exif : null;
+    const out = finishJpeg(await b.arrayBuffer(), exif, c.width, c.height);
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([buf], { type: "image/jpeg" }));
-    a.download = "photo-sheet-" + (i + 1) + "-" + tag + "mm-300dpi.jpg";
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    a.href = URL.createObjectURL(new Blob([out], { type: "image/jpeg" }));
+    a.download = (mode === "collage" ? "collage-" : "photo-sheet-") + (i + 1) + "-" + S.W + "x" + S.H + "mm-300dpi.jpg";
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    if ($("meta").checked && i === 0) toast(exif ? "Saved with the metadata of “" + metas[i].name + "”." : "Saved. The first photo has no metadata to copy (only JPEG originals carry it).");
   }, "image/jpeg", 0.95), i * 400));
 });
 $("pr").addEventListener("click", () => {
   if (!canvases.length) return;
-  const S = settings(), pa = $("printArea");
-  pa.innerHTML = "";
+  const S = settings(), pa = $("printArea"); pa.innerHTML = "";
   $("pageStyle").textContent = "@page{size:" + S.W + "mm " + S.H + "mm;margin:0}";
-  canvases.forEach(c => {
-    const im = new Image(); im.src = c.toDataURL("image/jpeg", 0.95);
-    im.style.cssText = "width:" + S.W + "mm;height:" + S.H + "mm;display:block;page-break-after:always";
-    pa.appendChild(im);
-  });
+  canvases.forEach(c => { const im = new Image(); im.src = c.toDataURL("image/jpeg", .95); im.style.cssText = "width:" + S.W + "mm;height:" + S.H + "mm;display:block;page-break-after:always"; pa.appendChild(im); });
   setTimeout(() => window.print(), 350);
 });
 
-render();
+buildTpls(); render();
 </script>
 </body>
 </html>
