@@ -118,7 +118,10 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
       </div>
       <div id="list"></div>
       <p class="hint" id="hintSheet">Give each photo a print size and a number of copies. They are packed onto the sheet to waste as little paper as possible.</p>
-      <div id="freeBar" hidden><button id="rearr">Auto-arrange</button></div>
+      <div id="freeBar" class="row" style="margin-top:10px" hidden>
+        <button id="alignBtn" title="Line the photos up side by side, using the gap you set">Align side by side</button>
+        <button id="rearr" title="Pack the photos as tightly as possible">Auto-arrange</button>
+      </div>
     </section>
 
     <section class="panel" id="collagePanel" hidden>
@@ -295,7 +298,7 @@ function setMode(m) {
   [["sheet", "tSheet"], ["collage", "tCollage"], ["free", "tFree"]].forEach(([k, id]) => $(id).setAttribute("aria-pressed", m === k));
   $("collagePanel").hidden = m !== "collage"; $("freeBar").hidden = m !== "free"; $("allSame").hidden = m === "collage"; $("hintSheet").hidden = m === "collage";
   $("hintSheet").textContent = m === "free"
-    ? "Pick a size for each photo, then drag the photos on the preview to place them. Double-click a photo to turn it 90°."
+    ? "Pick a size for each photo, then drag the photos on the preview to place them. Double-click a photo to turn it 90°. “Align side by side” lines them up in rows with the gap you set."
     : "Give each photo a print size and a number of copies. They are packed onto the sheet to waste as little paper as possible.";
   if (m === "collage" && !slots.some(Boolean)) autoFill();
   if (m === "free" && !Object.keys(pos).length) autoArrange();
@@ -543,6 +546,18 @@ function autoArrange() {
   if (r.bins[0]) r.bins[0].placed.forEach(q => { pos[q.it.key] = { x: q.x, y: q.y, rot: q.rot }; });
 }
 $("rearr").onclick = () => { autoArrange(); render(); };
+function alignAll() { // rows from the top-left, each photo right after the previous one, separated by exactly the gap
+  const S = settings(), g = S.g, arr = [];
+  buildItems().forEach(it => { const q = pos[it.key]; if (q) arr.push({ it, q, w: q.rot ? it.h : it.w, h: q.rot ? it.w : it.h }); });
+  arr.sort((a, b) => Math.round(a.q.y / 5) - Math.round(b.q.y / 5) || a.q.x - b.q.x);
+  let x = 0, y = 0, rowH = 0;
+  for (const a of arr) {
+    if (x > 0 && x + a.w > S.uw + EPS) { x = 0; y += rowH + g; rowH = 0; }
+    if (y + a.h > S.uh + EPS) { delete pos[a.it.key]; continue; } // no room in the rows: placed in free space instead
+    a.q.x = x; a.q.y = y; x += a.w + g; rowH = Math.max(rowH, a.h);
+  }
+}
+$("alignBtn").onclick = () => { alignAll(); render(); };
 function renderFree(S) {
   const items = buildItems();
   if (!items.length) { $("sheets").innerHTML = '<div class="empty-msg">Add a photo to start your layout.</div>'; $("sum").textContent = "No photos yet"; return; }
