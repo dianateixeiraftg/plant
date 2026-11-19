@@ -48,13 +48,14 @@ button.copied{background:var(--ok);border-color:var(--ok);color:#fff}
 <body>
 <main>
 <h1>Documentos da família</h1>
-<p class="sub">Guarda os números de cada pessoa e copia com um clique.</p>
+<p class="sub">Guarda os números de cada pessoa, do carro, da casa e do que precisares, e copia com um clique.</p>
 
 <div class="card" id="nojs" style="border-color:var(--bad)">Esta página precisa de JavaScript para funcionar. Se vês esta mensagem, descarrega o ficheiro e abre-o diretamente no navegador (Chrome, Safari ou Firefox), em vez de usares a pré-visualização.</div>
 
 <div class="bar">
-  <input id="newPerson" placeholder="Nome da pessoa" aria-label="Nome da pessoa" style="width:180px">
-  <button class="p" id="addPerson">Adicionar pessoa</button>
+  <select id="kind" aria-label="Tipo de separador"><option value="person">Pessoa</option><option value="car">Carro</option><option value="home">Casa</option><option value="other">Outro</option></select>
+  <input id="newPerson" placeholder="Nome da pessoa" aria-label="Nome" style="width:200px">
+  <button class="p" id="addPerson">Adicionar</button>
   <span class="grow"></span>
   <button id="vis" aria-pressed="false">Mostrar valores</button>
 </div>
@@ -63,7 +64,7 @@ button.copied{background:var(--ok);border-color:var(--ok);color:#fff}
 
 <div id="personView">
   <div class="card">
-    <h2 id="addTitle">Adicionar item</h2>
+    <h2 id="addTitle" style="overflow-wrap:anywhere">Adicionar item</h2>
     <div class="add">
       <select id="type" aria-label="Tipo de item"></select>
       <input id="value" placeholder="Valor" aria-label="Valor" autocomplete="off">
@@ -76,7 +77,7 @@ button.copied{background:var(--ok);border-color:var(--ok);color:#fff}
     <div id="items"></div>
     <div class="bar" style="margin:12px 0 0">
       <button id="renamePerson">Mudar nome</button>
-      <button class="d" id="delPerson">Apagar pessoa</button>
+      <button class="d" id="delPerson">Apagar este separador</button>
     </div>
   </div>
 </div>
@@ -102,11 +103,21 @@ button.copied{background:var(--ok);border-color:var(--ok);color:#fff}
 <div class="toast" id="toast"></div>
 
 <script>
-var PRESETS=["NIF","NISS (Segurança Social)","Cartão de Cidadão","Nº de utente (SNS)","Passaporte","Carta de condução","IBAN","Telemóvel","Email","Data de nascimento","Morada","Matrícula","Nº de aluno","Nº de sócio","Outro…"];
+var PRESETS={
+person:["NIF","NISS (Segurança Social)","Cartão de Cidadão","Nº de utente (SNS)","Passaporte","Carta de condução","IBAN","Telemóvel","Email","Data de nascimento","Morada","Nº de aluno","Nº de sócio","Outro…"],
+car:["Matrícula","Marca e modelo","Nº de quadro (VIN)","Documento Único Automóvel","Seguradora","Nº da apólice","Telefone de assistência","Data da inspeção","Data do IUC","Via Verde","Medida dos pneus","Outro…"],
+home:["Morada","Artigo matricial","Caderneta predial","Contador da luz (CPE)","Contador da água","Contador do gás (CUI)","Fornecedor de eletricidade","Apólice do seguro da casa","Internet (nº de cliente)","Palavra-passe do Wi-Fi","Contacto do condomínio","Outro…"],
+other:["Nº de cliente","Nº de contrato","Referência","Palavra-passe","Email","Telefone","Outro…"]};
+var ICON={person:"👤",car:"🚗",home:"🏠",other:"📁"};
+var HINT={person:"Nome da pessoa",car:"Nome do carro (ex.: Renault Clio)",home:"Nome da casa (ex.: Casa principal)",other:"Nome do separador"};
+function fillTypes(kind){var t=$("type");if(t.dataset.kind===kind)return;var cur=t.value;t.innerHTML="";
+  PRESETS[kind].forEach(function(x){t.appendChild(h("option",{value:x,text:x}))});t.dataset.kind=kind;
+  $("custom").hidden=true;}
 var KEY="documentos-familia-v1",ALL="__all__";
 var S={people:[],sel:null,show:false};
 
 function load(){try{var r=localStorage.getItem(KEY);if(r){var d=JSON.parse(r);if(d&&Array.isArray(d.people))S.people=d.people}}catch(e){}
+  S.people.forEach(function(p){if(!PRESETS[p.kind])p.kind="person"});
   S.sel=S.people.length?S.people[0].id:ALL}
 function save(){try{localStorage.setItem(KEY,JSON.stringify({people:S.people}))}catch(e){toast("Não foi possível guardar neste navegador")}}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
@@ -124,11 +135,11 @@ function copy(text,btn){
 function valEl(v){var s=h("div",{"class":"val"+(S.show?"":" hid"),text:S.show?v:"••••••••"});return s}
 
 function renderTabs(){var t=$("tabs");t.innerHTML="";
-  S.people.forEach(function(p){t.appendChild(h("button",{"class":"tab"+(S.sel===p.id?" on":""),role:"tab",text:p.name,on:{click:function(){S.sel=p.id;render()}}}))});
+  S.people.forEach(function(p){t.appendChild(h("button",{"class":"tab"+(S.sel===p.id?" on":""),role:"tab",text:ICON[p.kind]+" "+p.name,on:{click:function(){S.sel=p.id;render()}}}))});
   t.appendChild(h("button",{"class":"tab"+(S.sel===ALL?" on":""),role:"tab",text:"Ver todos",on:{click:function(){S.sel=ALL;render()}}}))}
 
 function renderPerson(){var p=person();$("personView").hidden=!p;if(!p)return;
-  $("addTitle").textContent="Adicionar item a "+p.name;$("listTitle").textContent="Itens de "+p.name;
+  fillTypes(p.kind);$("addTitle").textContent="Adicionar item a "+p.name;$("listTitle").textContent="Itens de "+p.name;
   var box=$("items");box.innerHTML="";
   if(!p.items.length){box.appendChild(h("div",{"class":"empty",text:"Ainda sem itens. Escolhe um tipo acima e guarda o primeiro valor."}));return}
   p.items.forEach(function(it){
@@ -142,7 +153,7 @@ function renderAll(){$("allView").hidden=S.sel!==ALL;if(S.sel!==ALL)return;
   var q=$("q").value.trim().toLowerCase(),map={},order=[];
   S.people.forEach(function(p){p.items.forEach(function(it){
     if(q&&(it.type+" "+p.name).toLowerCase().indexOf(q)<0)return;
-    if(!map[it.type]){map[it.type]=[];order.push(it.type)}map[it.type].push({n:p.name,v:it.value})})});
+    if(!map[it.type]){map[it.type]=[];order.push(it.type)}map[it.type].push({n:ICON[p.kind]+" "+p.name,v:it.value})})});
   var g=$("groups");g.innerHTML="";
   if(!order.length){g.appendChild(h("div",{"class":"empty",text:S.people.length?"Nada encontrado.":"Adiciona uma pessoa para começar."}));return}
   order.forEach(function(type){
@@ -155,9 +166,10 @@ function render(){renderTabs();renderPerson();renderAll();$("vis").textContent=S
 function init(){
   $("nojs").hidden=true;
   load();
-  PRESETS.forEach(function(p){$("type").appendChild(h("option",{value:p,text:p}))});
+  fillTypes("person");
+  $("kind").onchange=function(){$("newPerson").placeholder=HINT[$("kind").value]};
   $("type").onchange=function(){var o=$("type").value==="Outro…";$("custom").hidden=!o;if(o)$("custom").focus()};
-  function addPerson(){var n=$("newPerson").value.trim();if(!n){toast("Escreve primeiro o nome da pessoa");$("newPerson").focus();return}var p={id:uid(),name:n,items:[]};S.people.push(p);S.sel=p.id;$("newPerson").value="";save();render();toast(n+" adicionado(a)");$("value").focus()}
+  function addPerson(){var n=$("newPerson").value.trim();if(!n){toast("Escreve primeiro o nome");$("newPerson").focus();return}var p={id:uid(),name:n,kind:$("kind").value,items:[]};S.people.push(p);S.sel=p.id;$("newPerson").value="";save();render();toast(n+" adicionado(a)");$("value").focus()}
   $("addPerson").onclick=addPerson;$("newPerson").onkeydown=function(e){if(e.key==="Enter")addPerson()};
   function addItem(){var p=person();if(!p)return;var type=$("type").value;if(type==="Outro…")type=$("custom").value.trim();
     var v=$("value").value.trim();if(!type){toast("Escreve o nome do item");return}if(!v){toast("Escreve o valor");return}
@@ -170,7 +182,7 @@ function init(){
   $("export").onclick=function(){var b=new Blob([JSON.stringify({people:S.people},null,2)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="documentos-familia-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)};
   $("import").onclick=function(){$("file").click()};
   $("file").onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var d=JSON.parse(r.result);if(!d||!Array.isArray(d.people))throw 0;
-    if(confirm("Isto substitui os dados atuais. Continuar?")){S.people=d.people;S.sel=S.people.length?S.people[0].id:ALL;save();render();toast("Importado")}}catch(e){toast("Ficheiro inválido")}};r.readAsText(f);this.value=""};
+    if(confirm("Isto substitui os dados atuais. Continuar?")){S.people=d.people;S.people.forEach(function(p){if(!PRESETS[p.kind])p.kind="person"});S.sel=S.people.length?S.people[0].id:ALL;save();render();toast("Importado")}}catch(e){toast("Ficheiro inválido")}};r.readAsText(f);this.value=""};
   render()}
 init();
 </script>
