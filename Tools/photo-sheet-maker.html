@@ -351,10 +351,11 @@ function buildList() {
           <select data-k="fit"><option value="fill"${p.fit === "fill" ? " selected" : ""}>Fill the frame</option><option value="fit"${p.fit === "fit" ? " selected" : ""}>Whole photo</option></select>
         </label>
         <div class="acts">
-          <button data-act="rot" title="Rotate the photo 90°">⟳ Rotate</button>
+          <button data-act="rot" title="Rotate the photo 90°: its frame switches between portrait and landscape">⟳ Rotate</button>
           <button data-act="bw" class="tg" aria-pressed="${p.filter === "bw"}">B&amp;W</button>
           <button data-act="sepia" class="tg" aria-pressed="${p.filter === "sepia"}">Sepia</button>
           <button data-act="crop">Crop…</button>
+          <button data-act="turn" class="tg" aria-pressed="${!p.lock}" title="On: the packer may turn this photo sideways to save paper. Rotating a photo switches this off.">Auto-turn</button>
           <button data-act="ignore" class="tg" aria-pressed="${p.ignore}" title="Use the chosen size as portrait, whatever the photo's orientation">Ignore orientation</button>
           ${i > 0 ? '<button data-act="same" title="Use the same print size as the photo before this one">Same size as previous</button>' : ""}
           <button data-act="fill" title="Add copies until the sheet is full">Fill the sheet</button>
@@ -380,7 +381,7 @@ $("list").addEventListener("click", e => {
   const id = el.closest("[data-id]").dataset.id, p = byId(id), act = el.dataset.act;
   if (act === "del") { URL.revokeObjectURL(p.url); photos = photos.filter(x => x !== p); slots = slots.map(s => s === p.id ? null : s); }
   else if (act === "fill") fillSheet(p);
-  else if (["rot", "bw", "sepia", "crop", "ignore", "same"].includes(act)) editPhoto(p, act);
+  else if (["rot", "bw", "sepia", "crop", "ignore", "same", "turn"].includes(act)) editPhoto(p, act);
   else if (act === "use") {
     slots[active] = p.id;
     const n = slots.findIndex((s, i) => !s && i !== active); if (n >= 0) active = n;
@@ -417,9 +418,9 @@ function cellRects(S) {
 const inside = (a, b) => a.x >= b.x - EPS && a.y >= b.y - EPS && a.x + a.w <= b.x + b.w + EPS && a.y + a.h <= b.y + b.h + EPS;
 class Bin {
   constructor(w, h) { this.free = [{ x: 0, y: 0, w, h }]; this.placed = []; this.area = 0; }
-  find(w, h) {
+  find(w, h, canTurn) {
     let best = null;
-    for (const r of this.free) for (const rot of [false, true]) {
+    for (const r of this.free) for (const rot of (canTurn === false ? [false] : [false, true])) {
       const ww = rot ? h : w, hh = rot ? w : h;
       if (ww <= r.w + EPS && hh <= r.h + EPS) {
         const s1 = Math.min(r.w - ww, r.h - hh), s2 = Math.max(r.w - ww, r.h - hh);
@@ -445,10 +446,11 @@ function runOrder(order, S) {
   const bw = S.uw + S.g, bh = S.uh + S.g, bins = [], lost = [];
   for (const it of order) {
     const pw = it.w + S.g, ph = it.h + S.g;
-    if (!((pw <= bw + EPS && ph <= bh + EPS) || (ph <= bw + EPS && pw <= bh + EPS))) { lost.push(it); continue; }
+    const turn = !it.p.lock;
+    if (!((pw <= bw + EPS && ph <= bh + EPS) || (turn && ph <= bw + EPS && pw <= bh + EPS))) { lost.push(it); continue; }
     let done = false;
-    for (const b of bins) { const f = b.find(pw, ph); if (f) { f.it = it; b.place(f); done = true; break; } }
-    if (!done) { const b = new Bin(bw, bh), f = b.find(pw, ph); f.it = it; b.place(f); bins.push(b); }
+    for (const b of bins) { const f = b.find(pw, ph, turn); if (f) { f.it = it; b.place(f); done = true; break; } }
+    if (!done) { const b = new Bin(bw, bh), f = b.find(pw, ph, turn); f.it = it; b.place(f); bins.push(b); }
   }
   return { bins, lost, score: bins.reduce((s, b) => s + b.area * b.area, 0) };
 }
@@ -554,7 +556,7 @@ function renderFree(S) {
     bin.place({ x: q.x, y: q.y, w: w + g, h: h + g }); placed.push({ it, x: q.x, y: q.y, w, h, rot: q.rot, key: it.key });
   }
   for (const it of todo) {
-    const f = bin.find(it.w + g, it.h + g);
+    const f = bin.find(it.w + g, it.h + g, !it.p.lock);
     if (!f) { lost.push(it); continue; }
     bin.place(f); pos[it.key] = { x: f.x, y: f.y, rot: f.rot };
     placed.push({ it, x: f.x, y: f.y, w: f.rot ? it.h : it.w, h: f.rot ? it.w : it.h, rot: f.rot, key: it.key });
@@ -626,8 +628,10 @@ function thumb(p) {
   c.getContext("2d").drawImage(s, 0, 0, c.width, c.height);
   p._tk = p._k; p._tu = c.toDataURL("image/jpeg", .8); return p._tu;
 }
+function unturn(p) { Object.keys(pos).forEach(k => { if (k.startsWith(p.id + ":")) pos[k].rot = false; }); }
 function editPhoto(p, act) {
-  if (act === "rot") { const [x, y, w, h] = p.crop; p.crop = [1 - y - h, x, h, w]; p.rot = (p.rot + 90) % 360; }
+  if (act === "rot") { const [x, y, w, h] = p.crop; p.crop = [1 - y - h, x, h, w]; p.rot = (p.rot + 90) % 360; p.lock = true; unturn(p); }
+  else if (act === "turn") { p.lock = !p.lock; if (p.lock) unturn(p); }
   else if (act === "bw" || act === "sepia") p.filter = p.filter === act ? "none" : act;
   else if (act === "ignore") p.ignore = !p.ignore;
   else if (act === "same") { const prev = photos[photos.indexOf(p) - 1]; if (prev) { p.size = prev.size; p.cw = prev.cw; p.ch = prev.ch; } }
