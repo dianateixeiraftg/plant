@@ -39,6 +39,9 @@ input,select{border:1px solid var(--line);background:var(--card);border-radius:8
 button.copied{background:var(--ok);border-color:var(--ok);color:#fff}
 @media(max-width:620px){.row{flex-wrap:wrap}.lab{width:100%}}
 .empty{color:var(--mute);padding:6px 0}
+.sm{font-size:.76rem;margin-top:2px}
+summary{cursor:pointer;font-weight:600}
+.h3{font-weight:600;margin:14px 0 4px}
 .who{display:inline-block;min-width:90px;font-weight:600}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.on{opacity:1}
@@ -63,7 +66,7 @@ button.copied{background:var(--ok);border-color:var(--ok);color:#fff}
 <div class="tabs" id="tabs" role="tablist"></div>
 
 <div id="personView">
-  <div class="card">
+  <div class="card" id="addCard">
     <h2 id="addTitle" style="overflow-wrap:anywhere">Adicionar item</h2>
     <div class="add">
       <select id="type" aria-label="Tipo de item"></select>
@@ -77,14 +80,28 @@ button.copied{background:var(--ok);border-color:var(--ok);color:#fff}
     <div id="items"></div>
     <div class="bar" style="margin:12px 0 0">
       <button id="renamePerson">Mudar nome</button>
+      <button id="archivePerson">Arquivar este separador</button>
       <button class="d" id="delPerson">Apagar este separador</button>
     </div>
+  </div>
+</div>
+
+<div class="card" id="archCard" hidden>
+  <details><summary id="archSum">Arquivo</summary><div id="archItems"></div></details>
+</div>
+
+<div id="archView" hidden>
+  <div class="card">
+    <h2>Arquivo</h2>
+    <p class="note" style="margin-top:0">Informação antiga ou de coisas que já não tens. Podes copiar, restaurar ou apagar de vez.</p>
+    <div id="archBox"></div>
   </div>
 </div>
 
 <div id="allView" hidden>
   <div class="card">
     <h2>Todos, por tipo de item</h2>
+    <label style="display:block;margin-bottom:8px"><input type="checkbox" id="inclArch" style="padding:0;width:auto;vertical-align:middle"> Incluir arquivados</label>
     <input id="q" placeholder="Pesquisar (ex.: NIF)" aria-label="Pesquisar" style="width:100%;margin-bottom:8px">
     <div id="groups"></div>
   </div>
@@ -113,13 +130,16 @@ var HINT={person:"Nome da pessoa",car:"Nome do carro (ex.: Renault Clio)",home:"
 function fillTypes(kind){var t=$("type");if(t.dataset.kind===kind)return;var cur=t.value;t.innerHTML="";
   PRESETS[kind].forEach(function(x){t.appendChild(h("option",{value:x,text:x}))});t.dataset.kind=kind;
   $("custom").hidden=true;}
-var KEY="documentos-familia-v1",ALL="__all__";
+var KEY="documentos-familia-v1",ALL="__all__",ARCH="__arch__";
 var S={people:[],sel:null,show:false};
 
 function load(){try{var r=localStorage.getItem(KEY);if(r){var d=JSON.parse(r);if(d&&Array.isArray(d.people))S.people=d.people}}catch(e){}
   S.people.forEach(function(p){if(!PRESETS[p.kind])p.kind="person"});
-  S.sel=S.people.length?S.people[0].id:ALL}
+  S.sel=firstSel()}
 function save(){try{localStorage.setItem(KEY,JSON.stringify({people:S.people}))}catch(e){toast("Não foi possível guardar neste navegador")}}
+function today(){return new Date().toISOString().slice(0,10)}
+function active(){return S.people.filter(function(p){return !p.archived})}
+function firstSel(){var a=active();return a.length?a[0].id:ALL}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function $(i){return document.getElementById(i)}
 function h(tag,props,kids){var e=document.createElement(tag);for(var k in (props||{})){if(k==="text")e.textContent=props[k];else if(k==="on")for(var ev in props.on)e.addEventListener(ev,props.on[ev]);else e.setAttribute(k,props[k])}
@@ -134,34 +154,69 @@ function copy(text,btn){
 
 function valEl(v){var s=h("div",{"class":"val"+(S.show?"":" hid"),text:S.show?v:"••••••••"});return s}
 
-function renderTabs(){var t=$("tabs");t.innerHTML="";
-  S.people.forEach(function(p){t.appendChild(h("button",{"class":"tab"+(S.sel===p.id?" on":""),role:"tab",text:ICON[p.kind]+" "+p.name,on:{click:function(){S.sel=p.id;render()}}}))});
-  t.appendChild(h("button",{"class":"tab"+(S.sel===ALL?" on":""),role:"tab",text:"Ver todos",on:{click:function(){S.sel=ALL;render()}}}))}
+function itemRow(p,it,ro){
+  var arch=!!it.archived,act=h("div",{"class":"act"},[]);
+  act.appendChild(h("button",{"class":"p",text:"Copiar",on:{click:function(e){copy(it.value,e.currentTarget)}}}));
+  if(!ro){
+    if(!arch)act.appendChild(h("button",{text:"Editar","aria-label":"Editar "+it.type,on:{click:function(){var n=prompt(it.type,it.value);if(n!==null&&n.trim()){it.value=n.trim();save();render()}}}}));
+    act.appendChild(h("button",{text:arch?"Restaurar":"Arquivar","aria-label":(arch?"Restaurar ":"Arquivar ")+it.type,on:{click:function(){
+      if(arch){delete it.archived;delete it.archivedAt}else{it.archived=true;it.archivedAt=today()}
+      save();render();toast(arch?"Restaurado":"Arquivado")}}}));
+    act.appendChild(h("button",{"class":"d",text:"Apagar","aria-label":"Apagar "+it.type,on:{click:function(){if(confirm("Apagar "+it.type+" de "+p.name+"?")){p.items=p.items.filter(function(x){return x!==it});save();render()}}}}));
+  }
+  var lab=h("div",{"class":"lab",text:it.type});
+  if(arch)lab.appendChild(h("div",{"class":"sm",text:"Arquivado"+(it.archivedAt?" em "+it.archivedAt:"")}));
+  return h("div",{"class":"row"},[lab,valEl(it.value),act])}
 
-function renderPerson(){var p=person();$("personView").hidden=!p;if(!p)return;
-  fillTypes(p.kind);$("addTitle").textContent="Adicionar item a "+p.name;$("listTitle").textContent="Itens de "+p.name;
+function archCount(){var n=0;S.people.forEach(function(p){if(p.archived)n++;else p.items.forEach(function(i){if(i.archived)n++})});return n}
+
+function renderTabs(){var t=$("tabs");t.innerHTML="";var pa=person();
+  active().forEach(function(p){t.appendChild(h("button",{"class":"tab"+(S.sel===p.id?" on":""),role:"tab",text:ICON[p.kind]+" "+p.name,on:{click:function(){S.sel=p.id;render()}}}))});
+  t.appendChild(h("button",{"class":"tab"+(S.sel===ALL?" on":""),role:"tab",text:"Ver todos",on:{click:function(){S.sel=ALL;render()}}}));
+  var n=archCount(),on=S.sel===ARCH||(pa&&pa.archived);
+  t.appendChild(h("button",{"class":"tab"+(on?" on":""),role:"tab",text:"Arquivo"+(n?" ("+n+")":""),on:{click:function(){S.sel=ARCH;render()}}}))}
+
+function renderPerson(){var p=person();$("personView").hidden=!p;if(!p)return;var ro=!!p.archived;
+  $("addCard").hidden=ro;fillTypes(p.kind);
+  $("addTitle").textContent="Adicionar item a "+p.name;
+  $("listTitle").textContent="Itens de "+p.name+(ro?" (arquivado"+(p.archivedAt?" em "+p.archivedAt:"")+")":"");
+  $("archivePerson").textContent=ro?"Restaurar separador":"Arquivar este separador";
   var box=$("items");box.innerHTML="";
-  if(!p.items.length){box.appendChild(h("div",{"class":"empty",text:"Ainda sem itens. Escolhe um tipo acima e guarda o primeiro valor."}));return}
-  p.items.forEach(function(it){
-    var act=h("div",{"class":"act"},[
-      h("button",{"class":"p",text:"Copiar",on:{click:function(e){copy(it.value,e.currentTarget)}}}),
-      h("button",{text:"Editar","aria-label":"Editar "+it.type,on:{click:function(){var n=prompt(it.type,it.value);if(n!==null&&n.trim()){it.value=n.trim();save();render()}}}}),
-      h("button",{"class":"d",text:"Apagar","aria-label":"Apagar "+it.type,on:{click:function(){if(confirm("Apagar "+it.type+" de "+p.name+"?")){p.items=p.items.filter(function(x){return x!==it});save();render()}}}})]);
-    box.appendChild(h("div",{"class":"row"},[h("div",{"class":"lab",text:it.type}),valEl(it.value),act]))})}
+  var cur=p.items.filter(function(i){return ro||!i.archived}),old=p.items.filter(function(i){return !ro&&i.archived});
+  if(!cur.length)box.appendChild(h("div",{"class":"empty",text:ro?"Sem itens.":"Ainda sem itens. Escolhe um tipo acima e guarda o primeiro valor."}));
+  cur.forEach(function(it){box.appendChild(itemRow(p,it,ro))});
+  $("archCard").hidden=!old.length;
+  if(old.length){$("archSum").textContent="Arquivo de "+p.name+" ("+old.length+")";var ab=$("archItems");ab.innerHTML="";old.forEach(function(it){ab.appendChild(itemRow(p,it,false))})}}
+
+function renderArch(){$("archView").hidden=S.sel!==ARCH;if(S.sel!==ARCH)return;
+  var box=$("archBox");box.innerHTML="";var cs=S.people.filter(function(p){return p.archived}),any=false;
+  if(cs.length){any=true;box.appendChild(h("div",{"class":"h3",text:"Separadores arquivados"}));
+    cs.forEach(function(p){
+      var lab=h("div",{"class":"lab",style:"width:auto;flex:1;color:var(--ink)",text:ICON[p.kind]+" "+p.name});
+      if(p.archivedAt)lab.appendChild(h("div",{"class":"sm",style:"color:var(--mute)",text:"Arquivado em "+p.archivedAt}));
+      box.appendChild(h("div",{"class":"row"},[lab,h("div",{"class":"act"},[
+        h("button",{"class":"p",text:"Abrir",on:{click:function(){S.sel=p.id;render()}}}),
+        h("button",{text:"Restaurar",on:{click:function(){delete p.archived;delete p.archivedAt;save();render();toast(p.name+" restaurado(a)")}}}),
+        h("button",{"class":"d",text:"Apagar",on:{click:function(){if(confirm("Apagar "+p.name+" e todos os seus itens, de vez?")){S.people=S.people.filter(function(x){return x!==p});save();render()}}}})])]))})}
+  active().forEach(function(p){var old=p.items.filter(function(i){return i.archived});if(!old.length)return;any=true;
+    box.appendChild(h("div",{"class":"h3",text:ICON[p.kind]+" "+p.name}));old.forEach(function(it){box.appendChild(itemRow(p,it,false))})});
+  if(!any)box.appendChild(h("div",{"class":"empty",text:"O arquivo está vazio."}))}
 
 function renderAll(){$("allView").hidden=S.sel!==ALL;if(S.sel!==ALL)return;
-  var q=$("q").value.trim().toLowerCase(),map={},order=[];
-  S.people.forEach(function(p){p.items.forEach(function(it){
+  var q=$("q").value.trim().toLowerCase(),inc=$("inclArch").checked,map={},order=[];
+  S.people.forEach(function(p){if(p.archived&&!inc)return;p.items.forEach(function(it){
+    if(it.archived&&!inc)return;
     if(q&&(it.type+" "+p.name).toLowerCase().indexOf(q)<0)return;
-    if(!map[it.type]){map[it.type]=[];order.push(it.type)}map[it.type].push({n:ICON[p.kind]+" "+p.name,v:it.value})})});
+    if(!map[it.type]){map[it.type]=[];order.push(it.type)}
+    map[it.type].push({n:ICON[p.kind]+" "+p.name+((p.archived||it.archived)?" (arquivado)":""),v:it.value})})});
   var g=$("groups");g.innerHTML="";
-  if(!order.length){g.appendChild(h("div",{"class":"empty",text:S.people.length?"Nada encontrado.":"Adiciona uma pessoa para começar."}));return}
+  if(!order.length){g.appendChild(h("div",{"class":"empty",text:S.people.length?"Nada encontrado.":"Adiciona uma pessoa, um carro ou uma casa para começar."}));return}
   order.forEach(function(type){
     g.appendChild(h("div",{"class":"lab",style:"width:auto;margin:12px 0 2px;font-weight:600;color:var(--ink)",text:type}));
     map[type].forEach(function(r){g.appendChild(h("div",{"class":"row"},[h("div",{"class":"lab",text:r.n}),valEl(r.v),
       h("div",{"class":"act"},[h("button",{"class":"p",text:"Copiar",on:{click:function(e){copy(r.v,e.currentTarget)}}})])]))})})}
 
-function render(){renderTabs();renderPerson();renderAll();$("vis").textContent=S.show?"Ocultar valores":"Mostrar valores";$("vis").setAttribute("aria-pressed",S.show)}
+function render(){renderTabs();renderPerson();renderArch();renderAll();$("vis").textContent=S.show?"Ocultar valores":"Mostrar valores";$("vis").setAttribute("aria-pressed",S.show)}
 
 function init(){
   $("nojs").hidden=true;
@@ -176,13 +231,17 @@ function init(){
     p.items.push({id:uid(),type:type,value:v});$("value").value="";save();render();$("value").focus()}
   $("addItem").onclick=addItem;$("value").onkeydown=function(e){if(e.key==="Enter")addItem()};
   $("renamePerson").onclick=function(){var p=person();if(!p)return;var n=prompt("Novo nome",p.name);if(n&&n.trim()){p.name=n.trim();save();render()}};
-  $("delPerson").onclick=function(){var p=person();if(!p)return;if(confirm("Apagar "+p.name+" e todos os seus itens?")){S.people=S.people.filter(function(x){return x!==p});S.sel=S.people.length?S.people[0].id:ALL;save();render()}};
+  $("delPerson").onclick=function(){var p=person();if(!p)return;if(confirm("Apagar "+p.name+" e todos os seus itens?")){S.people=S.people.filter(function(x){return x!==p});S.sel=firstSel();save();render()}};
   $("vis").onclick=function(){S.show=!S.show;render()};
-  $("q").oninput=renderAll;
+  $("q").oninput=renderAll;$("inclArch").onchange=renderAll;
+  $("archivePerson").onclick=function(){var p=person();if(!p)return;
+    if(p.archived){delete p.archived;delete p.archivedAt;toast(p.name+" restaurado(a)")}
+    else{p.archived=true;p.archivedAt=today();S.sel=firstSel();toast("Arquivado")}
+    save();render()};
   $("export").onclick=function(){var b=new Blob([JSON.stringify({people:S.people},null,2)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="documentos-familia-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500)};
   $("import").onclick=function(){$("file").click()};
   $("file").onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var d=JSON.parse(r.result);if(!d||!Array.isArray(d.people))throw 0;
-    if(confirm("Isto substitui os dados atuais. Continuar?")){S.people=d.people;S.people.forEach(function(p){if(!PRESETS[p.kind])p.kind="person"});S.sel=S.people.length?S.people[0].id:ALL;save();render();toast("Importado")}}catch(e){toast("Ficheiro inválido")}};r.readAsText(f);this.value=""};
+    if(confirm("Isto substitui os dados atuais. Continuar?")){S.people=d.people;S.people.forEach(function(p){if(!PRESETS[p.kind])p.kind="person"});S.sel=firstSel();save();render();toast("Importado")}}catch(e){toast("Ficheiro inválido")}};r.readAsText(f);this.value=""};
   render()}
 init();
 </script>
