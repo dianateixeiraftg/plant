@@ -18,7 +18,7 @@ Pick a tool to get started.
   </a>
   <a class="tool-btn" href="Tools/notes.html">
     <strong>📝 Notes</strong>
-    <span>Random needs, anywhre, anytime</span>
+    <span>Random needs, anywhere, anytime</span>
   </a>
   <a class="tool-btn" href="Tools/Plant_Diary.html">
     <strong>🌱 Caderno de Campo</strong>
