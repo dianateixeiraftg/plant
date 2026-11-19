@@ -117,9 +117,13 @@ summary{cursor:pointer;font-weight:600}
 
 <div class="card" id="exPanel" hidden>
   <h2>Exportar…</h2>
-  <p class="note" style="margin-top:0">Escolhe o que queres incluir. Por defeito está tudo selecionado.</p>
+  <p class="note" style="margin-top:0">Por defeito está tudo selecionado. Escolhe como queres selecionar:</p>
+  <div class="tabs" id="exModes"></div>
+  <label id="exArchWrap" style="display:block;margin-bottom:8px"><input type="checkbox" id="exArch" checked style="padding:0;width:auto;vertical-align:middle"> Incluir arquivados</label>
   <div class="bar"><button id="exAll">Selecionar tudo</button><button id="exNone">Limpar seleção</button><span class="grow"></span><span id="exCount" class="note" style="margin:0"></span></div>
-  <div id="exTree"></div>
+  <div id="exPer"></div>
+  <div id="exTyp" hidden></div>
+  <div id="exTree" hidden></div>
   <div class="bar" style="margin-top:12px"><button class="p" id="exJson">Exportar JSON</button><button class="p" id="exPdf">Exportar PDF</button><button id="exClose">Fechar</button></div>
   <p class="note">Os ficheiros exportados contêm os valores completos, sem ocultar. Guarda-os num sítio seguro.</p>
 </div>
@@ -354,7 +358,46 @@ function exBuild(){var box=$("exTree");box.innerHTML="";EX=[];
     box.appendChild(w);EX.push(g)});
   if(!EX.length)box.appendChild(h("div",{"class":"empty",text:"Ainda não há nada para exportar."}));
   exUpdate()}
-function exSetAll(v){EX.forEach(function(g){g.cb.checked=v;g.items.forEach(function(x){x.cb.checked=v;x.kids.forEach(function(k){k.cb.checked=v})})});exUpdate()}
+function exSetAll(v){
+  if(EXM==="p"){PC.forEach(function(c){c.cb.checked=v});exSync()}
+  else if(EXM==="t"){TC.forEach(function(c){c.cb.checked=v});exSync()}
+  else{EX.forEach(function(g){g.cb.checked=v;g.items.forEach(function(x){x.cb.checked=v;x.kids.forEach(function(k){k.cb.checked=v})})});exUpdate()}}
+
+var EXM="p",PC=[],TC=[];
+function exSync(){
+  if(EXM==="d"){exUpdate();return}
+  var inc=$("exArch").checked;
+  if(EXM==="p"){
+    PC.forEach(function(c){var g=c.g,on=c.cb.checked&&(inc||!g.p.archived);g.cb.checked=on;
+      g.items.forEach(function(x){var xo=on&&(inc||!x.it.archived);x.cb.checked=xo;x.kids.forEach(function(k){k.cb.checked=xo})})})}
+  else{
+    var sel={};TC.forEach(function(t){if(t.cb.checked)sel[t.key]=true});
+    EX.forEach(function(g){var gi=inc||!g.p.archived;g.cb.checked=false;
+      g.items.forEach(function(x){var ok=gi&&(inc||!x.it.archived),any=false;
+        x.kids.forEach(function(k){k.cb.checked=!!(ok&&(sel[x.it.type]||sel[x.it.type+" › "+k.c.type]));if(k.cb.checked)any=true});
+        x.cb.checked=!!(ok&&sel[x.it.type])||any})})}
+  exUpdate()}
+function exModes(){var t=$("exModes");t.innerHTML="";
+  [["p","Por pessoa, carro ou casa"],["t","Por tipo de item"],["d","Escolher item a item"]].forEach(function(m){
+    t.appendChild(h("button",{"class":"tab"+(EXM===m[0]?" on":""),text:m[1],on:{click:function(){exMode(m[0])}}}))})}
+function exMode(m){EXM=m;$("exPer").hidden=m!=="p";$("exTyp").hidden=m!=="t";$("exTree").hidden=m!=="d";$("exArchWrap").hidden=m==="d";
+  exModes();if(m==="d")exUpdate();else exSync()}
+function exLists(){
+  var per=$("exPer");per.innerHTML="";PC=[];
+  EX.forEach(function(g){var n=g.p.items.length;
+    var cb=cbx(ICON[g.p.kind]+" "+g.p.name+(g.p.archived?" (arquivado)":"")+" · "+n+(n===1?" item":" itens"),per,false,"");
+    cb.onchange=exSync;PC.push({g:g,cb:cb})});
+  if(!EX.length)per.appendChild(h("div",{"class":"empty",text:"Ainda não há nada para exportar."}));
+  var map={},order=[];
+  EX.forEach(function(g){g.items.forEach(function(x){
+    function add(key){if(!map[key]){map[key]={n:0,who:[]};order.push(key)}map[key].n++;if(map[key].who.indexOf(g.p.name)<0)map[key].who.push(g.p.name)}
+    add(x.it.type);x.kids.forEach(function(k){add(x.it.type+" › "+k.c.type)})})});
+  order.sort(function(a,b){return a.localeCompare(b,"pt")});
+  var typ=$("exTyp");typ.innerHTML="";TC=[];
+  order.forEach(function(key){var m=map[key];
+    var cb=cbx(key+" · "+m.n+" × ("+m.who.join(", ")+")",typ,false,key.indexOf(" › ")>0?"exi":"");
+    cb.onchange=exSync;TC.push({key:key,cb:cb})});
+  if(!order.length)typ.appendChild(h("div",{"class":"empty",text:"Ainda não há nada para exportar."}))}
 function exCollect(){var out=[];EX.forEach(function(g){var items=[];
   g.items.forEach(function(x){var kids=x.kids.filter(function(k){return k.cb.checked}).map(function(k){return JSON.parse(JSON.stringify(k.c))});
     if(x.cb.checked||kids.length){var it=JSON.parse(JSON.stringify(x.it));delete it.children;if(kids.length)it.children=kids;items.push(it)}});
@@ -382,9 +425,9 @@ function init(){
     save();render()};
   $("export").onclick=function(){doExport(S.people,"json")};
   $("exportPdf").onclick=function(){doExport(S.people,"pdf")};
-  $("exportSel").onclick=function(){exBuild();$("exPanel").hidden=false;$("exPanel").scrollIntoView({behavior:"smooth",block:"start"})};
+  $("exportSel").onclick=function(){exBuild();exLists();exMode("p");$("exPanel").hidden=false;$("exPanel").scrollIntoView({behavior:"smooth",block:"start"})};
   $("exClose").onclick=function(){$("exPanel").hidden=true};
-  $("exAll").onclick=function(){exSetAll(true)};$("exNone").onclick=function(){exSetAll(false)};
+  $("exAll").onclick=function(){exSetAll(true)};$("exNone").onclick=function(){exSetAll(false)};$("exArch").onchange=exSync;
   $("exJson").onclick=function(){doExport(exCollect(),"json")};
   $("exPdf").onclick=function(){doExport(exCollect(),"pdf")};
   $("import").onclick=function(){$("file").click()};
