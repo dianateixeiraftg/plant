@@ -43,7 +43,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-within
 .item .nm{flex-basis:100%;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mut)}
 .cust{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--mut)}
 .cust[hidden]{display:none}
-.item .acts{display:flex;gap:6px;flex-basis:100%}
+.item .acts{display:flex;flex-wrap:wrap;gap:6px;flex-basis:100%}
 .item .acts button{padding:3px 9px;font-size:13px}
 .item .acts .del{margin-left:auto}
 .ti{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;border:2px solid var(--line);cursor:pointer}
@@ -71,6 +71,19 @@ button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-within
 .slot.empty{border:2px dashed rgba(0,0,0,.4);background:rgba(120,130,140,.12)}
 .slot.active{border:3px solid #3b8ee0}
 .slot.over{background:rgba(59,142,224,.3)}
+button.tg[aria-pressed=true]{background:var(--acc);color:var(--accInk);border-color:var(--acc)}
+button.danger{color:var(--bad);border-color:var(--bad)}
+button:disabled{opacity:.45;cursor:default}
+dialog{border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);padding:16px;max-width:96vw}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+.cstage{position:relative;display:inline-block;line-height:0;user-select:none;touch-action:none;overflow:hidden}
+.cstage img{max-width:min(86vw,720px);max-height:60vh;display:block}
+#cbox{position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,0,0,.55);cursor:move}
+#cbox i{position:absolute;width:20px;height:20px;background:#fff;border:2px solid #3b8ee0;border-radius:3px}
+#cbox i[data-h=nw]{left:-10px;top:-10px;cursor:nwse-resize}#cbox i[data-h=ne]{right:-10px;top:-10px;cursor:nesw-resize}
+#cbox i[data-h=sw]{left:-10px;bottom:-10px;cursor:nesw-resize}#cbox i[data-h=se]{right:-10px;bottom:-10px;cursor:nwse-resize}
+.slot.free{border:1px solid transparent;cursor:grab;touch-action:none}
+.slot.free:hover{border:2px solid #3b8ee0}
 .sheet figcaption{margin-top:8px;color:#c9d3dd;font-size:13px}
 .empty-msg{color:#a9b6c3;padding:40px 10px;text-align:center}
 .warn{color:#ffb3a6;font-size:13px;margin-top:10px;background:rgba(255,120,100,.14);padding:7px 10px;border-radius:6px}
@@ -86,6 +99,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-within
   <div class="tabs" role="group" aria-label="Mode">
     <button id="tSheet" aria-pressed="true">Photo sheet</button>
     <button id="tCollage" aria-pressed="false">Collage</button>
+    <button id="tFree" aria-pressed="false">Free layout</button>
   </div>
 </header>
 <div id="msg" role="status"></div>
@@ -98,8 +112,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-within
         <input type="file" id="file" accept="image/*" multiple>
         <b>Choose photos</b> or drop them anywhere on this page, including from Google Photos
       </label>
+      <div class="row" id="listTools" style="margin:10px 0 0">
+        <button id="allSame" title="Give every photo the size of the first one">All same size as first</button>
+        <button id="clearProj" class="danger">Clear project</button>
+      </div>
       <div id="list"></div>
       <p class="hint" id="hintSheet">Give each photo a print size and a number of copies. They are packed onto the sheet to waste as little paper as possible.</p>
+      <div id="freeBar" hidden><button id="rearr">Auto-arrange</button></div>
     </section>
 
     <section class="panel" id="collagePanel" hidden>
@@ -112,6 +131,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-within
           <select id="cfit"><option value="fill">Fill the frame</option><option value="fit">Whole photo</option></select>
         </label>
       </div>
+      <div class="row" id="cedit">
+        <button data-edit="rot">⟳ Rotate</button>
+        <button data-edit="bw" class="tg" aria-pressed="false">B&amp;W</button>
+        <button data-edit="sepia" class="tg" aria-pressed="false">Sepia</button>
+        <button data-edit="crop">Crop…</button>
+      </div>
+      <p class="hint">Rotate, B&amp;W, sepia and crop apply to the photo in the selected slot. Your original files are never changed.</p>
       <p class="hint">Click a slot on the preview, then click a photo to put it there. You can also drag a photo (or a file) onto a slot.</p>
     </section>
 
@@ -141,6 +167,11 @@ button:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-within
     <div id="warn"></div>
   </div>
 </main>
+<dialog id="cropDlg">
+  <div class="cstage" id="cstage"><img id="cimg" alt=""><div id="cbox"><i data-h="nw"></i><i data-h="ne"></i><i data-h="sw"></i><i data-h="se"></i></div></div>
+  <label class="chk"><input type="checkbox" id="clock" checked> Keep the proportions of the print size</label>
+  <div class="row"><button id="cOk" class="primary">Apply crop</button><button id="cReset">Reset</button><button id="cCancel">Cancel</button></div>
+</dialog>
 <div id="printArea"></div>
 
 <script>
@@ -209,7 +240,7 @@ function addBlob(blob, name, preferred) {
     try { exif = findExif(new Uint8Array(await blob.slice(0, 262144).arrayBuffer())); } catch (e) {}
     const url = URL.createObjectURL(blob), img = new Image();
     img.onload = () => {
-      const p = { id: ++uid, name, url, img, exif, size: "5x7", cw: 5, ch: 7, copies: 1, fit: "fill" };
+      const p = { id: ++uid, name, url, img, exif, size: "5x7", cw: 5, ch: 7, copies: 1, fit: "fill", rot: 0, filter: "none", crop: [0, 0, 1, 1], ignore: false };
       photos.push(p);
       if (mode === "collage") {
         if (preferred != null) { slots[preferred] = p.id; active = preferred; }
@@ -261,12 +292,16 @@ window.addEventListener("paste", e => { [...(e.clipboardData?.files || [])].filt
 /* ---------- mode, templates ---------- */
 function setMode(m) {
   mode = m;
-  $("tSheet").setAttribute("aria-pressed", m === "sheet"); $("tCollage").setAttribute("aria-pressed", m === "collage");
-  $("collagePanel").hidden = m !== "collage"; $("hintSheet").hidden = m !== "sheet";
+  [["sheet", "tSheet"], ["collage", "tCollage"], ["free", "tFree"]].forEach(([k, id]) => $(id).setAttribute("aria-pressed", m === k));
+  $("collagePanel").hidden = m !== "collage"; $("freeBar").hidden = m !== "free"; $("allSame").hidden = m === "collage"; $("hintSheet").hidden = m === "collage";
+  $("hintSheet").textContent = m === "free"
+    ? "Pick a size for each photo, then drag the photos on the preview to place them. Double-click a photo to turn it 90°."
+    : "Give each photo a print size and a number of copies. They are packed onto the sheet to waste as little paper as possible.";
   if (m === "collage" && !slots.some(Boolean)) autoFill();
+  if (m === "free" && !Object.keys(pos).length) autoArrange();
   buildList(); render();
 }
-$("tSheet").onclick = () => setMode("sheet"); $("tCollage").onclick = () => setMode("collage");
+$("tSheet").onclick = () => setMode("sheet"); $("tCollage").onclick = () => setMode("collage"); $("tFree").onclick = () => setMode("free");
 const cellsOf = () => TPLS[tpl][1].map(c => $("orient").value === "l" ? [c[1], c[0], c[3], c[2]] : c);
 function buildTpls() {
   const L = $("orient").value === "l", bw = L ? 54 : 36, bh = L ? 36 : 54;
@@ -294,14 +329,14 @@ function buildList() {
   const L = $("list");
   if (mode === "collage") {
     L.className = "tray";
-    L.innerHTML = photos.map(p => `<div class="ti${slots.includes(p.id) ? " used" : ""}" draggable="true" data-id="${p.id}" data-act="use" title="${esc(p.name)}">
-      <img src="${p.url}" alt="${esc(p.name)}" draggable="false">${slots.includes(p.id) ? '<span class="ok">✓</span>' : ""}<button class="x" data-act="del" aria-label="Remove">×</button></div>`).join("");
+    L.innerHTML = photos.map((p, i) => `<div class="ti${slots.includes(p.id) ? " used" : ""}" draggable="true" data-id="${p.id}" data-act="use" title="${esc(p.name)}">
+      <img src="${thumb(p)}" alt="${esc(p.name)}" draggable="false">${slots.includes(p.id) ? '<span class="ok">✓</span>' : ""}<button class="x" data-act="del" aria-label="Remove">×</button></div>`).join("");
     return;
   }
   L.className = "";
-  L.innerHTML = photos.map(p => `
+  L.innerHTML = photos.map((p, i) => `
     <div class="item" data-id="${p.id}">
-      <img class="th" src="${p.url}" alt="">
+      <img class="th" src="${thumb(p)}" alt="">
       <div class="fields">
         <div class="nm" title="${esc(p.name)}">${esc(p.name)}</div>
         <label class="f">Print size
@@ -316,6 +351,12 @@ function buildList() {
           <select data-k="fit"><option value="fill"${p.fit === "fill" ? " selected" : ""}>Fill the frame</option><option value="fit"${p.fit === "fit" ? " selected" : ""}>Whole photo</option></select>
         </label>
         <div class="acts">
+          <button data-act="rot" title="Rotate the photo 90°">⟳ Rotate</button>
+          <button data-act="bw" class="tg" aria-pressed="${p.filter === "bw"}">B&amp;W</button>
+          <button data-act="sepia" class="tg" aria-pressed="${p.filter === "sepia"}">Sepia</button>
+          <button data-act="crop">Crop…</button>
+          <button data-act="ignore" class="tg" aria-pressed="${p.ignore}" title="Use the chosen size as portrait, whatever the photo's orientation">Ignore orientation</button>
+          ${i > 0 ? '<button data-act="same" title="Use the same print size as the photo before this one">Same size as previous</button>' : ""}
           <button data-act="fill" title="Add copies until the sheet is full">Fill the sheet</button>
           <button data-act="del" class="del">Remove</button>
         </div>
@@ -339,6 +380,7 @@ $("list").addEventListener("click", e => {
   const id = el.closest("[data-id]").dataset.id, p = byId(id), act = el.dataset.act;
   if (act === "del") { URL.revokeObjectURL(p.url); photos = photos.filter(x => x !== p); slots = slots.map(s => s === p.id ? null : s); }
   else if (act === "fill") fillSheet(p);
+  else if (["rot", "bw", "sepia", "crop", "ignore", "same"].includes(act)) editPhoto(p, act);
   else if (act === "use") {
     slots[active] = p.id;
     const n = slots.findIndex((s, i) => !s && i !== active); if (n >= 0) active = n;
@@ -358,9 +400,11 @@ function dimsMM(p) {
   let a, b;
   if (p.size === "custom") { a = p.cw * 10; b = p.ch * 10; } else [a, b] = p.size.split("x").map(v => parseFloat(v) * 10);
   const s = Math.min(a, b), l = Math.max(a, b);
-  return p.img.naturalWidth > p.img.naturalHeight ? [l, s] : [s, l];
+  if (p.ignore) return [s, l];
+  const [ew, eh] = effDims(p);
+  return ew > eh ? [l, s] : [s, l];
 }
-function buildItems() { const it = []; photos.forEach(p => { const [w, h] = dimsMM(p); for (let i = 0; i < p.copies; i++) it.push({ p, w, h }); }); return it; }
+function buildItems() { const it = []; photos.forEach(p => { const [w, h] = dimsMM(p); for (let i = 0; i < p.copies; i++) it.push({ p, w, h, key: p.id + ":" + i }); }); return it; }
 function cellRects(S) {
   const g = S.g / 2;
   return cellsOf().map(([x, y, w, h]) => {
@@ -432,7 +476,7 @@ function newCanvas(S) {
   return [c, x];
 }
 function drawPhoto(x, img, mx, my, mw, mh, rot, fit) { // mm rectangle
-  const px = mx * MM, py = my * MM, pw = mw * MM, ph = mh * MM, iw = img.naturalWidth, ih = img.naturalHeight;
+  const px = mx * MM, py = my * MM, pw = mw * MM, ph = mh * MM, iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
   x.save(); x.beginPath(); x.rect(px, py, pw, ph); x.clip();
   x.translate(px + pw / 2, py + ph / 2); if (rot) x.rotate(Math.PI / 2);
   const bw = rot ? ph : pw, bh = rot ? pw : ph;
@@ -451,8 +495,8 @@ function addSheetEl(c, S, caption, overlays) {
 /* ---------- render ---------- */
 function render() {
   const S = settings(); $("sheets").innerHTML = ""; $("warn").innerHTML = ""; canvases = []; metas = [];
-  if (mode === "sheet") renderSheet(S); else renderCollage(S);
-  $("dl").disabled = $("pr").disabled = !canvases.length;
+  if (mode === "sheet") renderSheet(S); else if (mode === "free") renderFree(S); else renderCollage(S);
+  $("dl").disabled = $("pr").disabled = !canvases.length; syncEdit();
 }
 function renderSheet(S) {
   const items = buildItems();
@@ -460,7 +504,7 @@ function renderSheet(S) {
   const r = pack(items, S, 120);
   r.bins.forEach((b, i) => {
     const [c, x] = newCanvas(S); canvases.push(c); metas.push(b.placed[0].it.p);
-    for (const q of b.placed) drawPhoto(x, q.it.p.img, S.m + q.x, S.m + q.y, q.w - S.g, q.h - S.g, q.rot, q.it.p.fit);
+    for (const q of b.placed) drawPhoto(x, srcOf(q.it.p), S.m + q.x, S.m + q.y, q.w - S.g, q.h - S.g, q.rot, q.it.p.fit);
     const used = b.placed.reduce((s, q) => s + (q.w - S.g) * (q.h - S.g), 0) / (S.W * S.H) * 100;
     addSheetEl(c, S, "Sheet " + (i + 1) + ": " + b.placed.length + (b.placed.length === 1 ? " photo, " : " photos, ") + Math.round(used) + "% of the paper used");
   });
@@ -472,7 +516,7 @@ function renderCollage(S) {
   const rects = cellRects(S), [c, x] = newCanvas(S), ov = [];
   rects.forEach((q, i) => {
     const p = byId(slots[i]);
-    if (p) drawPhoto(x, p.img, q.x, q.y, q.w, q.h, false, $("cfit").value);
+    if (p) drawPhoto(x, srcOf(p), q.x, q.y, q.w, q.h, false, $("cfit").value);
     const d = document.createElement("div");
     d.className = "slot" + (p ? "" : " empty") + (i === active ? " active" : ""); d.dataset.i = i;
     d.style.cssText = `left:${q.x / S.W * 100}%;top:${q.y / S.H * 100}%;width:${q.w / S.W * 100}%;height:${q.h / S.H * 100}%`;
@@ -488,6 +532,172 @@ function renderCollage(S) {
   addSheetEl(c, S, filled + " of " + slots.length + " slots filled", ov);
   $("sum").textContent = photos.length ? filled + " of " + slots.length + " slots filled" : "Add photos, then click a slot to place them";
 }
+
+/* ---------- free layout: choose each size, drag to place ---------- */
+let pos = {};
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function autoArrange() {
+  const r = pack(buildItems(), settings(), 120); pos = {};
+  if (r.bins[0]) r.bins[0].placed.forEach(q => { pos[q.it.key] = { x: q.x, y: q.y, rot: q.rot }; });
+}
+$("rearr").onclick = () => { autoArrange(); render(); };
+function renderFree(S) {
+  const items = buildItems();
+  if (!items.length) { $("sheets").innerHTML = '<div class="empty-msg">Add a photo to start your layout.</div>'; $("sum").textContent = "No photos yet"; return; }
+  const g = S.g, bin = new Bin(S.uw + g, S.uh + g), todo = [], lost = [], placed = [];
+  for (const it of items) {
+    const q = pos[it.key];
+    if (!q) { todo.push(it); continue; }
+    const w = q.rot ? it.h : it.w, h = q.rot ? it.w : it.h;
+    if (w > S.uw + EPS || h > S.uh + EPS) { delete pos[it.key]; todo.push(it); continue; }
+    q.x = clamp(q.x, 0, S.uw - w); q.y = clamp(q.y, 0, S.uh - h);
+    bin.place({ x: q.x, y: q.y, w: w + g, h: h + g }); placed.push({ it, x: q.x, y: q.y, w, h, rot: q.rot, key: it.key });
+  }
+  for (const it of todo) {
+    const f = bin.find(it.w + g, it.h + g);
+    if (!f) { lost.push(it); continue; }
+    bin.place(f); pos[it.key] = { x: f.x, y: f.y, rot: f.rot };
+    placed.push({ it, x: f.x, y: f.y, w: f.rot ? it.h : it.w, h: f.rot ? it.w : it.h, rot: f.rot, key: it.key });
+  }
+  const [c, x] = newCanvas(S), ov = [];
+  placed.forEach(q => {
+    drawPhoto(x, srcOf(q.it.p), S.m + q.x, S.m + q.y, q.w, q.h, q.rot, q.it.p.fit);
+    const d = document.createElement("div"); d.className = "slot free";
+    const place = (nx, ny) => { d.style.left = (S.m + nx) / S.W * 100 + "%"; d.style.top = (S.m + ny) / S.H * 100 + "%"; };
+    place(q.x, q.y); d.style.width = q.w / S.W * 100 + "%"; d.style.height = q.h / S.H * 100 + "%"; d.title = "Drag to move, double-click to rotate";
+    d.onpointerdown = e => {
+      e.preventDefault(); d.setPointerCapture(e.pointerId);
+      const k = S.W / d.parentElement.getBoundingClientRect().width, sx = e.clientX, sy = e.clientY; let np = null;
+      d.onpointermove = ev => { np = [clamp(q.x + (ev.clientX - sx) * k, 0, S.uw - q.w), clamp(q.y + (ev.clientY - sy) * k, 0, S.uh - q.h)]; place(np[0], np[1]); };
+      d.onpointerup = () => { d.onpointermove = d.onpointerup = null; if (np) { pos[q.key].x = Math.round(np[0] * 2) / 2; pos[q.key].y = Math.round(np[1] * 2) / 2; render(); } };
+    };
+    d.ondblclick = () => { pos[q.key].rot = !pos[q.key].rot; render(); };
+    ov.push(d);
+  });
+  canvases.push(c); metas.push(placed[0] && placed[0].it.p);
+  const used = placed.reduce((s, q) => s + q.w * q.h, 0) / (S.W * S.H) * 100;
+  addSheetEl(c, S, placed.length + (placed.length === 1 ? " photo, " : " photos, ") + Math.round(used) + "% of the paper used", ov);
+  $("sum").textContent = placed.length + (placed.length === 1 ? " photo on the sheet" : " photos on the sheet");
+  let msg = "";
+  for (let i = 0; i < placed.length; i++) for (let j = i + 1; j < placed.length; j++) {
+    const a = placed[i], b = placed[j];
+    if (a.x < b.x + b.w - EPS && b.x < a.x + a.w - EPS && a.y < b.y + b.h - EPS && b.y < a.y + a.h - EPS) msg = "Some photos overlap. Drag them apart or press Auto-arrange.";
+  }
+  if (lost.length) msg = "No room left for: " + [...new Set(lost.map(i => i.p.name))].join(", ") + ". Use a smaller size, fewer copies or a smaller margin.";
+  if (msg) $("warn").innerHTML = '<div class="warn">' + esc(msg) + '</div>';
+}
+
+/* ---------- non-destructive edits: rotate, B&W, sepia, crop (originals are never modified) ---------- */
+function effDims(p) {
+  const iw = p.img.naturalWidth, ih = p.img.naturalHeight, odd = p.rot % 180;
+  return [p.crop[2] * (odd ? ih : iw), p.crop[3] * (odd ? iw : ih)];
+}
+function srcOf(p) { // working copy used for drawing; the original image stays as imported
+  const key = p.rot + "|" + p.filter + "|" + p.crop.join(",");
+  if (p._k === key) return p._s;
+  const iw = p.img.naturalWidth, ih = p.img.naturalHeight, odd = p.rot % 180, sw = odd ? ih : iw, sh = odd ? iw : ih, [cx, cy, cw, ch] = p.crop;
+  let out = p.img;
+  if (p.rot || p.filter !== "none" || cw < 1 - EPS || ch < 1 - EPS) {
+    let w = cw * sw, h = ch * sh; const k = Math.min(1, 2400 / Math.max(w, h));
+    w = Math.max(1, Math.round(w * k)); h = Math.max(1, Math.round(h * k));
+    const c = document.createElement("canvas"); c.width = w; c.height = h;
+    const x = c.getContext("2d", { willReadFrequently: true }), s = w / (cw * sw);
+    x.imageSmoothingQuality = "high";
+    x.translate(-cx * sw * s, -cy * sh * s); x.scale(s, s);
+    x.translate(sw / 2, sh / 2); x.rotate(p.rot * Math.PI / 180); x.drawImage(p.img, -iw / 2, -ih / 2);
+    if (p.filter !== "none") {
+      const d = x.getImageData(0, 0, w, h), a = d.data;
+      for (let i = 0; i < a.length; i += 4) {
+        const r = a[i], g = a[i + 1], b = a[i + 2];
+        if (p.filter === "bw") a[i] = a[i + 1] = a[i + 2] = .299 * r + .587 * g + .114 * b;
+        else { a[i] = Math.min(255, .393 * r + .769 * g + .189 * b); a[i + 1] = Math.min(255, .349 * r + .686 * g + .168 * b); a[i + 2] = Math.min(255, .272 * r + .534 * g + .131 * b); }
+      }
+      x.putImageData(d, 0, 0);
+    }
+    out = c;
+  }
+  p._k = key; p._s = out; return out;
+}
+function thumb(p) {
+  const s = srcOf(p); if (s === p.img) return p.url;
+  if (p._tk === p._k) return p._tu;
+  const c = document.createElement("canvas"), k = 160 / Math.max(s.width, s.height);
+  c.width = Math.max(1, Math.round(s.width * k)); c.height = Math.max(1, Math.round(s.height * k));
+  c.getContext("2d").drawImage(s, 0, 0, c.width, c.height);
+  p._tk = p._k; p._tu = c.toDataURL("image/jpeg", .8); return p._tu;
+}
+function editPhoto(p, act) {
+  if (act === "rot") { const [x, y, w, h] = p.crop; p.crop = [1 - y - h, x, h, w]; p.rot = (p.rot + 90) % 360; }
+  else if (act === "bw" || act === "sepia") p.filter = p.filter === act ? "none" : act;
+  else if (act === "ignore") p.ignore = !p.ignore;
+  else if (act === "same") { const prev = photos[photos.indexOf(p) - 1]; if (prev) { p.size = prev.size; p.cw = prev.cw; p.ch = prev.ch; } }
+  else if (act === "crop") { openCrop(p); return; }
+  buildList(); render();
+}
+function syncEdit() {
+  const p = mode === "collage" ? byId(slots[active]) : null;
+  document.querySelectorAll("#cedit button").forEach(b => {
+    b.disabled = !p;
+    if (b.dataset.edit === "bw" || b.dataset.edit === "sepia") b.setAttribute("aria-pressed", !!p && p.filter === b.dataset.edit);
+  });
+}
+$("cedit").addEventListener("click", e => { const a = e.target.dataset.edit, p = byId(slots[active]); if (a && p) editPhoto(p, a); });
+$("allSame").onclick = () => { const f = photos[0]; if (!f) return; photos.forEach(p => { p.size = f.size; p.cw = f.cw; p.ch = f.ch; }); buildList(); render(); };
+$("clearProj").onclick = () => {
+  if (!photos.length) return;
+  if (!confirm("Start a brand new project? All photos and the layout will be removed (your original files are not affected).")) return;
+  photos.forEach(p => URL.revokeObjectURL(p.url));
+  photos = []; slots = slots.map(() => null); active = 0; pos = {}; canvases = []; metas = []; toast("");
+  buildList(); render();
+};
+
+/* crop editor */
+let cropP = null, cbox = [0, 0, 1, 1];
+function slotRatio(p) {
+  if (mode === "collage") { const r = cellRects(settings())[active]; return r.w / r.h; }
+  const [w, h] = dimsMM(p); return w / h;
+}
+function drawBox() { const [x, y, w, h] = cbox; $("cbox").style.cssText = `left:${x * 100}%;top:${y * 100}%;width:${w * 100}%;height:${h * 100}%`; }
+function fitRatio() {
+  const r = $("cstage").getBoundingClientRect(), a = slotRatio(cropP); let [x, y, w, h] = cbox;
+  if ((w * r.width) / (h * r.height) > a) { const nw = h * r.height * a / r.width; x += (w - nw) / 2; w = nw; }
+  else { const nh = w * r.width / (a * r.height); y += (h - nh) / 2; h = nh; }
+  cbox = [x, y, w, h];
+}
+function openCrop(p) {
+  cropP = p; cbox = p.crop.slice();
+  const iw = p.img.naturalWidth, ih = p.img.naturalHeight, odd = p.rot % 180, sw = odd ? ih : iw, sh = odd ? iw : ih, k = Math.min(1, 1000 / Math.max(sw, sh));
+  const c = document.createElement("canvas"); c.width = Math.round(sw * k); c.height = Math.round(sh * k);
+  const x = c.getContext("2d"); x.translate(c.width / 2, c.height / 2); x.rotate(p.rot * Math.PI / 180); x.scale(k, k); x.drawImage(p.img, -iw / 2, -ih / 2);
+  const im = $("cimg"); im.onload = () => { if ($("clock").checked) fitRatio(); drawBox(); };
+  im.src = c.toDataURL("image/jpeg", .85); $("cropDlg").showModal();
+}
+function resizeBox(h, b0, dx, dy, r) {
+  let [x, y, w, hh] = b0, L = x, T = y, R = x + w, B = y + hh; const M = .03;
+  if (h.includes("w")) L = clamp(L + dx, 0, R - M); else R = clamp(R + dx, L + M, 1);
+  if (h.includes("n")) T = clamp(T + dy, 0, B - M); else B = clamp(B + dy, T + M, 1);
+  if ($("clock").checked) {
+    const a = slotRatio(cropP); let nw = R - L, nh = nw * r.width / (a * r.height); const maxH = h.includes("n") ? B : 1 - T;
+    if (nh > maxH) { nh = maxH; nw = nh * a * r.height / r.width; }
+    if (h.includes("w")) L = R - nw; else R = L + nw;
+    if (h.includes("n")) T = B - nh; else B = T + nh;
+  }
+  return [L, T, R - L, B - T];
+}
+$("cbox").addEventListener("pointerdown", e => {
+  e.preventDefault(); const box = $("cbox"), h = e.target.dataset.h || "m"; box.setPointerCapture(e.pointerId);
+  const r = $("cstage").getBoundingClientRect(), b0 = cbox.slice(), sx = e.clientX, sy = e.clientY;
+  box.onpointermove = ev => {
+    const dx = (ev.clientX - sx) / r.width, dy = (ev.clientY - sy) / r.height;
+    cbox = h === "m" ? [clamp(b0[0] + dx, 0, 1 - b0[2]), clamp(b0[1] + dy, 0, 1 - b0[3]), b0[2], b0[3]] : resizeBox(h, b0, dx, dy, r);
+    drawBox();
+  };
+  box.onpointerup = () => { box.onpointermove = box.onpointerup = null; };
+});
+$("clock").addEventListener("change", () => { if ($("clock").checked) { fitRatio(); drawBox(); } });
+$("cReset").onclick = () => { $("clock").checked = false; cbox = [0, 0, 1, 1]; drawBox(); };
+$("cCancel").onclick = () => $("cropDlg").close();
+$("cOk").onclick = () => { cropP.crop = cbox.map(v => +v.toFixed(4)); $("cropDlg").close(); buildList(); render(); };
 
 /* ---------- output ---------- */
 $("dl").addEventListener("click", () => {
