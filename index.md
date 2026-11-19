@@ -16,6 +16,10 @@ Pick a tool to get started.
     <strong>ℹ️ Nós</strong>
     <span>detalhes</span>
   </a>
+  <a class="tool-btn" href="Tools/notes.html">
+    <strong>📝 Notes</strong>
+    <span>Random needs, anywhre, anytime</span>
+  </a>
   <a class="tool-btn" href="Tools/Plant_Diary.html">
     <strong>🌱 Caderno de Campo</strong>
     <span>Plant diary, one diary per plant</span>
