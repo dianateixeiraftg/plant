@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Notes</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='10' y='6' width='44' height='52' rx='6' fill='%231F4E79'/%3E%3Crect x='18' y='18' width='28' height='4' rx='2' fill='%23fff'/%3E%3Crect x='18' y='28' width='28' height='4' rx='2' fill='%23fff'/%3E%3Crect x='18' y='38' width='16' height='4' rx='2' fill='%23F2B632'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#E9EDF1; --panel:#F8FAFB; --ink:#17212B; --mute:#5B6773; --line:#CBD3DB;
+  --accent:#1F4E79; --accent-ink:#fff;
+  --soon-bg:#FFF0C7; --soon-ink:#6E4300; --soon:#E0A20F;
+  --over-bg:#FBE0DC; --over-ink:#9B2318; --over:#C8372D;
+  --done-bg:#DDF0E5; --done-ink:#1F6040; --done:#2F7D5B;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#11171D; --panel:#19212A; --ink:#E7ECF1; --mute:#93A0AD; --line:#2B3641;
+    --accent:#7FB2E5; --accent-ink:#0C1218;
+    --soon-bg:#3A2D0B; --soon-ink:#F2C766; --soon:#E0A20F;
+    --over-bg:#3B1A17; --over-ink:#F29A91; --over:#E0584C;
+    --done-bg:#16302334; --done-ink:#8FD3AC; --done:#4FAE82;
+  }
+}
+*{box-sizing:border-box}
+html{height:100%}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);
+  padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{border:1px solid var(--line);background:var(--panel);padding:7px 13px;border-radius:8px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.btn.danger:hover{border-color:var(--over);color:var(--over)}
+.btn.small{padding:4px 10px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:default}
+
+header.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:18px 24px 6px;max-width:1280px;margin:0 auto}
+header.top h1{font:600 28px/1 var(--serif);margin:0;letter-spacing:-.01em;flex:1 1 auto}
+header.top .actions{display:flex;gap:8px;flex-wrap:wrap}
+
+main{display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:22px;max-width:1280px;margin:0 auto;padding:12px 24px 60px;align-items:start}
+@media (max-width:860px){main{grid-template-columns:1fr;padding:10px 14px 60px} header.top{padding:14px 14px 4px}}
+
+.composer{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;position:sticky;top:12px}
+@media (max-width:860px){.composer{position:static}}
+.composer h2{font:600 18px var(--serif);margin:0 0 12px}
+label.f{display:block;font-size:13px;color:var(--mute);margin:12px 0 4px}
+input[type=text],input[type=email],input[type=password],input[type=datetime-local],textarea,select{
+  width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{min-height:92px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.quick{margin-top:6px}
+.checks{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:4px}
+.checks label{display:flex;gap:6px;align-items:center;font-size:14px}
+
+.drop{margin-top:12px;border:2px dashed var(--line);border-radius:10px;padding:16px 12px;text-align:center;color:var(--mute);font-size:14px;transition:border-color .15s,background .15s}
+.drop.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--ink)}
+.drop b{color:var(--ink)}
+.drop .link{background:none;border:0;padding:0;color:var(--accent);text-decoration:underline}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;margin-top:10px}
+.thumbs .t{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.thumbs img{width:100%;height:100%;object-fit:cover;display:block}
+.thumbs .x{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;line-height:1;font-size:15px}
+
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.bar input[type=search]{flex:1 1 180px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.tabs{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.tabs button{border:0;background:none;padding:7px 12px;font-size:14px}
+.tabs button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.bar select{width:auto;background:var(--panel)}
+
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:10px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card.soon{border-left-color:var(--soon)} .card.over{border-left-color:var(--over)} .card.done{border-left-color:var(--done)}
+.card.done .title,.card.done .body{opacity:.55}
+.card.done .title{text-decoration:line-through}
+.card.flash{animation:flash 1.4s ease-out}
+@keyframes flash{from{box-shadow:0 0 0 4px var(--soon)}to{box-shadow:0 0 0 0 transparent}}
+.head{display:flex;gap:10px;justify-content:space-between;align-items:flex-start}
+.title{font:600 19px/1.25 var(--serif);margin:0;overflow-wrap:anywhere}
+.due{flex:none;text-align:right;border-radius:8px;padding:4px 9px;min-width:84px;background:var(--bg)}
+.due .d{font:600 15px/1.2 var(--serif)}
+.due .t{font-size:12px;color:var(--mute)}
+.due .r{font-size:12px;font-weight:600;margin-top:1px}
+.card.soon .due{background:var(--soon-bg);color:var(--soon-ink)} .card.soon .due .t{color:inherit}
+.card.over .due{background:var(--over-bg);color:var(--over-ink)} .card.over .due .t{color:inherit}
+.card.done .due{background:var(--done-bg);color:var(--done-ink)} .card.done .due .t{color:inherit}
+.body{white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink)}
+.pics{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.pics button{position:relative;padding:0;border:1px solid var(--line);border-radius:7px;overflow:hidden;aspect-ratio:1;background:var(--bg)}
+.pics img{width:100%;height:100%;object-fit:cover;display:block}
+.pics .more{position:absolute;inset:0;background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center;font-weight:600}
+.foot{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:auto}
+.foot .meta{font-size:12px;color:var(--mute);margin-right:auto}
+.empty{grid-column:1/-1;text-align:center;color:var(--mute);padding:50px 10px;border:1px dashed var(--line);border-radius:12px}
+
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);padding:0;max-width:min(560px,94vw);width:100%}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+dialog .in{padding:18px 20px 16px}
+dialog h2{font:600 20px var(--serif);margin:0 0 4px}
+dialog p.hint{color:var(--mute);font-size:13px;margin:4px 0 8px}
+dialog .sect{border-top:1px solid var(--line);margin-top:16px;padding-top:12px}
+dialog .sect h3{margin:0 0 4px;font-size:15px}
+.status{font-size:13px;margin-top:6px}
+.status.ok{color:var(--done)} .status.bad{color:var(--over)}
+.lb{max-width:96vw;width:auto;background:#000;border:0}
+.lb .in{padding:0;position:relative}
+.lb img{display:block;max-width:96vw;max-height:88vh;margin:auto}
+.lb .nav{position:absolute;top:50%;transform:translateY(-50%);border:0;background:rgba(0,0,0,.55);color:#fff;font-size:26px;width:44px;height:64px}
+.lb .prev{left:0}.lb .next{right:0}
+.lb .close{position:absolute;top:8px;right:8px;border:0;background:rgba(0,0,0,.6);color:#fff;width:36px;height:36px;border-radius:50%;font-size:20px}
+.lb .cap{position:absolute;bottom:8px;left:0;right:0;text-align:center;color:#fff;font-size:13px;text-shadow:0 1px 3px #000}
+
+#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0));display:flex;flex-direction:column;gap:8px;z-index:50;width:min(420px,92vw)}
+.toast{background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:10px;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.toast.err{background:var(--over);color:#fff}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Notes</h1>
+  <div class="actions">
+    <button class="btn" id="btnExport">Export backup</button>
+    <button class="btn" id="btnImport">Import backup</button>
+    <button class="btn" id="btnSettings">Notifications</button>
+  </div>
+  <input type="file" id="importFile" accept="application/json,.json" hidden>
+</header>
+
+<main>
+  <section class="composer" id="composer" aria-labelledby="cTitle">
+    <h2 id="cTitle">New note</h2>
+    <form id="form" autocomplete="off">
+      <label class="f" for="fTitle" style="margin-top:0">Title</label>
+      <input type="text" id="fTitle" maxlength="140" required>
+
+      <label class="f" for="fBody">Details</label>
+      <textarea id="fBody"></textarea>
+
+      <div class="drop" id="drop" tabindex="0">
+        <div><b>Drop pictures here</b>, paste them, or <button type="button" class="link" id="pick">choose files</button></div>
+        <div style="font-size:12px;margin-top:4px">Works with drag &amp; drop from Google Photos too</div>
+      </div>
+      <input type="file" id="files" accept="image/*" multiple hidden>
+      <div class="thumbs" id="draftThumbs"></div>
+
+      <label class="f" for="fDue">Deadline (optional)</label>
+      <input type="datetime-local" id="fDue">
+      <div class="row quick">
+        <button type="button" class="btn small" data-q="today">Today 18:00</button>
+        <button type="button" class="btn small" data-q="tomorrow">Tomorrow 09:00</button>
+        <button type="button" class="btn small" data-q="week">In a week</button>
+        <button type="button" class="btn small" data-q="clear">No deadline</button>
+      </div>
+
+      <div id="remindBox" hidden>
+        <label class="f">Remind me</label>
+        <div class="checks" id="remindChecks">
+          <label><input type="checkbox" value="0" checked> At the deadline</label>
+          <label><input type="checkbox" value="60"> 1 hour before</label>
+          <label><input type="checkbox" value="1440" checked> 1 day before</label>
+          <label><input type="checkbox" value="2880"> 2 days before</label>
+          <label><input type="checkbox" value="10080"> 1 week before</label>
+        </div>
+        <label class="f">Send reminder by</label>
+        <div class="checks">
+          <label><input type="checkbox" id="chBrowser" checked> Browser notification</label>
+          <label><input type="checkbox" id="chEmail"> Email</label>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:16px">
+        <button class="btn primary" id="saveBtn" type="submit">Add note</button>
+        <button class="btn" id="cancelBtn" type="button" hidden>Cancel</button>
+      </div>
+    </form>
+  </section>
+
+  <section aria-label="Notes">
+    <div class="bar">
+      <input type="search" id="q" placeholder="Search notes" aria-label="Search notes">
+      <div class="tabs" id="tabs" role="group" aria-label="Filter">
+        <button data-f="open" aria-pressed="true">Open</button>
+        <button data-f="over" aria-pressed="false">Overdue</button>
+        <button data-f="done" aria-pressed="false">Done</button>
+        <button data-f="all" aria-pressed="false">All</button>
+      </div>
+      <select id="sort" aria-label="Sort">
+        <option value="due">By deadline</option>
+        <option value="new">Newest first</option>
+      </select>
+    </div>
+    <div class="list" id="list"></div>
+  </section>
+</main>
+
+<dialog id="dlgSettings">
+  <div class="in">
+    <h2>Notifications</h2>
+    <p class="hint">Reminders are checked every 30 seconds while this page is open (a pinned tab works well). Anything that came due while it was closed is sent the next time you open it.</p>
+
+    <div class="sect">
+      <h3>Browser</h3>
+      <div class="row">
+        <button class="btn" id="btnPerm" type="button">Allow notifications</button>
+        <button class="btn" id="btnTestBrowser" type="button">Send test</button>
+      </div>
+      <div class="status" id="permStatus"></div>
+      <p class="hint">Browsers only allow notifications on secure pages (https, such as GitHub Pages, or localhost). On iPhone, add the page to the Home Screen first.</p>
+    </div>
+
+    <div class="sect">
+      <h3>Email with EmailJS</h3>
+      <p class="hint">In EmailJS, create an email service and a template. Set the template’s “To email” to <code>{{to_email}}</code>, the subject to <code>{{subject}}</code>, and use <code>{{title}}</code>, <code>{{message}}</code>, <code>{{deadline}}</code> and <code>{{notes}}</code> in the body. Pictures are not included in the email.</p>
+      <label class="f" for="sService">Service ID</label>
+      <input type="text" id="sService" placeholder="service_xxxxxxx">
+      <label class="f" for="sTemplate">Template ID</label>
+      <input type="text" id="sTemplate" placeholder="template_xxxxxxx">
+      <label class="f" for="sKey">Public key</label>
+      <input type="text" id="sKey">
+      <label class="f" for="sTo">Send reminders to</label>
+      <input type="email" id="sTo" placeholder="you@example.com">
+      <div class="row" style="margin-top:12px">
+        <button class="btn" id="btnTestEmail" type="button">Send test email</button>
+      </div>
+      <div class="status" id="emailStatus"></div>
+    </div>
+
+    <div class="row" style="justify-content:flex-end;margin-top:18px">
+      <button class="btn primary" id="btnSaveSettings" type="button">Save</button>
+      <button class="btn" id="btnCloseSettings" type="button">Close</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="lb" class="lb">
+  <div class="in">
+    <img id="lbImg" alt="">
+    <button class="nav prev" id="lbPrev" aria-label="Previous picture">‹</button>
+    <button class="nav next" id="lbNext" aria-label="Next picture">›</button>
+    <button class="close" id="lbClose" aria-label="Close">×</button>
+    <div class="cap" id="lbCap"></div>
+  </div>
+</dialog>
+
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : 'n' + Date.now() + Math.random().toString(16).slice(2));
+function toast(msg, kind) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (kind === 'err' ? ' err' : '');
+  el.textContent = msg;
+  $('#toasts').appendChild(el);
+  setTimeout(() => el.remove(), kind === 'err' ? 7000 : 4500);
+}
+function toLocalInput(d) {
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+const fmtDate = d => d.toLocaleDateString(undefined, {weekday:'short', day:'numeric', month:'short'});
+const fmtTime = d => d.toLocaleTimeString(undefined, {hour:'2-digit', minute:'2-digit'});
+const fmtFull = d => `${fmtDate(d)} ${d.getFullYear()}, ${fmtTime(d)}`;
+function rel(ms) {
+  const m = Math.max(1, Math.round(Math.abs(ms) / 60000));
+  const t = m < 60 ? m + ' min' : m < 1440 ? Math.round(m / 60) + ' h' : Math.round(m / 1440) + ' d';
+  return ms < 0 ? t + ' overdue' : 'in ' + t;
+}
+const OFFSET_LABEL = {0:'now', 60:'1 hour', 1440:'1 day', 2880:'2 days', 10080:'1 week'};
+
+/* ---------- storage (IndexedDB, so pictures fit) ---------- */
+let dbp;
+function db() {
+  return dbp || (dbp = new Promise((res, rej) => {
+    const r = indexedDB.open('overall-notes', 1);
+    r.onupgradeneeded = () => { r.result.createObjectStore('notes', {keyPath:'id'}); r.result.createObjectStore('kv'); };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  }));
+}
+function tx(store, mode, fn) {
+  return db().then(d => new Promise((res, rej) => {
+    const t = d.transaction(store, mode);
+    const out = fn(t.objectStore(store));
+    t.oncomplete = () => res(out && 'result' in out ? out.result : undefined);
+    t.onerror = () => rej(t.error);
+    t.onabort = () => rej(t.error);
+  }));
+}
+const saveNote = n => tx('notes', 'readwrite', s => s.put(n));
+const deleteNote = id => tx('notes', 'readwrite', s => s.delete(id));
+const loadNotes = () => tx('notes', 'readonly', s => s.getAll());
+const kvSet = (k, v) => tx('kv', 'readwrite', s => s.put(v, k));
+const kvGet = k => tx('kv', 'readonly', s => s.get(k));
+
+/* ---------- state ---------- */
+let notes = [];
+let settings = {service:'', template:'', publicKey:'', to:''};
+let filter = 'open', sortBy = 'due', search = '';
+let draft = {id:null, images:[]};
+const failAt = {};
+
+/* ---------- pictures: files, paste, drag & drop (incl. Google Photos) ---------- */
+async function blobToDataURL(blob) {
+  const bmp = await createImageBitmap(blob, {imageOrientation:'from-image'});
+  const MAX = 1600;
+  const k = Math.min(1, MAX / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+  const g = c.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+  g.drawImage(bmp, 0, 0, c.width, c.height);
+  bmp.close && bmp.close();
+  return c.toDataURL('image/jpeg', 0.86);
+}
+async function addBlobs(blobs) {
+  let failed = 0;
+  for (const b of blobs) {
+    try { draft.images.push(await blobToDataURL(b)); } catch { failed++; }
+  }
+  renderDraftThumbs();
+  if (failed) toast(`${failed} picture(s) couldn’t be read. If they’re HEIC, export them as JPG first.`, 'err');
+}
+function urlsFromDrop(dt) {
+  const urls = new Set();
+  const uriList = dt.getData('text/uri-list');
+  if (uriList) uriList.split(/\r?\n/).forEach(u => { if (u && !u.startsWith('#')) urls.add(u.trim()); });
+  const html = dt.getData('text/html');
+  if (html) {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    doc.querySelectorAll('img').forEach(i => i.src && urls.add(i.src));
+  }
+  const txt = dt.getData('text/plain');
+  if (txt && /^https?:\/\//i.test(txt.trim())) urls.add(txt.trim());
+  return [...urls].filter(u => /^(https?:|data:image|blob:)/i.test(u));
+}
+async function handleDrop(dt) {
+  const files = [...(dt.files || [])].filter(f => f.type.startsWith('image/'));
+  if (files.length) return addBlobs(files);
+  const urls = urlsFromDrop(dt);
+  if (!urls.length) return toast('Nothing to add: drop picture files or pictures from Google Photos.', 'err');
+  const blobs = [];
+  for (const u of urls) {
+    try {
+      const r = await fetch(u, {mode:'cors'});
+      const b = await r.blob();
+      if (b.type.startsWith('image/')) blobs.push(b);
+    } catch {}
+  }
+  if (blobs.length) addBlobs(blobs);
+  else toast('Google Photos wouldn’t hand over that picture. Download it and drop the file instead.', 'err');
+}
+const drop = $('#drop');
+['dragenter','dragover'].forEach(ev => $('#composer').addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(ev => $('#composer').addEventListener(ev, e => { e.preventDefault(); if (ev === 'drop' || e.target === $('#composer')) drop.classList.remove('over'); }));
+$('#composer').addEventListener('drop', e => handleDrop(e.dataTransfer));
+['dragover','drop'].forEach(ev => window.addEventListener(ev, e => e.preventDefault()));
+$('#pick').onclick = () => $('#files').click();
+drop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#files').click(); } });
+$('#files').onchange = e => { addBlobs([...e.target.files]); e.target.value = ''; };
+document.addEventListener('paste', e => {
+  const files = [...(e.clipboardData?.files || [])].filter(f => f.type.startsWith('image/'));
+  if (files.length) { e.preventDefault(); addBlobs(files); }
+});
+function renderDraftThumbs() {
+  $('#draftThumbs').innerHTML = draft.images.map((src, i) =>
+    `<div class="t"><img src="${src}" alt="Picture ${i+1}"><button type="button" class="x" data-i="${i}" aria-label="Remove picture ${i+1}">×</button></div>`).join('');
+}
+$('#draftThumbs').onclick = e => {
+  const b = e.target.closest('.x'); if (!b) return;
+  draft.images.splice(+b.dataset.i, 1); renderDraftThumbs();
+};
+
+/* ---------- composer ---------- */
+function emailReady() { return !!(settings.service && settings.template && settings.publicKey && settings.to); }
+function syncRemindBox() { $('#remindBox').hidden = !$('#fDue').value; }
+$('#fDue').addEventListener('input', syncRemindBox);
+$$('[data-q]').forEach(b => b.onclick = () => {
+  const d = new Date(); const k = b.dataset.q;
+  if (k === 'clear') $('#fDue').value = '';
+  else {
+    if (k === 'today') d.setHours(18, 0, 0, 0);
+    if (k === 'tomorrow') { d.setDate(d.getDate() + 1); d.setHours(9, 0, 0, 0); }
+    if (k === 'week') { d.setDate(d.getDate() + 7); d.setHours(9, 0, 0, 0); }
+    $('#fDue').value = toLocalInput(d);
+  }
+  syncRemindBox();
+});
+function resetComposer() {
+  draft = {id:null, images:[]};
+  $('#form').reset();
+  $('#chEmail').checked = emailReady();
+  $$('#remindChecks input').forEach(c => c.checked = (c.value === '0' || c.value === '1440'));
+  $('#cTitle').textContent = 'New note';
+  $('#saveBtn').textContent = 'Add note';
+  $('#cancelBtn').hidden = true;
+  renderDraftThumbs(); syncRemindBox();
+}
+$('#cancelBtn').onclick = resetComposer;
+function editNote(n) {
+  draft = {id:n.id, images:[...n.images]};
+  $('#fTitle').value = n.title; $('#fBody').value = n.body; $('#fDue').value = n.deadline || '';
+  $$('#remindChecks input').forEach(c => c.checked = (n.remind || []).includes(+c.value));
+  $('#chBrowser').checked = !!n.channels?.browser; $('#chEmail').checked = !!n.channels?.email;
+  $('#cTitle').textContent = 'Edit note';
+  $('#saveBtn').textContent = 'Save changes';
+  $('#cancelBtn').hidden = false;
+  renderDraftThumbs(); syncRemindBox();
+  $('#composer').scrollIntoView({behavior:'smooth', block:'start'});
+  $('#fTitle').focus();
+}
+$('#form').onsubmit = async e => {
+  e.preventDefault();
+  const title = $('#fTitle').value.trim();
+  if (!title) return;
+  const deadline = $('#fDue').value;
+  const remind = deadline ? $$('#remindChecks input:checked').map(c => +c.value) : [];
+  const channels = {browser: $('#chBrowser').checked, email: $('#chEmail').checked};
+  if (deadline && channels.email && !emailReady()) {
+    toast('Add your EmailJS details under Notifications to receive email reminders.', 'err');
+  }
+  const old = draft.id ? notes.find(x => x.id === draft.id) : null;
+  const n = {
+    id: old?.id || uid(), created: old?.created || Date.now(), done: old?.done || false,
+    title, body: $('#fBody').value.trim(), images: draft.images, deadline, remind, channels,
+    sent: old?.sent || {}
+  };
+  const changed = !old || old.deadline !== deadline || JSON.stringify(old.remind) !== JSON.stringify(remind);
+  if (changed) {
+    n.sent = {};
+    if (deadline) { // don't fire reminders whose time has already passed when the note is saved
+      const dl = new Date(deadline).getTime(), now = Date.now();
+      remind.forEach(m => { if (now >= dl - m * 60000) ['browser','email'].forEach(ch => n.sent[m + ':' + ch] = 1); });
+    }
+  }
+  try { await saveNote(n); } catch { return toast('Couldn’t save. Is browser storage blocked or full?', 'err'); }
+  const i = notes.findIndex(x => x.id === n.id);
+  if (i >= 0) notes[i] = n; else notes.push(n);
+  resetComposer(); render();
+  toast(old ? 'Changes saved' : 'Note added');
+};
+
+/* ---------- list ---------- */
+function status(n, now) {
+  if (n.done) return 'done';
+  if (!n.deadline) return '';
+  const left = new Date(n.deadline).getTime() - now;
+  return left < 0 ? 'over' : left < 86400000 ? 'soon' : '';
+}
+function visible(now) {
+  const q = search.toLowerCase();
+  let out = notes.filter(n => {
+    const s = status(n, now);
+    if (filter === 'open' && n.done) return false;
+    if (filter === 'done' && !n.done) return false;
+    if (filter === 'over' && s !== 'over') return false;
+    return !q || (n.title + ' ' + n.body).toLowerCase().includes(q);
+  });
+  out.sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    if (sortBy === 'new') return b.created - a.created;
+    const da = a.deadline ? new Date(a.deadline).getTime() : Infinity;
+    const db_ = b.deadline ? new Date(b.deadline).getTime() : Infinity;
+    return da !== db_ ? da - db_ : b.created - a.created;
+  });
+  return out;
+}
+function render() {
+  const now = Date.now();
+  const items = visible(now);
+  $('#list').innerHTML = items.length ? items.map(n => {
+    const s = status(n, now);
+    let due = '';
+    if (n.deadline) {
+      const d = new Date(n.deadline);
+      due = `<div class="due"><div class="d">${esc(fmtDate(d))}</div><div class="t">${esc(fmtTime(d))}</div>${n.done ? '' : `<div class="r">${esc(rel(d - now))}</div>`}</div>`;
+    }
+    const pics = n.images.length ? `<div class="pics">${n.images.slice(0, 4).map((src, i) =>
+      `<button type="button" data-lb="${n.id}" data-i="${i}" aria-label="Open picture ${i+1}"><img src="${src}" alt="">${i === 3 && n.images.length > 4 ? `<span class="more">+${n.images.length - 3}</span>` : ''}</button>`).join('')}</div>` : '';
+    const bells = [n.deadline && n.channels?.browser ? 'browser' : '', n.deadline && n.channels?.email ? 'email' : ''].filter(Boolean).join(' + ');
+    return `<article class="card ${s}" id="n-${n.id}">
+      <div class="head"><h3 class="title">${esc(n.title)}</h3>${due}</div>
+      ${n.body ? `<div class="body">${esc(n.body)}</div>` : ''}
+      ${pics}
+      <div class="foot">
+        <span class="meta">${bells ? 'Reminders: ' + bells : ''}</span>
+        <button class="btn small" data-act="done" data-id="${n.id}">${n.done ? 'Reopen' : 'Mark done'}</button>
+        <button class="btn small" data-act="edit" data-id="${n.id}">Edit</button>
+        <button class="btn small danger" data-act="del" data-id="${n.id}">Delete</button>
+      </div></article>`;
+  }).join('') : `<div class="empty">${notes.length ? 'No notes match this view.' : 'No notes yet. Add your first one on the left.'}</div>`;
+  const overdue = notes.filter(n => status(n, now) === 'over').length;
+  document.title = (overdue ? `(${overdue}) ` : '') + 'Notes';
+}
+$('#list').onclick = async e => {
+  const lbBtn = e.target.closest('[data-lb]');
+  if (lbBtn) return openLightbox(notes.find(n => n.id === lbBtn.dataset.lb), +lbBtn.dataset.i);
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const n = notes.find(x => x.id === b.dataset.id); if (!n) return;
+  if (b.dataset.act === 'done') { n.done = !n.done; await saveNote(n); render(); }
+  if (b.dataset.act === 'edit') editNote(n);
+  if (b.dataset.act === 'del' && confirm(`Delete “${n.title}”? This can’t be undone.`)) {
+    await deleteNote(n.id); notes = notes.filter(x => x.id !== n.id);
+    if (draft.id === n.id) resetComposer();
+    render();
+  }
+};
+$('#tabs').onclick = e => {
+  const b = e.target.closest('[data-f]'); if (!b) return;
+  filter = b.dataset.f;
+  $$('#tabs button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  render();
+};
+$('#q').oninput = e => { search = e.target.value; render(); };
+$('#sort').onchange = e => { sortBy = e.target.value; render(); };
+
+/* ---------- lightbox ---------- */
+let lbSet = [], lbIdx = 0, lbTitle = '';
+function openLightbox(n, i) { lbSet = n.images; lbIdx = i; lbTitle = n.title; showLb(); $('#lb').showModal(); }
+function showLb() {
+  $('#lbImg').src = lbSet[lbIdx]; $('#lbCap').textContent = `${lbTitle} · ${lbIdx + 1}/${lbSet.length}`;
+  $('#lbPrev').hidden = $('#lbNext').hidden = lbSet.length < 2;
+}
+$('#lbPrev').onclick = () => { lbIdx = (lbIdx - 1 + lbSet.length) % lbSet.length; showLb(); };
+$('#lbNext').onclick = () => { lbIdx = (lbIdx + 1) % lbSet.length; showLb(); };
+$('#lbClose').onclick = () => $('#lb').close();
+$('#lb').addEventListener('click', e => { if (e.target === $('#lb')) $('#lb').close(); });
+$('#lb').addEventListener('keydown', e => { if (e.key === 'ArrowLeft') $('#lbPrev').click(); if (e.key === 'ArrowRight') $('#lbNext').click(); });
+
+/* ---------- notifications ---------- */
+function permText() {
+  if (!('Notification' in window)) return ['This browser doesn’t support notifications.', 'bad'];
+  const p = Notification.permission;
+  if (p === 'granted') return ['Allowed. Browser notifications are on.', 'ok'];
+  if (p === 'denied') return ['Blocked. Re-enable notifications for this site in your browser settings.', 'bad'];
+  return ['Not allowed yet. Click “Allow notifications”.', ''];
+}
+function showPerm() { const [t, k] = permText(); const el = $('#permStatus'); el.textContent = t; el.className = 'status ' + k; }
+$('#btnPerm').onclick = async () => {
+  if (!('Notification' in window)) return showPerm();
+  await Notification.requestPermission(); showPerm();
+};
+function browserNotify(title, body, id) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    const n = new Notification(title, {body, tag: id || 'notes'});
+    n.onclick = () => { window.focus(); if (id) flashNote(id); n.close(); };
+    return true;
+  }
+  return false;
+}
+$('#btnTestBrowser').onclick = () => {
+  if (!browserNotify('Notes', 'Browser notifications are working.')) { toast('Allow notifications first.', 'err'); showPerm(); }
+};
+function flashNote(id) {
+  filter = 'all'; $$('#tabs button').forEach(x => x.setAttribute('aria-pressed', x.dataset.f === 'all')); render();
+  const el = document.getElementById('n-' + id);
+  if (el) { el.scrollIntoView({behavior:'smooth', block:'center'}); el.classList.add('flash'); }
+}
+async function sendEmail(n, label, test) {
+  if (!emailReady()) throw new Error('EmailJS isn’t set up yet');
+  const dl = n.deadline ? fmtFull(new Date(n.deadline)) : 'No deadline';
+  const params = {
+    to_email: settings.to,
+    subject: `${label}: ${n.title}`,
+    title: n.title,
+    message: `${label}: ${n.title}`,
+    deadline: dl,
+    notes: n.body || '(no details)',
+    pictures: String(n.images?.length || 0)
+  };
+  const r = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({service_id: settings.service, template_id: settings.template, user_id: settings.publicKey, template_params: params})
+  });
+  if (!r.ok) throw new Error((await r.text()) || r.statusText);
+}
+$('#btnTestEmail').onclick = async () => {
+  readSettingsForm();
+  const el = $('#emailStatus'); el.className = 'status'; el.textContent = 'Sending…';
+  try {
+    await sendEmail({title:'Test reminder', body:'If you can read this, EmailJS is set up correctly.', deadline:'', images:[]}, 'Test');
+    el.className = 'status ok'; el.textContent = 'Sent. Check your inbox (and spam).';
+  } catch (err) { el.className = 'status bad'; el.textContent = 'Failed: ' + err.message; }
+};
+function reminderLabel(n, m, now) {
+  const dl = new Date(n.deadline).getTime();
+  if (now - dl > 60000) return 'Overdue';
+  return m === 0 ? 'Due now' : 'Due in ' + OFFSET_LABEL[m];
+}
+async function tick() {
+  const now = Date.now();
+  for (const n of notes) {
+    if (n.done || !n.deadline) continue;
+    const dl = new Date(n.deadline).getTime();
+    for (const m of n.remind || []) {
+      if (now < dl - m * 60000) continue;
+      for (const ch of ['browser', 'email']) {
+        if (!n.channels?.[ch]) continue;
+        const key = m + ':' + ch;
+        if (n.sent?.[key]) continue;
+        if (failAt[n.id + key] && now - failAt[n.id + key] < 300000) continue;
+        const label = reminderLabel(n, m, now);
+        try {
+          if (ch === 'browser') {
+            browserNotify(`${label}: ${n.title}`, `Deadline ${fmtFull(new Date(n.deadline))}`, n.id);
+            toast(`${label}: ${n.title}`);
+          } else await sendEmail(n, label);
+          n.sent = n.sent || {}; n.sent[key] = 1;
+          await saveNote(n);
+        } catch (err) {
+          failAt[n.id + key] = now;
+          if (ch === 'email') toast(`Email reminder for “${n.title}” failed: ${err.message}`, 'err');
+        }
+      }
+    }
+  }
+  render();
+}
+
+/* ---------- settings ---------- */
+function readSettingsForm() {
+  settings = {service: $('#sService').value.trim(), template: $('#sTemplate').value.trim(), publicKey: $('#sKey').value.trim(), to: $('#sTo').value.trim()};
+}
+$('#btnSettings').onclick = () => {
+  $('#sService').value = settings.service; $('#sTemplate').value = settings.template; $('#sKey').value = settings.publicKey; $('#sTo').value = settings.to;
+  $('#emailStatus').textContent = ''; showPerm(); $('#dlgSettings').showModal();
+};
+$('#btnSaveSettings').onclick = async () => {
+  readSettingsForm(); await kvSet('settings', settings);
+  if (!draft.id) $('#chEmail').checked = emailReady() || $('#chEmail').checked;
+  $('#dlgSettings').close(); toast('Notification settings saved');
+};
+$('#btnCloseSettings').onclick = () => $('#dlgSettings').close();
+
+/* ---------- backup ---------- */
+$('#btnExport').onclick = () => {
+  const blob = new Blob([JSON.stringify({app:'overall-notes', version:1, exported:new Date().toISOString(), notes}, null, 1)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `notes-backup-${new Date().toISOString().slice(0,10)}.json`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+};
+$('#btnImport').onclick = () => $('#importFile').click();
+$('#importFile').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const data = JSON.parse(await f.text());
+    if (!Array.isArray(data.notes)) throw new Error('not a notes backup');
+    for (const n of data.notes) {
+      if (!n.id || !n.title) continue;
+      n.images = n.images || []; n.remind = n.remind || []; n.channels = n.channels || {}; n.sent = n.sent || {};
+      await saveNote(n);
+    }
+    notes = await loadNotes(); render(); toast(`Imported ${data.notes.length} note(s)`);
+  } catch (err) { toast('Import failed: ' + err.message, 'err'); }
+};
+
+/* ---------- start ---------- */
+(async function init() {
+  try {
+    notes = (await loadNotes()) || [];
+    settings = Object.assign(settings, await kvGet('settings') || {});
+  } catch { toast('Browser storage is unavailable, so notes can’t be saved here.', 'err'); }
+  resetComposer(); render();
+  tick();
+  setInterval(tick, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+})();
+</script>
+</body>
+</html>
