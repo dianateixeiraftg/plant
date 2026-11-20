@@ -32,12 +32,12 @@ input,select{border:1px solid var(--line);background:var(--card);border-radius:8
 .row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
 .row:first-of-type{border-top:0}
 .lab{width:170px;flex:none;color:var(--mute);font-size:.92rem}
-.val{flex:1;min-width:0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;font-size:1.02rem}
+.val{flex:1 1 140px;min-width:0;font-variant-numeric:tabular-nums;overflow-wrap:break-word;word-break:normal;font-size:1.02rem}
 .val.hid{letter-spacing:.15em;color:var(--mute)}
 .act{display:flex;gap:4px;flex:none;flex-wrap:wrap}
 .act button{padding:5px 9px;font-size:.88rem}
 button.copied{background:var(--ok);border-color:var(--ok);color:#fff}
-@media(max-width:620px){.row{flex-wrap:wrap}.lab{width:100%}}
+@media(max-width:620px){.row{flex-wrap:wrap}.lab{width:100%}.val{flex:1 1 100%}.act{flex:1 1 100%}}
 .empty{color:var(--mute);padding:6px 0}
 .sm{font-size:.76rem;margin-top:2px}
 .files{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
