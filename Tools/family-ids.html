@@ -40,6 +40,10 @@ button.copied{background:var(--ok);border-color:var(--ok);color:#fff}
 @media(max-width:620px){.row{flex-wrap:wrap}.lab{width:100%}}
 .empty{color:var(--mute);padding:6px 0}
 .sm{font-size:.76rem;margin-top:2px}
+.files{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.chip{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:3px 6px;font-size:.88rem;max-width:100%}
+.chip .cn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:210px}
+.chip button{padding:2px 7px;font-size:.8rem}
 .exl{display:flex;gap:8px;align-items:center;padding:3px 0;cursor:pointer}
 .exl input{width:auto;min-width:0;padding:0;margin:0}
 .exl.s{font-weight:600}
@@ -124,6 +128,7 @@ summary{cursor:pointer;font-weight:600}
   <div id="exPer"></div>
   <div id="exTyp" hidden></div>
   <div id="exTree" hidden></div>
+  <label style="display:block;margin-top:10px"><input type="checkbox" id="exFiles" checked style="padding:0;width:auto;vertical-align:middle"> Incluir os ficheiros anexados no JSON (o ficheiro fica maior)</label>
   <div class="bar" style="margin-top:12px"><button class="p" id="exJson">Exportar JSON</button><button class="p" id="exPdf">Exportar PDF</button><button id="exClose">Fechar</button></div>
   <p class="note">Os ficheiros exportados contêm os valores completos, sem ocultar. Guarda-os num sítio seguro.</p>
 </div>
@@ -137,9 +142,10 @@ summary{cursor:pointer;font-weight:600}
     <button id="import">Importar ficheiro</button>
     <input type="file" id="file" accept=".json" hidden>
   </div>
-  <p class="note">Os dados ficam só neste navegador, neste dispositivo. Exporta o JSON de vez em quando e guarda o ficheiro num local seguro, porque limpar os dados do navegador apaga tudo.</p>
+  <p class="note">Os dados ficam só neste navegador, neste dispositivo. Os ficheiros anexados também ficam só neste navegador. Exporta o JSON (inclui os anexos) de vez em quando e guarda o ficheiro num local seguro, porque limpar os dados do navegador apaga tudo.</p>
 </div>
 </main>
+<input type="file" id="fileIn" accept="image/*,application/pdf" multiple hidden>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -187,15 +193,51 @@ function copy(text,btn){
 
 function valEl(v){var s=h("div",{"class":"val"+(S.show?"":" hid"),text:S.show?v:"••••••••"});return s}
 
+/* ===== Anexos (fotos e PDF) guardados em IndexedDB ===== */
+var DB=null,ATT=null;
+function dbOpen(){try{var r=indexedDB.open("documentos-familia-files",1);r.onupgradeneeded=function(){r.result.createObjectStore("f",{keyPath:"id"})};r.onsuccess=function(){DB=r.result};}catch(e){}}
+function dbTx(mode,fn){return new Promise(function(res,rej){if(!DB)return rej(new Error("sem base de dados"));var t=DB.transaction("f",mode),o=fn(t.objectStore("f"));t.oncomplete=function(){res(o&&o.result)};t.onerror=t.onabort=function(){rej(t.error)}})}
+function filePut(r){return dbTx("readwrite",function(st){return st.put(r)})}
+function fileGet(id){return dbTx("readonly",function(st){return st.get(id)})}
+function fileClear(){return dbTx("readwrite",function(st){return st.clear()})}
+function delIds(ids){if(ids.length&&DB)dbTx("readwrite",function(st){ids.forEach(function(i){st.delete(i)})}).catch(function(){})}
+function idsOfNode(n){var r=(n.files||[]).map(function(f){return f.id});(n.children||[]).forEach(function(c){r=r.concat(idsOfNode(c))});return r}
+function idsOfPerson(p){var r=[];p.items.forEach(function(i){r=r.concat(idsOfNode(i))});return r}
+function eachNode(people,fn){people.forEach(function(p){(p.items||[]).forEach(function(i){fn(i);(i.children||[]).forEach(fn)})})}
+function stripFiles(people){eachNode(people,function(n){delete n.files})}
+function toDataURL(b){return new Promise(function(res){var r=new FileReader();r.onload=function(){res(r.result)};r.readAsDataURL(b)})}
+function dataToBlob(u){var i=u.indexOf(","),t=u.slice(5,i).split(";")[0],bin=atob(u.slice(i+1)),a=new Uint8Array(bin.length);for(var k=0;k<bin.length;k++)a[k]=bin.charCodeAt(k);return new Blob([a],{type:t})}
+function attachData(people){var jobs=[];eachNode(people,function(n){(n.files||[]).forEach(function(m){jobs.push(fileGet(m.id).then(function(r){if(r)return toDataURL(r.blob).then(function(d){m.data=d})}).catch(function(){}))})});return Promise.all(jobs).then(function(){return people})}
+function importFiles(people){
+  if(!DB){stripFiles(people);return Promise.resolve()}
+  var puts=[];eachNode(people,function(n){if(n.files)n.files=n.files.filter(function(m){if(!m.data)return false;try{puts.push({id:m.id,name:m.name,type:m.type,blob:dataToBlob(m.data)})}catch(e){return false}delete m.data;return true})});
+  return fileClear().then(function(){return Promise.all(puts.map(filePut))})}
+function shrink(f){return new Promise(function(res){
+  if(f.type.indexOf("image/")!==0||f.size<1500000||!window.createImageBitmap)return res(f);
+  createImageBitmap(f).then(function(bm){var sc=Math.min(1,2000/Math.max(bm.width,bm.height));
+    var c=document.createElement("canvas");c.width=Math.round(bm.width*sc);c.height=Math.round(bm.height*sc);c.getContext("2d").drawImage(bm,0,0,c.width,c.height);
+    c.toBlob(function(b){res(b&&b.size<f.size?b:f)},"image/jpeg",0.85)},function(){res(f)})})}
+function pickFile(n){if(!DB){toast("Os anexos não funcionam neste navegador");return}ATT=n;$("fileIn").click()}
+function viewFile(m){var w=window.open("","_blank");
+  fileGet(m.id).then(function(r){if(!r){if(w)w.close();toast("Ficheiro não encontrado");return}
+    var u=URL.createObjectURL(r.blob);if(w)w.location.href=u;else toast("O navegador bloqueou a nova janela");setTimeout(function(){URL.revokeObjectURL(u)},300000)}).catch(function(){if(w)w.close();toast("Não foi possível abrir o ficheiro")})}
+function saveFile(m){fileGet(m.id).then(function(r){if(r)dl(m.name,r.blob);else toast("Ficheiro não encontrado")}).catch(function(){toast("Não foi possível descarregar")})}
+function removeFile(n,m){if(confirm("Remover "+m.name+"?")){delIds([m.id]);n.files=n.files.filter(function(x){return x!==m});save();render()}}
+function filesBar(n,edit){var f=n.files||[];if(!f.length)return null;var w=h("div",{"class":"files"},[]);
+  f.forEach(function(m){var c=h("div",{"class":"chip"},[h("span",{"class":"cn",text:(m.type==="application/pdf"?"📄 ":"🖼️ ")+m.name,title:m.name}),
+    h("button",{text:"Ver",on:{click:function(){viewFile(m)}}}),h("button",{text:"Descarregar",on:{click:function(){saveFile(m)}}})]);
+    if(edit)c.appendChild(h("button",{"class":"d",text:"Remover",on:{click:function(){removeFile(n,m)}}}));w.appendChild(c)});return w}
+
 function isGroup(it){return !!(CHILDREN[it.type]||it.group||(it.children&&it.children.length))}
 
 function childRow(p,it,c,ro){
   var act=h("div",{"class":"act"},[h("button",{"class":"p",text:"Copiar",on:{click:function(e){copy(c.value,e.currentTarget)}}})]);
   if(!ro){
+    act.appendChild(h("button",{text:"Anexar","aria-label":"Anexar ficheiro a "+c.type,on:{click:function(){pickFile(c)}}}));
     act.appendChild(h("button",{text:"Editar","aria-label":"Editar "+c.type,on:{click:function(){var n=prompt(c.type,c.value);if(n!==null&&n.trim()){c.value=n.trim();save();render()}}}}));
-    act.appendChild(h("button",{"class":"d",text:"Apagar","aria-label":"Apagar "+c.type,on:{click:function(){if(confirm("Apagar "+c.type+" de "+it.type+"?")){it.children=it.children.filter(function(x){return x!==c});save();render()}}}}));
+    act.appendChild(h("button",{"class":"d",text:"Apagar","aria-label":"Apagar "+c.type,on:{click:function(){if(confirm("Apagar "+c.type+" de "+it.type+"?")){delIds(idsOfNode(c));it.children=it.children.filter(function(x){return x!==c});save();render()}}}}));
   }
-  return h("div",{"class":"row"},[h("div",{"class":"lab",style:"width:150px",text:c.type}),valEl(c.value),act])}
+  var r=h("div",{"class":"row"},[h("div",{"class":"lab",style:"width:150px",text:c.type}),valEl(c.value),act]),fb=filesBar(c,!ro);return fb?h("div",{"class":"grp"},[r,fb]):r}
 
 function childForm(p,it){
   var sel=h("select",{"aria-label":"Tipo de sub-item"},[]);
@@ -216,21 +258,23 @@ function itemRow(p,it,ro){
   act.appendChild(h("button",{"class":"p",text:"Copiar",on:{click:function(e){copy(it.value,e.currentTarget)}}}));
   if(!ro){
     if(!arch&&isGroup(it))act.appendChild(h("button",{text:"+ Sub-item","aria-label":"Adicionar sub-item a "+it.type,on:{click:function(){S.childFor=S.childFor===it.id?null:it.id;render()}}}));
+    if(!arch)act.appendChild(h("button",{text:"Anexar","aria-label":"Anexar ficheiro a "+it.type,on:{click:function(){pickFile(it)}}}));
     if(!arch)act.appendChild(h("button",{text:"Editar","aria-label":"Editar "+it.type,on:{click:function(){var n=prompt(it.type,it.value);if(n!==null&&n.trim()){it.value=n.trim();save();render()}}}}));
     act.appendChild(h("button",{text:arch?"Restaurar":"Arquivar","aria-label":(arch?"Restaurar ":"Arquivar ")+it.type,on:{click:function(){
       if(arch){delete it.archived;delete it.archivedAt}else{it.archived=true;it.archivedAt=today()}
       save();render();toast(arch?"Restaurado":"Arquivado")}}}));
-    act.appendChild(h("button",{"class":"d",text:"Apagar","aria-label":"Apagar "+it.type,on:{click:function(){if(confirm("Apagar "+it.type+" de "+p.name+(it.children&&it.children.length?" e os seus sub-itens":"")+"?")){p.items=p.items.filter(function(x){return x!==it});save();render()}}}}));
+    act.appendChild(h("button",{"class":"d",text:"Apagar","aria-label":"Apagar "+it.type,on:{click:function(){if(confirm("Apagar "+it.type+" de "+p.name+(it.children&&it.children.length?" e os seus sub-itens":"")+"?")){delIds(idsOfNode(it));p.items=p.items.filter(function(x){return x!==it});save();render()}}}}));
   }
   var lab=h("div",{"class":"lab",text:it.type});
   if(arch)lab.appendChild(h("div",{"class":"sm",text:"Arquivado"+(it.archivedAt?" em "+it.archivedAt:"")}));
   var row=h("div",{"class":"row"},[lab,valEl(it.value),act]);
-  var kids=it.children||[],form=S.childFor===it.id&&!ro&&!arch;
-  if(!kids.length&&!form)return row;
-  var blk=h("div",{"class":"kids"},[]);
-  kids.forEach(function(c){blk.appendChild(childRow(p,it,c,ro||arch))});
-  if(form)blk.appendChild(childForm(p,it));
-  return h("div",{"class":"grp"},[row,blk])}
+  var kids=it.children||[],form=S.childFor===it.id&&!ro&&!arch,fb=filesBar(it,!ro&&!arch);
+  if(!kids.length&&!form&&!fb)return row;
+  var parts=[row];if(fb)parts.push(fb);
+  if(kids.length||form){var blk=h("div",{"class":"kids"},[]);
+    kids.forEach(function(c){blk.appendChild(childRow(p,it,c,ro||arch))});
+    if(form)blk.appendChild(childForm(p,it));parts.push(blk)}
+  return h("div",{"class":"grp"},parts)}
 
 function archCount(){var n=0;S.people.forEach(function(p){if(p.archived)n++;else p.items.forEach(function(i){if(i.archived)n++})});return n}
 
@@ -261,7 +305,7 @@ function renderArch(){$("archView").hidden=S.sel!==ARCH;if(S.sel!==ARCH)return;
       box.appendChild(h("div",{"class":"row"},[lab,h("div",{"class":"act"},[
         h("button",{"class":"p",text:"Abrir",on:{click:function(){S.sel=p.id;render()}}}),
         h("button",{text:"Restaurar",on:{click:function(){delete p.archived;delete p.archivedAt;save();render();toast(p.name+" restaurado(a)")}}}),
-        h("button",{"class":"d",text:"Apagar",on:{click:function(){if(confirm("Apagar "+p.name+" e todos os seus itens, de vez?")){S.people=S.people.filter(function(x){return x!==p});save();render()}}}})])]))})}
+        h("button",{"class":"d",text:"Apagar",on:{click:function(){if(confirm("Apagar "+p.name+" e todos os seus itens, de vez?")){delIds(idsOfPerson(p));S.people=S.people.filter(function(x){return x!==p});save();render()}}}})])]))})}
   active().forEach(function(p){var old=p.items.filter(function(i){return i.archived});if(!old.length)return;any=true;
     box.appendChild(h("div",{"class":"h3",text:ICON[p.kind]+" "+p.name}));old.forEach(function(it){box.appendChild(itemRow(p,it,false))})});
   if(!any)box.appendChild(h("div",{"class":"empty",text:"O arquivo está vazio."}))}
@@ -311,7 +355,7 @@ function makePDF(people){
     cur.push(T((KL[p.kind]||"Outro")+" · "+p.name+(p.archived?" (arquivado)":""),M,y,13,true));y-=7;
     cur.push("0.75 0.75 0.75 rg "+M+" "+y.toFixed(1)+" "+(W-2*M)+" 0.7 re f");y-=16;
     if(!p.items.length){cur.push(T("Sem itens",M,y,10,false,true));y-=16}
-    p.items.forEach(function(it){row(it.type+(it.archived?" (arquivado)":""),it.value,0);(it.children||[]).forEach(function(c){row(c.type,c.value,14)})});
+    p.items.forEach(function(it){row(it.type+(it.archived?" (arquivado)":""),it.value,0);if(it.files&&it.files.length)row("Anexos",it.files.map(function(f){return f.name}).join(", "),14);(it.children||[]).forEach(function(c){row(c.type,c.value,14);if(c.files&&c.files.length)row("Anexos",c.files.map(function(f){return f.name}).join(", "),28)})});
     y-=12});
   var objs=[];function add(o){objs.push(o);return objs.length}
   add("<< /Type /Catalog /Pages 2 0 R >>");add("");
@@ -332,10 +376,11 @@ function makePDF(people){
 
 function dl(name,blob){var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(a.href)},1500)}
 function stamp(){return new Date().toISOString().slice(0,10)}
-function doExport(people,fmt){if(!people.length){toast("Nada para exportar");return}
-  if(fmt==="pdf")dl("documentos-familia-"+stamp()+".pdf",makePDF(people));
-  else dl("documentos-familia-"+stamp()+".json",new Blob([JSON.stringify({app:"documentos-familia",versao:2,exportado:new Date().toISOString(),people:people},null,2)],{type:"application/json"}));
-  toast("Exportado")}
+function doExport(people,fmt,wf){if(!people.length){toast("Nada para exportar");return}
+  if(fmt==="pdf"){dl("documentos-familia-"+stamp()+".pdf",makePDF(people));toast("Exportado");return}
+  var c=JSON.parse(JSON.stringify(people));if(!wf)stripFiles(c);
+  (wf?attachData(c):Promise.resolve(c)).then(function(c){
+    dl("documentos-familia-"+stamp()+".json",new Blob([JSON.stringify({app:"documentos-familia",versao:3,exportado:new Date().toISOString(),people:c},null,2)],{type:"application/json"}));toast("Exportado")})}
 
 var EX=[];
 function mask(v){return S.show?v:"••••"}
@@ -404,7 +449,15 @@ function exCollect(){var out=[];EX.forEach(function(g){var items=[];
   if(items.length||(!g.items.length&&g.cb.checked)){var p=JSON.parse(JSON.stringify(g.p));p.items=items;out.push(p)}});return out}
 
 function init(){
-  $("nojs").hidden=true;
+  $("nojs").hidden=true;dbOpen();
+  $("fileIn").onchange=function(){var list=Array.prototype.slice.call(this.files||[]),n=ATT;this.value="";if(!n||!list.length)return;
+    var done=0,bad=0,chain=Promise.resolve();
+    list.forEach(function(f){chain=chain.then(function(){
+      if(!(f.type.indexOf("image/")===0||f.type==="application/pdf")){bad++;return}
+      if(f.size>25*1048576){toast(f.name+" tem mais de 25 MB");return}
+      return shrink(f).then(function(b){var name=b!==f?f.name.replace(/\.[^.]+$/,"")+".jpg":f.name,rec={id:uid(),name:name,type:b.type||f.type,blob:b};
+        return filePut(rec).then(function(){(n.files=n.files||[]).push({id:rec.id,name:name,type:rec.type,size:b.size});done++})})})});
+    chain.catch(function(){toast("Não foi possível guardar o ficheiro")}).then(function(){if(done){save();render();toast(done===1?"Ficheiro anexado":done+" ficheiros anexados")}else if(bad)toast("Só são aceites fotos e PDF")})};
   load();
   fillTypes("person");
   $("kind").onchange=function(){$("newPerson").placeholder=HINT[$("kind").value]};
@@ -416,23 +469,23 @@ function init(){
     var it={id:uid(),type:type,value:v};if($("type").value==="Outro…"&&$("grp").checked){it.group=true;$("grp").checked=false}p.items.push(it);$("value").value="";save();render();$("value").focus()}
   $("addItem").onclick=addItem;$("value").onkeydown=function(e){if(e.key==="Enter")addItem()};
   $("renamePerson").onclick=function(){var p=person();if(!p)return;var n=prompt("Novo nome",p.name);if(n&&n.trim()){p.name=n.trim();save();render()}};
-  $("delPerson").onclick=function(){var p=person();if(!p)return;if(confirm("Apagar "+p.name+" e todos os seus itens?")){S.people=S.people.filter(function(x){return x!==p});S.sel=firstSel();save();render()}};
+  $("delPerson").onclick=function(){var p=person();if(!p)return;if(confirm("Apagar "+p.name+" e todos os seus itens?")){delIds(idsOfPerson(p));S.people=S.people.filter(function(x){return x!==p});S.sel=firstSel();save();render()}};
   $("vis").onclick=function(){S.show=!S.show;render()};
   $("q").oninput=renderAll;$("inclArch").onchange=renderAll;
   $("archivePerson").onclick=function(){var p=person();if(!p)return;
     if(p.archived){delete p.archived;delete p.archivedAt;toast(p.name+" restaurado(a)")}
     else{p.archived=true;p.archivedAt=today();S.sel=firstSel();toast("Arquivado")}
     save();render()};
-  $("export").onclick=function(){doExport(S.people,"json")};
+  $("export").onclick=function(){doExport(S.people,"json",true)};
   $("exportPdf").onclick=function(){doExport(S.people,"pdf")};
   $("exportSel").onclick=function(){exBuild();exLists();exMode("p");$("exPanel").hidden=false;$("exPanel").scrollIntoView({behavior:"smooth",block:"start"})};
   $("exClose").onclick=function(){$("exPanel").hidden=true};
   $("exAll").onclick=function(){exSetAll(true)};$("exNone").onclick=function(){exSetAll(false)};$("exArch").onchange=exSync;
-  $("exJson").onclick=function(){doExport(exCollect(),"json")};
+  $("exJson").onclick=function(){doExport(exCollect(),"json",$("exFiles").checked)};
   $("exPdf").onclick=function(){doExport(exCollect(),"pdf")};
   $("import").onclick=function(){$("file").click()};
   $("file").onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var d=JSON.parse(r.result);if(!d||!Array.isArray(d.people))throw 0;
-    if(confirm("Isto substitui TODOS os dados atuais pelos do ficheiro (que pode ter só parte dos itens). Continuar?")){S.people=d.people;S.people.forEach(function(p){if(!PRESETS[p.kind])p.kind="person"});S.sel=firstSel();save();render();toast("Importado")}}catch(e){toast("Ficheiro inválido")}};r.readAsText(f);this.value=""};
+    if(confirm("Isto substitui TODOS os dados atuais pelos do ficheiro (que pode ter só parte dos itens). Continuar?")){importFiles(d.people).then(function(){S.people=d.people;S.people.forEach(function(p){if(!PRESETS[p.kind])p.kind="person"});S.sel=firstSel();save();render();toast("Importado")})}}catch(e){toast("Ficheiro inválido")}};r.readAsText(f);this.value=""};
   render()}
 init();
 </script>
