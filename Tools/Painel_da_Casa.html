@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Painel da Casa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: quadro elétrico. Cada equipamento é um módulo de calha DIN (etiqueta Q1..Q6, alavanca, LED); tarefas da semana por baixo. */
+:root {
+  color-scheme: light;
+  --bg: #E8EDEE;
+  --surface: #F6F8F8;
+  --ink: #1A2427;
+  --muted: #56666B;
+  --line: #CBD5D7;
+  --line-strong: #9FB0B4;
+  --accent: #0E7C6B;
+  --accent-ink: #FFFFFF;
+  --led-off: #9AA9AD;
+  --danger: #A33A2F;
+  --f-display: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11181A;
+    --surface: #192326;
+    --ink: #E3ECEE;
+    --muted: #8FA2A7;
+    --line: #2B3A3E;
+    --line-strong: #4A5C61;
+    --accent: #3FC1A9;
+    --accent-ink: #08201B;
+    --led-off: #4A5C61;
+    --danger: #E58A7E;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11181A;
+  --surface: #192326;
+  --ink: #E3ECEE;
+  --muted: #8FA2A7;
+  --line: #2B3A3E;
+  --line-strong: #4A5C61;
+  --accent: #3FC1A9;
+  --accent-ink: #08201B;
+  --led-off: #4A5C61;
+  --danger: #E58A7E;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px;
+}
+.wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header { display: flex; flex-direction: column; gap: 10px; }
+.date { font-family: var(--f-mono); font-size: 12px; letter-spacing: .06em; color: var(--muted); }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(30px, 6vw, 44px); line-height: 1.05; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.stats { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; color: var(--muted); }
+.stats b { color: var(--ink); font-family: var(--f-display); font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; margin-right: 4px; }
+.note-top { margin: 0; max-width: 62ch; color: var(--muted); font-size: 14px; }
+
+h2 { font-family: var(--f-display); font-size: 20px; font-weight: 600; margin: 0 0 14px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.tag { font-family: var(--f-mono); font-size: 11px; letter-spacing: .1em; padding: 2px 7px; border: 1px solid var(--line-strong); border-radius: 3px; color: var(--muted); }
+.state { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.led { width: 8px; height: 8px; border-radius: 50%; background: var(--led-off); flex: none; }
+.lever { width: 14px; height: 24px; border: 1.5px solid var(--line-strong); border-radius: 3px; position: relative; background: var(--bg); flex: none; }
+.lever::after { content: ""; position: absolute; left: 2px; right: 2px; bottom: 2px; height: 9px; border-radius: 2px; background: var(--led-off); }
+.card h3 { font-family: var(--f-display); font-size: 18px; font-weight: 600; margin: 0; line-height: 1.2; }
+.kind { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+.shows { margin: 0; font-size: 13px; color: var(--muted); }
+label.lbl { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 4px; }
+textarea, input[type="text"], select {
+  width: 100%; font: inherit; font-size: 14px; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px;
+}
+textarea { min-height: 62px; resize: vertical; }
+.stamp { font-size: 11px; color: var(--muted); margin-top: 3px; min-height: 16px; font-variant-numeric: tabular-nums; }
+.card-foot { margin-top: auto; display: flex; align-items: center; min-height: 34px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font: inherit; font-size: 13px; font-weight: 500; padding: 7px 12px; border-radius: 4px; border: 1px solid var(--line-strong); color: var(--ink); background: transparent; text-decoration: none; cursor: pointer; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { color: var(--accent-ink); filter: brightness(1.08); }
+.hint { font-size: 13px; color: var(--muted); }
+
+.tasks-box { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; }
+.add { display: grid; grid-template-columns: 1fr minmax(120px, 190px) auto; gap: 8px; margin-bottom: 14px; }
+@media (max-width: 560px) { .add { grid-template-columns: 1fr; } }
+ul.tasks { list-style: none; margin: 0; padding: 0; }
+ul.tasks li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); min-width: 0; }
+ul.tasks li:first-child { border-top: 1px solid var(--line); }
+ul.tasks input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); flex: none; margin: 0; }
+.t-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+li.done .t-text { color: var(--muted); text-decoration: line-through; }
+.t-tag { font-family: var(--f-mono); font-size: 11px; letter-spacing: .08em; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 1px 6px; flex: none; }
+.x { background: none; border: 0; color: var(--muted); font-size: 20px; line-height: 1; padding: 4px 8px; cursor: pointer; border-radius: 4px; flex: none; }
+.x:hover { color: var(--danger); }
+.empty { color: var(--muted); font-size: 14px; padding: 12px 0 2px; border-top: 1px solid var(--line); margin: 0; }
+
+footer { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="date" id="date"></div>
+    <h1>Painel da Casa</h1>
+    <div class="stats" aria-live="polite">
+      <span><b id="n-eq">6</b>equipamentos</span>
+      <span><b id="n-live">0</b>com dados em direto</span>
+      <span><b id="n-open">0</b>tarefas por fazer</span>
+    </div>
+    <p class="note-top">Cada módulo abre a app do equipamento. Os valores em direto ainda não estão ligados: por agora podes guardar a última leitura de cada um e uma lista de tarefas da casa.</p>
+  </header>
+
+  <section aria-labelledby="h-eq">
+    <h2 id="h-eq">Equipamentos</h2>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section aria-labelledby="h-t">
+    <h2 id="h-t">Tarefas da casa</h2>
+    <div class="tasks-box">
+      <form class="add" id="add" autocomplete="off">
+        <input type="text" id="t-new" aria-label="Nova tarefa" placeholder="Ex.: limpar filtros do ar condicionado" maxlength="160">
+        <select id="t-mod" aria-label="Equipamento da tarefa"></select>
+        <button class="btn primary" type="submit">Adicionar</button>
+      </form>
+      <ul class="tasks" id="tasks"></ul>
+      <p class="empty" id="t-empty" hidden>Sem tarefas por agora. Adiciona a primeira acima.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span id="sync"></span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var MODS = [
+    { id: "shelly", tag: "Q1", name: "Shelly", kind: "Relés e medição de consumo", shows: "Estado dos relés e potência por circuito.", appName: "Shelly Cloud", link: "https://control.shelly.cloud" },
+    { id: "nippon", tag: "Q2", name: "Nippon Innovus", kind: "Bomba de calor, depósito de 300 L", shows: "Temperatura da água, temporizador e avisos.", appName: "app da Nippon" },
+    { id: "piso", tag: "Q3", name: "Piso radiante", kind: "Controlo pela app Tuya", shows: "Temperatura e programação por zona.", appName: "app Tuya" },
+    { id: "daikin", tag: "Q4", name: "Daikin", kind: "Ar condicionado, app Onecta", shows: "Modo, temperatura pedida e programação.", appName: "app Onecta" },
+    { id: "teka", tag: "Q5", name: "Teka", kind: "Eletrodomésticos", shows: "Ciclos em curso e avisos de manutenção.", appName: "app da Teka" },
+    { id: "foxess", tag: "Q6", name: "Fox ESS", kind: "Painéis solares, 4 kWp", shows: "Produção, autoconsumo e energia injetada na rede.", appName: "Fox ESS Cloud", link: "https://www.foxesscloud.com" }
+  ];
+
+  var state = { notes: {}, tasks: [] };
+  var db = null;
+  var LS_KEY = "painel-casa-v1";
+  var saved = {};   // última nota gravada por módulo
+  var timers = {};
+
+  function h(tag, attrs) {
+    var el = document.createElement(tag);
+    if (attrs) for (var k in attrs) {
+      if (k === "text") el.textContent = attrs[k];
+      else if (k === "class") el.className = attrs[k];
+      else el.setAttribute(k, attrs[k]);
+    }
+    for (var i = 2; i < arguments.length; i++) if (arguments[i]) el.appendChild(arguments[i]);
+    return el;
+  }
+  function $(id) { return document.getElementById(id); }
+  function modById(id) { for (var i = 0; i < MODS.length; i++) if (MODS[i].id === id) return MODS[i]; return null; }
+  function newId() { return "t" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+  // data no topo
+  (function () {
+    var d = new Date().toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long" });
+    $("date").textContent = d.charAt(0).toUpperCase() + d.slice(1);
+  })();
+
+  // ---------- armazenamento ----------
+  function lsLoad() { try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch (e) { return {}; } }
+  function lsSave() { try { localStorage.setItem(LS_KEY, JSON.stringify({ notes: state.notes, tasks: state.tasks })); } catch (e) {} }
+
+  function saveNote(id, texto) {
+    if (saved[id] === texto) return;
+    saved[id] = texto;
+    var rec = { texto: texto, atualizado: Date.now() };
+    state.notes[id] = rec;
+    renderStamp(id);
+    if (db) db.doc("notas/" + id).set(rec).catch(function () { $("sync").textContent = "Não foi possível guardar a nota agora."; });
+    else lsSave();
+  }
+  function addTask(texto, modulo) {
+    var rec = { texto: texto, modulo: modulo, feito: false, criado: Date.now() };
+    if (db) db.collection("tarefas").add(rec).catch(function () { $("sync").textContent = "Não foi possível guardar a tarefa agora."; });
+    else { rec.id = newId(); state.tasks.push(rec); lsSave(); renderTasks(); }
+  }
+  function toggleTask(t) {
+    if (db) db.doc("tarefas/" + t.id).update({ feito: !t.feito }).catch(function () {});
+    else { t.feito = !t.feito; lsSave(); renderTasks(); }
+  }
+  function removeTask(t) {
+    if (db) db.doc("tarefas/" + t.id).delete().catch(function () {});
+    else { state.tasks = state.tasks.filter(function (x) { return x.id !== t.id; }); lsSave(); renderTasks(); }
+  }
+
+  // ---------- cartões ----------
+  function buildCards() {
+    var grid = $("grid");
+    var sel = $("t-mod");
+    sel.appendChild(h("option", { value: "", text: "Geral" }));
+    MODS.forEach(function (m) {
+      sel.appendChild(h("option", { value: m.id, text: m.tag + " · " + m.name }));
+
+      var ta = h("textarea", { id: "note-" + m.id, placeholder: "Ex.: 52 °C às 7h, ou o que viste na app", maxlength: "400" });
+      ta.addEventListener("input", function () {
+        clearTimeout(timers[m.id]);
+        timers[m.id] = setTimeout(function () { saveNote(m.id, ta.value); }, 700);
+      });
+      ta.addEventListener("blur", function () { clearTimeout(timers[m.id]); saveNote(m.id, ta.value); });
+
+      var foot = m.link
+        ? h("a", { class: "btn", href: m.link, target: "_blank", rel: "noopener", text: "Abrir " + m.appName })
+        : h("span", { class: "hint", text: "Abre na " + m.appName });
+
+      var card = h("article", { class: "card" },
+        h("div", { class: "card-top" },
+          h("span", { class: "tag", text: m.tag }),
+          h("div", { class: "state" }, h("span", { class: "led", "aria-hidden": "true" }), h("span", { text: "Sem ligação em direto" }), h("span", { class: "lever", "aria-hidden": "true" }))
+        ),
+        h("div", null, h("h3", { text: m.name }), h("p", { class: "kind", text: m.kind })),
+        h("p", { class: "shows", text: m.shows }),
+        h("div", null,
+          h("label", { class: "lbl", for: "note-" + m.id, text: "Última leitura ou nota" }),
+          ta,
+          h("div", { class: "stamp", id: "stamp-" + m.id })
+        ),
+        h("div", { class: "card-foot" }, foot)
+      );
+      grid.appendChild(card);
+    });
+  }
+
+  function renderStamp(id) {
+    var n = state.notes[id], el = $("stamp-" + id);
+    if (!el) return;
+    el.textContent = n && n.atualizado
+      ? "Atualizado a " + new Date(n.atualizado).toLocaleDateString("pt-PT", { day: "numeric", month: "short" }) + ", " + new Date(n.atualizado).toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" })
+      : "";
+  }
+
+  function renderNotes() {
+    MODS.forEach(function (m) {
+      var ta = $("note-" + m.id), n = state.notes[m.id];
+      if (!ta) return;
+      var texto = n && typeof n.texto === "string" ? n.texto : "";
+      saved[m.id] = texto;
+      if (document.activeElement !== ta && ta.value !== texto) ta.value = texto;
+      renderStamp(m.id);
+    });
+  }
+
+  // ---------- tarefas ----------
+  function renderTasks() {
+    var ul = $("tasks");
+    ul.textContent = "";
+    var list = state.tasks.slice().sort(function (a, b) {
+      if (!!a.feito !== !!b.feito) return a.feito ? 1 : -1;
+      return (b.criado || 0) - (a.criado || 0);
+    });
+    list.forEach(function (t) {
+      var cb = h("input", { type: "checkbox", "aria-label": "Concluir: " + t.texto });
+      cb.checked = !!t.feito;
+      cb.addEventListener("change", function () { toggleTask(t); });
+      var m = t.modulo ? modById(t.modulo) : null;
+      var x = h("button", { class: "x", type: "button", "aria-label": "Apagar: " + t.texto, text: "×" });
+      x.addEventListener("click", function () { removeTask(t); });
+      ul.appendChild(h("li", { class: t.feito ? "done" : "" },
+        cb,
+        h("span", { class: "t-text", text: t.texto }),
+        m ? h("span", { class: "t-tag", text: m.tag }) : null,
+        x
+      ));
+    });
+    $("t-empty").hidden = list.length > 0;
+    $("n-open").textContent = state.tasks.filter(function (t) { return !t.feito; }).length;
+  }
+
+  $("add").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var inp = $("t-new"), texto = inp.value.trim();
+    if (!texto) return;
+    addTask(texto, $("t-mod").value);
+    inp.value = "";
+    inp.focus();
+  });
+
+  // ---------- arranque ----------
+  buildCards();
+  renderTasks();
+
+  function useLocal(msg) {
+    var d = lsLoad();
+    state.notes = d.notes || {};
+    state.tasks = d.tasks || [];
+    renderNotes();
+    renderTasks();
+    $("sync").textContent = msg || "Notas e tarefas guardadas apenas neste navegador.";
+  }
+
+  (async function () {
+    var d = null;
+    try { d = window.claude && window.claude.use ? await window.claude.use("db") : null; } catch (e) { d = null; }
+    if (!d) { useLocal(); return; }
+    db = d;
+    $("sync").textContent = "A carregar notas e tarefas…";
+    var slow = setTimeout(function () { $("sync").textContent = "Ainda sem resposta do armazenamento. Os dados podem estar desatualizados."; }, 10000);
+    var onErr = function () { clearTimeout(slow); $("sync").textContent = "O armazenamento partilhado não está acessível. As alterações podem não ser guardadas."; };
+    db.collection("notas").onSnapshot(function (snap) {
+      state.notes = {};
+      snap.docs.forEach(function (s) { state.notes[s.id] = s.data(); });
+      renderNotes();
+      if (!snap.metadata.fromCache) { clearTimeout(slow); $("sync").textContent = "Notas e tarefas guardadas para quem abre esta página."; }
+    }, onErr);
+    db.collection("tarefas").onSnapshot(function (snap) {
+      state.tasks = snap.docs.map(function (s) { var o = Object.assign({}, s.data()); o.id = s.id; return o; });
+      renderTasks();
+    }, onErr);
+  })();
+})();
+</script>
+</body>
+</html>

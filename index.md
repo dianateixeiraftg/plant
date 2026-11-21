@@ -72,4 +72,8 @@ Pick a tool to get started.
    <strong>📖 Impressão de livros</strong>
    <span>Para imprimir como livro</span>
   </a>
+  <a class="tool-btn" href="Tools/Painel_da_Casa.html">
+    <strong>🏠 Painel da Casa</strong>
+    <span>Equipamentos, notas e tarefas da casa</span>
+  </a>
 </div>
