@@ -137,6 +137,7 @@ textarea{width:100%;border:1px solid var(--line);background:var(--card);border-r
   <div class="actions">
     <button type="button" id="btnSettings">Definições</button>
     <button type="button" id="btnHtml">Exportar HTML</button>
+    <button type="button" id="btnSvg">Exportar SVG</button>
     <button type="button" id="btnPdf" class="p">Exportar PDF</button>
   </div>
 </header>
@@ -232,7 +233,7 @@ textarea{width:100%;border:1px solid var(--line);background:var(--card);border-r
 
 </main>
 
-<input class="sr" type="file" id="importFile" accept=".json,.html,.htm,.pdf,application/json,text/html,application/pdf" tabindex="-1">
+<input class="sr" type="file" id="importFile" accept=".json,.html,.htm,.pdf,.svg,application/json,text/html,application/pdf,image/svg+xml" tabindex="-1">
 <dialog class="drawer" id="settings" aria-labelledby="setTitle">
   <div class="dhead"><h2 id="setTitle">Definições</h2><button type="button" id="setClose">Fechar</button></div>
   <div class="dbody">
@@ -297,8 +298,23 @@ textarea{width:100%;border:1px solid var(--line);background:var(--card);border-r
 
     <fieldset>
       <legend>Exportar</legend>
-      <label class="chk"><input type="checkbox" id="sPdfWhite"> PDF com fundo branco (poupa tinta)</label>
-      <p class="hint">O HTML exportado usa sempre o tema e as cores que escolheste.</p>
+      <label class="chk"><input type="checkbox" id="sPdfWhite"> PDF e SVG com fundo branco (poupa tinta)</label>
+      <label class="f">PDF
+        <select id="sPdfMode">
+          <option value="single">Uma página, ajustada ao tamanho da árvore</option>
+          <option value="tiles">Mosaico: várias folhas para juntar</option>
+        </select>
+      </label>
+      <div class="two">
+        <label class="f">Papel do mosaico
+          <select id="sTilePaper"><option value="a4">A4</option><option value="a3">A3</option></select>
+        </label>
+        <label class="f">Tamanho do desenho
+          <select id="sTileScale"><option value="0.6">Pequeno</option><option value="0.8">Médio</option><option value="1">Grande</option></select>
+        </label>
+      </div>
+      <p class="hint" id="tileInfo"></p>
+      <p class="hint">O mosaico imprime a árvore em tamanho certo, dividida em folhas de papel horizontais com marcas de corte e o número de cada folha. O SVG serve para pedir um poster numa gráfica. O HTML exportado usa sempre o tema e as cores que escolheste.</p>
     </fieldset>
 
     <button type="button" id="sResetAll" class="d">Repor todas as definições</button>
@@ -954,11 +970,60 @@ $("btnHtml").addEventListener("click",function(){
   toast("HTML exportado");
 });
 
+function cropSvg(svg,x,y,w,h,outW,outH){
+  return svg.replace(/^(<svg[^>]*?) width="[^"]*" height="[^"]*" viewBox="[^"]*"/,'$1 width="'+outW+'" height="'+outH+'" viewBox="'+x+" "+y+" "+w+" "+h+'"');
+}
+function loadSvgImg(svg){
+  return new Promise(function(resolve,reject){
+    var url=URL.createObjectURL(new Blob([svg],{type:"image/svg+xml;charset=utf-8"})),img=new Image();
+    img.onload=function(){URL.revokeObjectURL(url);resolve(img)};
+    img.onerror=function(){URL.revokeObjectURL(url);reject(new Error("svg"))};
+    img.src=url;
+  });
+}
+function exportTiles(m,title,btn,done){
+  var pal=pdfPalette(),r=buildSvg(m,pal,{title:title,subtitle:subtitle(m)}),g=tileGeom(m),total=g.cols*g.rows;
+  if(total>80){toast("O mosaico teria "+total+" folhas. Escolhe um desenho mais pequeno ou o papel A3.");done();return}
+  var jsPDF=window.jspdf.jsPDF,pdf=new jsPDF({orientation:"landscape",unit:"pt",format:[g.pw,g.ph]}),i=0,Q=2.6;
+  pdf.setProperties({title:title,subject:"ARVOREDATA:"+b64enc(JSON.stringify(payload()))+":FIM"});
+  var fail=function(){toast("Não foi possível gerar o PDF.");done()};
+  var step=function(){
+    if(i>=total){pdf.save(slug(title)+"-mosaico.pdf");toast("PDF em mosaico exportado: "+plural(total,"folha","folhas"));done();return}
+    btn.textContent="A gerar folha "+(i+1)+" de "+total+"…";
+    var row=Math.floor(i/g.cols),col=i%g.cols,w=g.W/g.cols,h=g.H/g.rows,x=col*w,y=row*h;
+    var cw=Math.max(1,Math.round(w*g.sc*Q)),ch=Math.max(1,Math.round(h*g.sc*Q));
+    loadSvgImg(cropSvg(r.svg,x,y,w,h,cw,ch)).then(function(img){
+      var c=document.createElement("canvas");c.width=cw;c.height=ch;
+      var ctx=c.getContext("2d");ctx.fillStyle=pal.bg;ctx.fillRect(0,0,cw,ch);ctx.drawImage(img,0,0,cw,ch);
+      if(i>0)pdf.addPage([g.pw,g.ph],"landscape");
+      var dw=w*g.sc,dh=h*g.sc,L=g.MG,T=g.MG;
+      pdf.addImage(c.toDataURL("image/jpeg",0.9),"JPEG",L,T,dw,dh);
+      pdf.setDrawColor(140);pdf.setLineWidth(0.5);
+      [[L,T,-1,-1],[L+dw,T,1,-1],[L,T+dh,-1,1],[L+dw,T+dh,1,1]].forEach(function(k){
+        pdf.line(k[0]+k[2]*4,k[1],k[0]+k[2]*14,k[1]);pdf.line(k[0],k[1]+k[3]*4,k[0],k[1]+k[3]*14);
+      });
+      pdf.setFontSize(8);pdf.setTextColor(110);
+      pdf.text("Folha "+(i+1)+" de "+total+"  ·  linha "+(row+1)+", coluna "+(col+1)+"  ·  junta as folhas pelas marcas de corte",L,g.ph-10);
+      i++;setTimeout(step,0);
+    }).catch(fail);
+  };
+  step();
+}
+
+$("btnSvg").addEventListener("click",function(){
+  var m=layoutTree();if(!m.count){toast("Adiciona pessoas antes de exportar.");return}
+  var title=state.title.trim()||"Árvore genealógica",r=buildSvg(m,pdfPalette(),{title:title,subtitle:subtitle(m)});
+  var svg='<?xml version="1.0" encoding="UTF-8"?>\n'+r.svg.replace(/<\/svg>$/,'<!--ARVOREDATA:'+b64enc(JSON.stringify(payload()))+':FIM-->\n</svg>');
+  download(slug(title)+".svg",new Blob([svg],{type:"image/svg+xml;charset=utf-8"}));
+  toast("SVG exportado");
+});
+
 $("btnPdf").addEventListener("click",function(){
   var m=layoutTree();if(!m.count){toast("Adiciona pessoas antes de exportar.");return}
   if(!window.jspdf){toast("A biblioteca de PDF não carregou. Verifica a ligação à internet e recarrega a página.");return}
   var btn=this;btn.disabled=true;btn.textContent="A gerar PDF…";
   var title=state.title.trim()||"Árvore genealógica";
+  if(settings.pdfMode==="tiles"){exportTiles(m,title,btn,function(){btn.disabled=false;btn.textContent="Exportar PDF"});return}
   var pal=pdfPalette(),r=buildSvg(m,pal,{title:title,subtitle:subtitle(m)});
   var url=URL.createObjectURL(new Blob([r.svg],{type:"image/svg+xml;charset=utf-8"})),img=new Image();
   var done=function(){btn.disabled=false;btn.textContent="Exportar PDF";URL.revokeObjectURL(url)};
@@ -980,7 +1045,7 @@ $("btnPdf").addEventListener("click",function(){
       var dw=r.w*sc,dh=r.h*sc;
       pdf.addImage(data,"JPEG",(pw-dw)/2,(ph-dh)/2,dw,dh);
       pdf.save(slug(title)+".pdf");
-      toast("PDF exportado");
+      toast(sc<0.5?"PDF exportado. O texto ficou pequeno: nas Definições podes escolher o mosaico, para imprimir em várias folhas.":"PDF exportado");
     }catch(err){toast("Não foi possível gerar o PDF.")}
     done();
   };
@@ -1006,6 +1071,8 @@ function extractData(buf){
   }
   var text=new TextDecoder().decode(bytes);
   if(/^\s*[\[{]/.test(text))return JSON.parse(text);
+  var sv=text.match(/<!--ARVOREDATA:([A-Za-z0-9+\/=]+):FIM-->/);
+  if(sv)return JSON.parse(b64dec(sv[1]));
   var h=text.match(/<script type="application\/json" id="arvore-data">([\s\S]*?)<\/script>/);
   if(!h)throw new Error("html");
   return JSON.parse(h[1]);
@@ -1021,7 +1088,7 @@ $("importFile").addEventListener("change",function(){
       state={title:String(x.title||""),people:people,sample:false};
       if(x.settings){settings=normSettings(x.settings);saveSettings();applySettings();buildKinList()}
       $("treeTitle").value=state.title;save();lastAdded=null;resetForm();render();toast("Árvore aberta: "+plural(people.length,"pessoa","pessoas"));
-    }catch(e){toast("Este ficheiro não tem dados da árvore. Só abre cópias e exports (HTML ou PDF) feitos por esta ferramenta.")}
+    }catch(e){toast("Este ficheiro não tem dados da árvore. Só abre cópias e exports (HTML, SVG ou PDF) feitos por esta ferramenta.")}
   };
   rd.readAsArrayBuffer(f);inp.value="";
 });
@@ -1037,7 +1104,7 @@ var BASE={
   light:{pageBg:"#edf1ee",pageCard:"#ffffff",pageInk:"#18221e",pageMute:"#5b6a63",pageLine:"#d3dcd7",acc:"#1f5f4a",bg:"#f6f8f6",card:"#ffffff",stroke:"#cdd7d2",ink:"#18221e",muted:"#5b6a63",line:"#9db0a7",ring:"#a8832f",av:"#e3ece7"},
   dark:{pageBg:"#101513",pageCard:"#18201c",pageInk:"#e4ebe7",pageMute:"#97a79f",pageLine:"#2b3732",acc:"#6cc3a0",bg:"#141a17",card:"#1d2622",stroke:"#33423b",ink:"#e8eee9",muted:"#9aaaa2",line:"#4d6359",ring:"#d1ad5b",av:"#27342e"}
 };
-function defaults(){return {theme:"auto",font:"serif",radius:14,photoShape:"circle",show:{photo:true,kin:true,date:true,place:true},colors:{pageBg:null,treeBg:null,cardBg:null,ink:null,acc:null,line:null},kinOptions:null,pdfWhite:true}}
+function defaults(){return {theme:"auto",font:"serif",radius:14,photoShape:"circle",show:{photo:true,kin:true,date:true,place:true},colors:{pageBg:null,treeBg:null,cardBg:null,ink:null,acc:null,line:null},kinOptions:null,pdfWhite:true,pdfMode:"single",tilePaper:"a4",tileScale:"0.8"}}
 var settings=defaults();
 function normSettings(x){
   var d=defaults();x=x&&typeof x==="object"?x:{};
@@ -1049,6 +1116,9 @@ function normSettings(x){
   COLOR_KEYS.forEach(function(k){var v=x.colors&&x.colors[k];if(typeof v==="string"&&/^#[0-9a-f]{6}$/i.test(v))d.colors[k]=v.toLowerCase()});
   if(Array.isArray(x.kinOptions))d.kinOptions=x.kinOptions.map(function(t){return String(t).trim().slice(0,60)}).filter(Boolean).slice(0,80);
   if(typeof x.pdfWhite==="boolean")d.pdfWhite=x.pdfWhite;
+  if(x.pdfMode==="single"||x.pdfMode==="tiles")d.pdfMode=x.pdfMode;
+  if(x.tilePaper==="a4"||x.tilePaper==="a3")d.tilePaper=x.tilePaper;
+  if(["0.6","0.8","1"].indexOf(String(x.tileScale))>=0)d.tileScale=String(x.tileScale);
   return d;
 }
 function loadSettings(){var raw=null;try{raw=localStorage.getItem(KEY_S)}catch(e){}if(raw){try{settings=normSettings(JSON.parse(raw))}catch(e){}}}
@@ -1105,6 +1175,21 @@ function syncSettingsUI(){
   COLOR_KEYS.forEach(function(k){$("c_"+k).value=settings.colors[k]||map[k];document.querySelector('.rs[data-k="'+k+'"]').hidden=!settings.colors[k]});
   $("sKin").value=(settings.kinOptions||DEFAULT_KIN).join("\n");
   $("sPdfWhite").checked=settings.pdfWhite;
+  $("sPdfMode").value=settings.pdfMode;$("sTilePaper").value=settings.tilePaper;$("sTileScale").value=settings.tileScale;
+  updateTileInfo();
+}
+function tileGeom(m){
+  var W=Math.max(m.w+PAD*2,520),H=m.h+PAD*2+92;
+  var paper=settings.tilePaper==="a3"?[1190.55,841.89]:[841.89,595.28],MG=28,sc=+settings.tileScale;
+  var aw=paper[0]-2*MG,ah=paper[1]-2*MG,tw=aw/sc,th=ah/sc;
+  return {W:W,H:H,pw:paper[0],ph:paper[1],MG:MG,sc:sc,aw:aw,ah:ah,tw:tw,th:th,cols:Math.max(1,Math.ceil(W/tw-1e-6)),rows:Math.max(1,Math.ceil(H/th-1e-6))};
+}
+function updateTileInfo(){
+  var el=$("tileInfo");if(!el)return;
+  var m=layoutTree();
+  if(!m.count){el.textContent="";return}
+  var g=tileGeom(m),n=g.cols*g.rows;
+  el.textContent="Com esta árvore, o mosaico tem "+plural(n,"folha","folhas")+" ("+g.cols+" na horizontal × "+g.rows+" na vertical).";
 }
 function changed(syncUI){applySettings();saveSettings();render();if(syncUI)syncSettingsUI()}
 
@@ -1128,6 +1213,9 @@ $("sKin").addEventListener("input",function(){
 });
 $("sKinReset").addEventListener("click",function(){settings.kinOptions=null;saveSettings();buildKinList();syncSettingsUI()});
 $("sPdfWhite").addEventListener("change",function(){settings.pdfWhite=this.checked;saveSettings()});
+$("sPdfMode").addEventListener("change",function(){settings.pdfMode=this.value;saveSettings()});
+$("sTilePaper").addEventListener("change",function(){settings.tilePaper=this.value;saveSettings();updateTileInfo()});
+$("sTileScale").addEventListener("change",function(){settings.tileScale=this.value;saveSettings();updateTileInfo()});
 $("sResetAll").addEventListener("click",function(){
   var b=this;
   if(!b.classList.contains("arm")){b.classList.add("arm");b.textContent="Confirmar: repor tudo";clearTimeout(resetArm);resetArm=setTimeout(function(){b.classList.remove("arm");b.textContent="Repor todas as definições"},4000);return}
