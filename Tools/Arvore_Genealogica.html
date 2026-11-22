@@ -6,13 +6,21 @@
 <title>Árvore Genealógica</title>
 <style>
 :root{
-  --bg:#edf1ee;--card:#fff;--ink:#18221e;--mute:#5b6a63;--line:#d3dcd7;--acc:#1f5f4a;--acc-ink:#fff;--bad:#b3392f;--ok:#2e7d5b;
-  --t-bg:#f6f8f6;--t-card:#fff;--t-stroke:#cdd7d2;--t-ink:#18221e;--t-muted:#5b6a63;--t-line:#9db0a7;--t-ring:#a8832f;--t-av:#e3ece7;
+  color-scheme:light;
+  --bg:#edf1ee;--card:#ffffff;--ink:#18221e;--mute:#5b6a63;--line:#d3dcd7;--acc:#1f5f4a;--acc-ink:#ffffff;--bad:#b3392f;--ok:#2e7d5b;
+  --t-bg:#f6f8f6;--t-card:#ffffff;--t-stroke:#cdd7d2;--t-ink:#18221e;--t-muted:#5b6a63;--t-line:#9db0a7;--t-ring:#a8832f;--t-av:#e3ece7;
+  --font-display:Georgia,'Times New Roman',serif;--av-radius:50%;
 }
-@media (prefers-color-scheme:dark){:root{
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
   --bg:#101513;--card:#18201c;--ink:#e4ebe7;--mute:#97a79f;--line:#2b3732;--acc:#6cc3a0;--acc-ink:#0d1a14;--bad:#e5736a;--ok:#5cc29a;
   --t-bg:#141a17;--t-card:#1d2622;--t-stroke:#33423b;--t-ink:#e8eee9;--t-muted:#9aaaa2;--t-line:#4d6359;--t-ring:#d1ad5b;--t-av:#27342e;
 }}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#101513;--card:#18201c;--ink:#e4ebe7;--mute:#97a79f;--line:#2b3732;--acc:#6cc3a0;--acc-ink:#0d1a14;--bad:#e5736a;--ok:#5cc29a;
+  --t-bg:#141a17;--t-card:#1d2622;--t-stroke:#33423b;--t-ink:#e8eee9;--t-muted:#9aaaa2;--t-line:#4d6359;--t-ring:#d1ad5b;--t-av:#27342e;
+}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
@@ -22,7 +30,7 @@ button:hover{border-color:var(--acc)}
 button.p{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:600}
 button.d{color:var(--bad)}
 button.d.arm{background:var(--bad);color:#fff;border-color:var(--bad)}
-button:focus-visible,input:focus-visible,select:focus-visible,.btn:focus-within{outline:2px solid var(--acc);outline-offset:2px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.btn:focus-within{outline:2px solid var(--acc);outline-offset:2px}
 input,select{width:100%;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:9px 10px;min-width:0}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
@@ -30,7 +38,7 @@ input,select{width:100%;border:1px solid var(--line);background:var(--card);bord
 .brand{flex:1 1 320px;min-width:0}
 .back{font-size:.85rem;color:var(--mute);text-decoration:none}
 .back:hover{color:var(--acc)}
-.title{display:block;width:100%;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;padding:2px 0;font:700 1.9rem/1.2 Georgia,"Times New Roman",serif;color:var(--ink)}
+.title{display:block;width:100%;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;padding:2px 0;font:700 1.9rem/1.2 var(--font-display);color:var(--ink)}
 .title:hover,.title:focus{border-bottom-color:var(--line);outline:none}
 .title:focus-visible{border-bottom-color:var(--acc)}
 .sub{margin:2px 0 0;color:var(--mute);font-size:.92rem}
@@ -48,7 +56,7 @@ form{display:grid;gap:12px}
 label.f{display:grid;gap:4px;font-size:.88rem;color:var(--mute)}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .photo{display:flex;align-items:center;gap:12px}
-.avatar{width:64px;height:64px;border-radius:50%;flex:none;background:var(--t-av);color:var(--acc);display:grid;place-items:center;font:600 1.4rem Georgia,serif;overflow:hidden;border:1px solid var(--line)}
+.avatar{width:64px;height:64px;border-radius:var(--av-radius);flex:none;background:var(--t-av);color:var(--acc);display:grid;place-items:center;font:600 1.4rem var(--font-display);overflow:hidden;border:1px solid var(--line)}
 .avatar img{width:100%;height:100%;object-fit:cover;display:block}
 .photo .btns{display:flex;flex-wrap:wrap;gap:6px}
 .btn{display:inline-block;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:8px 13px;cursor:pointer}
@@ -65,7 +73,7 @@ legend{padding:0 6px;font-size:.88rem;color:var(--mute)}
 .item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1px solid transparent;background:transparent;padding:6px 10px;border-radius:10px}
 .item:hover{background:var(--t-bg);border-color:var(--line)}
 .item[aria-current=true]{border-color:var(--acc);background:var(--t-bg)}
-.item .av{width:34px;height:34px;border-radius:50%;flex:none;background:var(--t-av);color:var(--acc);display:grid;place-items:center;font:600 .85rem Georgia,serif;overflow:hidden}
+.item .av{width:34px;height:34px;border-radius:var(--av-radius);flex:none;background:var(--t-av);color:var(--acc);display:grid;place-items:center;font:600 .85rem var(--font-display);overflow:hidden}
 .item .av img{width:100%;height:100%;object-fit:cover;display:block}
 .item .it{min-width:0;display:grid}
 .item b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -84,20 +92,36 @@ legend{padding:0 6px;font-size:.88rem;color:var(--mute)}
 .pcard:hover>rect{stroke:var(--acc)!important}
 .pcard:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .empty{display:grid;place-items:center;text-align:center;min-height:50vh;color:var(--mute);padding:24px}
-.empty b{display:block;color:var(--ink);font:700 1.2rem Georgia,serif;margin-bottom:6px}
+.empty b{display:block;color:var(--ink);font:700 1.2rem var(--font-display);margin-bottom:6px}
 
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center;z-index:5}
 .toast.on{opacity:1}
 
+dialog.drawer{position:fixed;inset:0 0 0 auto;margin:0;width:min(440px,100vw);height:100%;max-width:100vw;max-height:100%;border:0;border-left:1px solid var(--line);padding:0;background:var(--card);color:var(--ink);overflow:auto;box-shadow:-12px 0 32px rgba(0,0,0,.2)}
+dialog.drawer::backdrop{background:rgba(0,0,0,.38)}
+.dhead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card);z-index:1}
+.dhead h2{margin:0;font-size:1.15rem}
+.dbody{padding:16px 18px 32px;display:grid;gap:16px}
+.colors{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.col{display:grid;gap:4px;font-size:.88rem;color:var(--mute);min-width:0}
+.cw{display:flex;gap:6px;align-items:center}
+.cw input[type=color]{width:48px;height:38px;padding:2px;flex:none;cursor:pointer}
+.cw .rs{padding:6px 10px}
+.chk{display:flex;gap:10px;align-items:center;font-size:.95rem;color:var(--ink)}
+.chk input{width:auto;flex:none}
+input[type=range]{padding:0;width:100%}
+textarea{width:100%;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:9px 10px;font:inherit;color:inherit;resize:vertical;min-height:120px}
+.rv{color:var(--ink);font-variant-numeric:tabular-nums}
+
 @media (max-width:900px){
-  .app{grid-template-columns:1fr}
+  .app{grid-template-columns:minmax(0,1fr)}
   .tabs{display:flex}
   .app[data-view=tree] .people{display:none}
   .app[data-view=people] .treepane{display:none}
   .viewport{max-height:none;min-height:50vh}
   .title{font-size:1.5rem}
 }
-@media (max-width:420px){.two{grid-template-columns:1fr}}
+@media (max-width:420px){.two,.colors{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
@@ -111,6 +135,7 @@ legend{padding:0 6px;font-size:.88rem;color:var(--mute)}
     <p class="sub" id="count"></p>
   </div>
   <div class="actions">
+    <button type="button" id="btnSettings">Definições</button>
     <button type="button" id="btnHtml">Exportar HTML</button>
     <button type="button" id="btnPdf" class="p">Exportar PDF</button>
   </div>
@@ -129,6 +154,7 @@ legend{padding:0 6px;font-size:.88rem;color:var(--mute)}
       <div class="quick" id="quick" hidden>
         <button type="button" id="qChild">+ Filho/a</button>
         <button type="button" id="qSpouse">+ Cônjuge</button>
+        <button type="button" id="qSib">+ Irmão/ã</button>
       </div>
       <form id="form" novalidate>
         <label class="f">Nome completo
@@ -137,13 +163,7 @@ legend{padding:0 6px;font-size:.88rem;color:var(--mute)}
         <label class="f">Grau de parentesco
           <input id="fKin" maxlength="60" list="kinList" placeholder="ex.: Avó materna" autocomplete="off">
         </label>
-        <datalist id="kinList">
-          <option value="Eu"><option value="Pai"><option value="Mãe"><option value="Irmão"><option value="Irmã">
-          <option value="Avô paterno"><option value="Avó paterna"><option value="Avô materno"><option value="Avó materna">
-          <option value="Bisavô"><option value="Bisavó"><option value="Tio"><option value="Tia">
-          <option value="Primo"><option value="Prima"><option value="Filho"><option value="Filha">
-          <option value="Neto"><option value="Neta"><option value="Cônjuge"><option value="Padrinho"><option value="Madrinha">
-        </datalist>
+        <datalist id="kinList"></datalist>
         <div class="two">
           <label class="f">Data de nascimento
             <input id="fDate" maxlength="40" placeholder="dd/mm/aaaa ou só o ano" autocomplete="off">
@@ -166,6 +186,7 @@ legend{padding:0 6px;font-size:.88rem;color:var(--mute)}
             <option value="root">Pessoa inicial (sem ligação)</option>
             <option value="child">Filho/a de…</option>
             <option value="spouse">Cônjuge de…</option>
+            <option value="sibling">Irmão/irmã de…</option>
           </select>
           <select id="fTarget" aria-label="Pessoa a que se liga" hidden></select>
           <p class="hint" id="relHint">Uma pessoa inicial começa uma árvore nova, ao lado das outras. Serve para juntar o outro lado da família.</p>
@@ -210,6 +231,78 @@ legend{padding:0 6px;font-size:.88rem;color:var(--mute)}
 </main>
 
 <input class="sr" type="file" id="importFile" accept=".json,.html,.htm,.pdf,application/json,text/html,application/pdf" tabindex="-1">
+<dialog class="drawer" id="settings" aria-labelledby="setTitle">
+  <div class="dhead"><h2 id="setTitle">Definições</h2><button type="button" id="setClose">Fechar</button></div>
+  <div class="dbody">
+    <fieldset>
+      <legend>Aspeto</legend>
+      <label class="f">Tema
+        <select id="sTheme">
+          <option value="auto">Automático (segue o dispositivo)</option>
+          <option value="light">Claro</option>
+          <option value="dark">Escuro</option>
+        </select>
+      </label>
+      <label class="f">Tipo de letra
+        <select id="sFont">
+          <option value="serif">Clássica (Georgia)</option>
+          <option value="palatino">Elegante (Palatino)</option>
+          <option value="sans">Moderna (sem serifa)</option>
+          <option value="mono">Máquina de escrever</option>
+        </select>
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Cores</legend>
+      <div class="colors">
+        <div class="col"><label for="c_pageBg">Fundo da página</label><div class="cw"><input type="color" id="c_pageBg" data-k="pageBg"><button type="button" class="rs" data-k="pageBg" aria-label="Repor fundo da página" hidden>Repor</button></div></div>
+        <div class="col"><label for="c_treeBg">Fundo da árvore</label><div class="cw"><input type="color" id="c_treeBg" data-k="treeBg"><button type="button" class="rs" data-k="treeBg" aria-label="Repor fundo da árvore" hidden>Repor</button></div></div>
+        <div class="col"><label for="c_cardBg">Cartões</label><div class="cw"><input type="color" id="c_cardBg" data-k="cardBg"><button type="button" class="rs" data-k="cardBg" aria-label="Repor cor dos cartões" hidden>Repor</button></div></div>
+        <div class="col"><label for="c_ink">Texto dos cartões</label><div class="cw"><input type="color" id="c_ink" data-k="ink"><button type="button" class="rs" data-k="ink" aria-label="Repor cor do texto" hidden>Repor</button></div></div>
+        <div class="col"><label for="c_acc">Destaque e botões</label><div class="cw"><input type="color" id="c_acc" data-k="acc"><button type="button" class="rs" data-k="acc" aria-label="Repor cor de destaque" hidden>Repor</button></div></div>
+        <div class="col"><label for="c_line">Linhas de ligação</label><div class="cw"><input type="color" id="c_line" data-k="line"><button type="button" class="rs" data-k="line" aria-label="Repor cor das linhas" hidden>Repor</button></div></div>
+      </div>
+      <p class="hint">As cores que não mudares seguem o tema escolhido.</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Cartões</legend>
+      <label class="f">Cantos arredondados <span class="rv" id="sRadiusV"></span>
+        <input type="range" id="sRadius" min="0" max="28" step="1">
+      </label>
+      <label class="f">Forma da fotografia
+        <select id="sShape">
+          <option value="circle">Círculo</option>
+          <option value="rounded">Quadrado arredondado</option>
+          <option value="square">Quadrado</option>
+        </select>
+      </label>
+      <label class="chk"><input type="checkbox" id="sShow_photo"> Mostrar fotografia</label>
+      <label class="chk"><input type="checkbox" id="sShow_kin"> Mostrar parentesco</label>
+      <label class="chk"><input type="checkbox" id="sShow_date"> Mostrar data de nascimento</label>
+      <label class="chk"><input type="checkbox" id="sShow_place"> Mostrar local de nascimento</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Menu de parentesco</legend>
+      <label class="f">Sugestões, uma por linha
+        <textarea id="sKin" rows="8" spellcheck="false"></textarea>
+      </label>
+      <p class="hint">Aparecem quando escreves no campo “Grau de parentesco”. Podes escrever outro valor à mesma.</p>
+      <div class="row-btns"><button type="button" id="sKinReset">Repor sugestões</button></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Exportar</legend>
+      <label class="chk"><input type="checkbox" id="sPdfWhite"> PDF com fundo branco (poupa tinta)</label>
+      <p class="hint">O HTML exportado usa sempre o tema e as cores que escolheste.</p>
+    </fieldset>
+
+    <button type="button" id="sResetAll" class="d">Repor todas as definições</button>
+  </div>
+</dialog>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -217,12 +310,11 @@ legend{padding:0 6px;font-size:.88rem;color:var(--mute)}
 "use strict";
 
 /* ---------- constantes ---------- */
-var KEY="arvore-genealogica-v1";
-var NODE_W=172, NODE_H=214, SPG=36, SIB=28, VG=72, PAD=40;
-var SERIF="Georgia,'Times New Roman',serif";
+var KEY="arvore-genealogica-v1", KEY_S="arvore-genealogica-settings-v1";
+var NODE_W=172, NODE_H=214, LINK_Y=56, KIN_Y=118, NAME_Y=140, SPG=36, SIB=28, VG=72, PAD=40;
+var FONT="Georgia,'Times New Roman',serif";
 var SANS="'Helvetica Neue',Helvetica,Arial,sans-serif";
 var PAL_VARS={bg:"var(--t-bg)",card:"var(--t-card)",stroke:"var(--t-stroke)",ink:"var(--t-ink)",muted:"var(--t-muted)",acc:"var(--acc)",line:"var(--t-line)",ring:"var(--t-ring)",av:"var(--t-av)"};
-var PAL_PRINT={bg:"#ffffff",card:"#ffffff",stroke:"#c3cfc9",ink:"#18221e",muted:"#5b6a63",acc:"#1f5f4a",line:"#8fa59b",ring:"#a8832f",av:"#e3ece7"};
 
 var $=function(id){return document.getElementById(id)};
 var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
@@ -236,7 +328,7 @@ var editingId=null, formPhoto="", lastAdded=null, model=null;
 var zoom=1, fit=true, baseW=0, baseH=0, armTimer=null, warned=false;
 
 function sampleData(){
-  var P=function(id,name,kin,date,place,parentId,spouseOf){return {id:id,name:name,kin:kin,date:date,place:place,photo:"",parentId:parentId||null,spouseOf:spouseOf||null}};
+  var P=function(id,name,kin,date,place,parentId,spouseOf){return {id:id,name:name,kin:kin,date:date,place:place,photo:"",parentId:parentId||null,spouseOf:spouseOf||null,siblingOf:null}};
   return {title:"Família Pereira (exemplo)",sample:true,people:[
     P("e1","Manuel Pereira","Avô paterno","12/03/1938","Viseu"),
     P("e2","Rosa Lopes Pereira","Avó paterna","04/09/1941","Tondela",null,"e1"),
@@ -256,14 +348,30 @@ function sanitize(arr){
     if(!p||typeof p!=="object")return;
     var id=String(p.id||newId()); if(seen[id])return; seen[id]=1;
     out.push({id:id,name:String(p.name||"Sem nome").slice(0,120),kin:String(p.kin||"").slice(0,60),date:String(p.date||"").slice(0,40),place:String(p.place||"").slice(0,120),
-      photo:(typeof p.photo==="string"&&p.photo.indexOf("data:image/")===0)?p.photo:"",parentId:p.parentId?String(p.parentId):null,spouseOf:p.spouseOf?String(p.spouseOf):null});
+      photo:(typeof p.photo==="string"&&p.photo.indexOf("data:image/")===0)?p.photo:"",parentId:p.parentId?String(p.parentId):null,spouseOf:p.spouseOf?String(p.spouseOf):null,siblingOf:p.siblingOf?String(p.siblingOf):null});
   });
   var by={};out.forEach(function(p){by[p.id]=p});
   out.forEach(function(p){
     if(p.parentId&&(!by[p.parentId]||p.parentId===p.id))p.parentId=null;
     if(p.spouseOf&&(!by[p.spouseOf]||p.spouseOf===p.id))p.spouseOf=null;
+    if(p.siblingOf&&(!by[p.siblingOf]||p.siblingOf===p.id))p.siblingOf=null;
   });
   out.forEach(function(p){var q=p,g=0;while(q&&q.spouseOf&&g++<out.length+1){q=by[q.spouseOf];if(q===p){p.spouseOf=null;break}}});
+  var isSpo=function(q){return !!(q.spouseOf&&by[q.spouseOf])};
+  out.forEach(function(p){
+    if(!p.siblingOf)return;
+    if(isSpo(p)||p.parentId){p.siblingOf=null;return}
+    var q=by[p.siblingOf],seenS={},res=null;seenS[p.id]=1;
+    while(q){
+      if(seenS[q.id]||isSpo(q))break;
+      seenS[q.id]=1;
+      if(q.parentId){res={parent:q.parentId};break}
+      if(q.siblingOf&&by[q.siblingOf]){q=by[q.siblingOf];continue}
+      res={head:q};break;
+    }
+    if(!res)p.siblingOf=null;
+    else if(res.parent){p.parentId=res.parent;p.siblingOf=null}
+  });
   var root=function(id){var q=by[id],g=0;while(q&&q.spouseOf&&g++<out.length+1)q=by[q.spouseOf];return q};
   out.forEach(function(p){var q=p,g=0;while(q&&g++<out.length+2){if(!q.parentId)break;var u=root(q.parentId);if(!u)break;if(u===p){p.parentId=null;break}q=u}});
   return out;
@@ -326,7 +434,15 @@ function layoutTree(){
     var Cw=ch.reduce(function(s,c){return s+c.S},0)+SIB*Math.max(0,ch.length-1);
     return {p:p,members:members,ch:ch,depth:depth,Wu:Wu,Cw:Cw,S:Math.max(Wu,Cw)};
   };
-  var nodes=roots.map(function(r){return build(r,0,{})});
+  var sibKey=function(p){var q=p,g=0;while(q&&q.siblingOf&&by[q.siblingOf]&&g++<50)q=by[q.siblingOf];return q&&q!==p?q.id:null};
+  var rootSet={};roots.forEach(function(r){rootSet[r.id]=1});
+  var gm={},gorder=[],nodes=[],groups=[];
+  roots.forEach(function(r){var k=sibKey(r)||r.id;if(!rootSet[k])k=r.id;if(!gm[k]){gm[k]=[];gorder.push(k)}gm[k].push(r)});
+  gorder.forEach(function(k){
+    var ns=sortKids(gm[k]).map(function(r){var n=build(r,0,{});n.grp=k;return n});
+    ns.forEach(function(n){nodes.push(n)});
+    if(ns.length>1)groups.push(ns);
+  });
   people.forEach(function(p){if(!seen[p.id]){nodes.push(build(p,0,{}))}});
   var maxDepth=0,order=[];
   var place=function(n,x0){
@@ -337,46 +453,63 @@ function layoutTree(){
     n.ch.forEach(function(c){place(c,cx);cx+=c.S+SIB});
   };
   var x=0;
-  nodes.forEach(function(n,i){place(n,x);x+=n.S+(i<nodes.length-1?SIB*2:0)});
-  return {nodes:nodes,w:x,h:(maxDepth+1)*NODE_H+maxDepth*VG,order:order,count:people.length,gens:maxDepth+1};
+  nodes.forEach(function(n,i){var nx=nodes[i+1];place(n,x);x+=n.S+(i<nodes.length-1?((n.grp&&nx.grp===n.grp)?SIB:SIB*2):0)});
+  return {nodes:nodes,groups:groups,w:x,h:(maxDepth+1)*NODE_H+maxDepth*VG,order:order,count:people.length,gens:maxDepth+1};
 }
 
 /* ---------- SVG ---------- */
 function st(o){return Object.keys(o).map(function(k){return k+":"+o[k]}).join(";")}
 
+function shapeEl(cx,cy,style){
+  var sh=settings.photoShape,sty=style?' style="'+style+'"':"";
+  if(sh==="circle")return '<circle cx="'+cx+'" cy="'+cy+'" r="38"'+sty+'/>';
+  return '<rect x="'+(cx-38)+'" y="'+(cy-38)+'" width="76" height="76" rx="'+(sh==="rounded"?16:3)+'"'+sty+'/>';
+}
+function recalcCard(){
+  var S=settings.show,t0=S.photo?112:16;
+  KIN_Y=t0+6;NAME_Y=S.kin?t0+28:t0+16;
+  var last=NAME_Y+18,end=last;
+  if(S.date)end=last+22;
+  if(S.place)end=S.date?end+15:last+22;
+  NODE_H=Math.round(end+((S.date||S.place)?19:14));
+  LINK_Y=S.photo?56:Math.round(NODE_H/2);
+}
+
 function cardSvg(pp,x,y,p,sel,interactive){
-  var cx=NODE_W/2,g="";
+  var S=settings.show,cx=NODE_W/2,g="";
   g+='<g transform="translate('+x+' '+y+')"'+(interactive?' class="pcard" data-id="'+esc(pp.id)+'" tabindex="0" role="button" aria-label="'+esc(pp.name)+'"':"")+'>';
-  g+='<rect width="'+NODE_W+'" height="'+NODE_H+'" rx="14" style="'+st({fill:p.card,stroke:sel?p.acc:p.stroke,"stroke-width":sel?3:1.2})+'"/>';
-  if(pp.photo){
-    var cid="clip-"+pp.id;
-    g+='<clipPath id="'+esc(cid)+'"><circle cx="'+cx+'" cy="56" r="38"/></clipPath>';
-    g+='<image x="'+(cx-38)+'" y="18" width="76" height="76" preserveAspectRatio="xMidYMid slice" clip-path="url(#'+esc(cid)+')" xlink:href="'+esc(pp.photo)+'"/>';
-    g+='<circle cx="'+cx+'" cy="56" r="38" style="'+st({fill:"none",stroke:p.stroke,"stroke-width":1.2})+'"/>';
-  }else{
-    g+='<circle cx="'+cx+'" cy="56" r="38" style="fill:'+p.av+'"/>';
-    g+='<text x="'+cx+'" y="65" text-anchor="middle" font-size="26" style="fill:'+p.acc+'">'+esc(initials(pp.name))+'</text>';
+  g+='<rect width="'+NODE_W+'" height="'+NODE_H+'" rx="'+settings.radius+'" style="'+st({fill:p.card,stroke:sel?p.acc:p.stroke,"stroke-width":sel?3:1.2})+'"/>';
+  if(S.photo){
+    if(pp.photo){
+      var cid="clip-"+pp.id;
+      g+='<clipPath id="'+esc(cid)+'">'+shapeEl(cx,56,"")+'</clipPath>';
+      g+='<image x="'+(cx-38)+'" y="18" width="76" height="76" preserveAspectRatio="xMidYMid slice" clip-path="url(#'+esc(cid)+')" xlink:href="'+esc(pp.photo)+'"/>';
+      g+=shapeEl(cx,56,st({fill:"none",stroke:p.stroke,"stroke-width":1.2}));
+    }else{
+      g+=shapeEl(cx,56,"fill:"+p.av);
+      g+='<text x="'+cx+'" y="65" text-anchor="middle" font-size="26" style="fill:'+p.acc+'">'+esc(initials(pp.name))+'</text>';
+    }
   }
   var maxW=NODE_W-24;
-  if(pp.kin){
+  if(S.kin&&pp.kin){
     var kf="700 10.5px "+SANS,kt=fitText(pp.kin.toUpperCase(),kf,maxW,1.2);
-    g+='<text x="'+cx+'" y="118" text-anchor="middle" font-size="10.5" font-weight="700" letter-spacing="1.2" font-family="'+SANS+'" style="fill:'+p.acc+'">'+esc(kt)+'</text>';
+    g+='<text x="'+cx+'" y="'+KIN_Y+'" text-anchor="middle" font-size="10.5" font-weight="700" letter-spacing="1.2" font-family="'+SANS+'" style="fill:'+p.acc+'">'+esc(kt)+'</text>';
   }
-  var nf="700 15px "+SERIF,lines=wrap(pp.name,nf,maxW,2),yy=140;
+  var nf="700 15px "+FONT,lines=wrap(pp.name,nf,maxW,2),yy=NAME_Y;
   lines.forEach(function(l,i){g+='<text x="'+cx+'" y="'+(yy+i*18)+'" text-anchor="middle" font-size="15" font-weight="700" style="fill:'+p.ink+'">'+esc(l)+'</text>'});
   yy+=(lines.length-1)*18+22;
-  if(pp.date){
-    g+='<text x="'+cx+'" y="'+yy+'" text-anchor="middle" font-size="12" style="fill:'+p.muted+'">'+esc(fitText("Nasc. "+pp.date,"12px "+SERIF,maxW))+"</text>";
+  if(S.date&&pp.date){
+    g+='<text x="'+cx+'" y="'+yy+'" text-anchor="middle" font-size="12" style="fill:'+p.muted+'">'+esc(fitText("Nasc. "+pp.date,"12px "+FONT,maxW))+"</text>";
     yy+=15;
   }
-  if(pp.place){
-    g+='<text x="'+cx+'" y="'+yy+'" text-anchor="middle" font-size="11.5" font-style="italic" style="fill:'+p.muted+'">'+esc(fitText(pp.place,"italic 11.5px "+SERIF,maxW))+"</text>";
+  if(S.place&&pp.place){
+    g+='<text x="'+cx+'" y="'+yy+'" text-anchor="middle" font-size="11.5" font-style="italic" style="fill:'+p.muted+'">'+esc(fitText(pp.place,"italic 11.5px "+FONT,maxW))+"</text>";
   }
   return g+"</g>";
 }
 
 function connSvg(n,p){
-  var s="",cnt=n.members.length,cxu=n.x+n.Wu/2,linkY=n.y+56;
+  var s="",cnt=n.members.length,cxu=n.x+n.Wu/2,linkY=n.y+LINK_Y;
   for(var i=0;i<cnt-1;i++){
     var x1=n.x+i*(NODE_W+SPG)+NODE_W,x2=x1+SPG,gx=(x1+x2)/2;
     s+='<line x1="'+x1+'" y1="'+linkY+'" x2="'+x2+'" y2="'+linkY+'" style="'+st({stroke:p.line,"stroke-width":1.6})+'"/>';
@@ -406,14 +539,19 @@ function buildSvg(m,p,o){
   var titleH=o.title?92:0;
   var W=Math.max(m.w+PAD*2,o.title?520:0),H=m.h+PAD*2+titleH;
   var ox=(W-m.w)/2,oy=PAD+titleH;
-  var s='<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+" "+H+'" font-family="'+SERIF+'">';
+  var s='<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+" "+H+'" font-family="'+FONT+'">';
   s+='<rect width="'+W+'" height="'+H+'" style="fill:'+p.bg+'"/>';
   if(o.title){
-    s+='<text x="'+PAD+'" y="'+(PAD+30)+'" font-size="32" font-weight="700" style="fill:'+p.ink+'">'+esc(fitText(o.title,"700 32px "+SERIF,W-PAD*2))+"</text>";
+    s+='<text x="'+PAD+'" y="'+(PAD+30)+'" font-size="32" font-weight="700" style="fill:'+p.ink+'">'+esc(fitText(o.title,"700 32px "+FONT,W-PAD*2))+"</text>";
     s+='<text x="'+PAD+'" y="'+(PAD+54)+'" font-size="13" font-family="'+SANS+'" style="fill:'+p.muted+'">'+esc(o.subtitle||"")+"</text>";
   }
   s+='<g transform="translate('+ox+" "+oy+')">';
   m.nodes.forEach(function(n){s+=connSvg(n,p)});
+  (m.groups||[]).forEach(function(gr){
+    var by=gr[0].y-22,a=gr.map(function(n){return n.x+NODE_W/2}),d="M"+a[0]+" "+by+"H"+a[a.length-1];
+    a.forEach(function(ax,i){d+="M"+ax+" "+by+"V"+gr[i].y});
+    s+='<path d="'+d+'" style="'+st({fill:"none",stroke:p.line,"stroke-width":1.6,"stroke-linejoin":"round"})+'"/>';
+  });
   m.nodes.forEach(function(n){s+=cardsSvg(n,p,o)});
   s+="</g></svg>";
   return {svg:s,w:W,h:H};
@@ -471,21 +609,34 @@ function descendantsAndUnit(id){
   }
   return out;
 }
+function updateHint(){
+  var rel=$("fRel").value,t=$("fTarget").value,h;
+  if(rel==="root")h="Uma pessoa inicial começa uma árvore nova, ao lado das outras. Serve para juntar o outro lado da família.";
+  else if(rel==="child")h="A pessoa aparece por baixo de quem escolheres.";
+  else if(rel==="spouse")h="A pessoa aparece ao lado de quem escolheres.";
+  else{
+    var tp=state.people.filter(function(x){return x.id===t})[0];
+    h=(tp&&!tp.parentId)?"Esta pessoa não tem pais na árvore, por isso os irmãos ficam lado a lado, unidos por uma linha.":"Fica com os mesmos pais de quem escolheres.";
+  }
+  $("relHint").textContent=h;
+}
 function refreshTargets(prefer){
   var sel=$("fTarget"),rel=$("fRel").value,cur=prefer!==undefined?prefer:sel.value;
-  $("fTarget").hidden=rel==="root";
-  $("relHint").textContent=rel==="root"?"Uma pessoa inicial começa uma árvore nova, ao lado das outras. Serve para juntar o outro lado da família.":
-    rel==="child"?"A pessoa aparece por baixo de quem escolheres.":"A pessoa aparece ao lado de quem escolheres.";
+  sel.hidden=rel==="root";
   var ex=editingId?descendantsAndUnit(editingId):{};
   var by={};state.people.forEach(function(p){by[p.id]=p});
+  if(editingId&&rel==="sibling"){
+    state.people.forEach(function(p){var q=p,g=0;while(q&&q.siblingOf&&g++<50){if(q.siblingOf===editingId){ex[p.id]=1;break}q=by[q.siblingOf]}});
+  }
   var h='<option value="">— escolher pessoa —</option>';
   layoutTree().order.forEach(function(o){
     var p=o.p;if(ex[p.id])return;
-    if(rel==="spouse"&&o.spouse)return;
+    if((rel==="spouse"||rel==="sibling")&&o.spouse)return;
     h+='<option value="'+esc(p.id)+'">'+esc(p.name+(p.kin?" ("+p.kin+")":""))+"</option>";
   });
   sel.innerHTML=h;
   sel.value=by[cur]&&sel.querySelector('option[value="'+cur.replace(/"/g,"")+'"]')?cur:"";
+  updateHint();
 }
 
 function setPhoto(url){
@@ -511,10 +662,10 @@ function fillForm(p){
   editingId=p.id;
   $("fName").value=p.name;$("fKin").value=p.kin;$("fDate").value=p.date;$("fPlace").value=p.place;
   setPhoto(p.photo);
-  $("fRel").value=p.spouseOf?"spouse":(p.parentId?"child":"root");
+  $("fRel").value=p.spouseOf?"spouse":(p.siblingOf?"sibling":(p.parentId?"child":"root"));
   $("formTitle").textContent="Editar pessoa";$("btnSave").textContent="Guardar alterações";
   $("btnCancel").hidden=false;$("btnDel").hidden=false;$("quick").hidden=false;
-  refreshTargets(p.spouseOf||p.parentId||"");
+  refreshTargets(p.spouseOf||p.siblingOf||p.parentId||"");
 }
 function select(id){
   var p=state.people.filter(function(x){return x.id===id})[0];if(!p)return;
@@ -532,7 +683,7 @@ $("form").addEventListener("submit",function(e){
   e.preventDefault();
   var name=$("fName").value.trim(),rel=$("fRel").value,target=$("fTarget").value;
   if(!name){msg("Escreve o nome da pessoa.");$("fName").focus();return}
-  if(rel!=="root"&&!target){msg(rel==="child"?"Escolhe de quem é filho/a.":"Escolhe de quem é cônjuge.");$("fTarget").focus();return}
+  if(rel!=="root"&&!target){msg(rel==="child"?"Escolhe de quem é filho/a.":(rel==="sibling"?"Escolhe de quem é irmão/irmã.":"Escolhe de quem é cônjuge."));$("fTarget").focus();return}
   var p,isNew=!editingId;
   if(isNew){
     if(state.sample){
@@ -545,7 +696,10 @@ $("form").addEventListener("submit",function(e){
     state.sample=false;
   }
   p.name=name;p.kin=$("fKin").value.trim();p.date=$("fDate").value.trim();p.place=$("fPlace").value.trim();p.photo=formPhoto;
-  p.parentId=rel==="child"?target:null;p.spouseOf=rel==="spouse"?target:null;
+  p.parentId=null;p.spouseOf=null;p.siblingOf=null;
+  if(rel==="child")p.parentId=target;
+  else if(rel==="spouse")p.spouseOf=target;
+  else if(rel==="sibling"){var tg=state.people.filter(function(x){return x.id===target})[0];if(tg&&tg.parentId)p.parentId=tg.parentId;else p.siblingOf=target}
   if(isNew){state.people.push(p);lastAdded=p.id}
   state.people=sanitize(state.people);
   save();
@@ -555,6 +709,7 @@ $("form").addEventListener("submit",function(e){
   if(isNew)$("fName").focus();
 });
 $("fRel").addEventListener("change",function(){refreshTargets("")});
+$("fTarget").addEventListener("change",updateHint);
 $("fName").addEventListener("input",function(){if(!formPhoto)setPhoto("")});
 $("btnCancel").addEventListener("click",function(){resetForm();renderList();renderTree()});
 
@@ -567,7 +722,9 @@ $("btnDel").addEventListener("click",function(){
   var id=editingId,by={};state.people.forEach(function(p){by[p.id]=p});
   var del=by[id];if(!del)return;
   var firstSp=state.people.filter(function(p){return p.spouseOf===id})[0];
+  var firstSib=state.people.filter(function(p){return p.siblingOf===id})[0];
   state.people.forEach(function(p){
+    if(p.siblingOf===id)p.siblingOf=(p===firstSib)?(del.siblingOf||null):firstSib.id;
     if(p.parentId===id)p.parentId=firstSp?firstSp.id:(del.spouseOf||null);
     if(p.spouseOf===id){p.spouseOf=(p===firstSp)?null:firstSp.id;if(p===firstSp)p.parentId=del.parentId||null}
   });
@@ -577,6 +734,7 @@ $("btnDel").addEventListener("click",function(){
 });
 
 $("qChild").addEventListener("click",function(){var base=editingId;resetForm();$("fRel").value="child";refreshTargets(base);$("fName").focus()});
+$("qSib").addEventListener("click",function(){var base=editingId;resetForm();$("fRel").value="sibling";refreshTargets(base);$("fName").focus()});
 $("qSpouse").addEventListener("click",function(){
   var base=editingId,by={};state.people.forEach(function(p){by[p.id]=p});
   var q=by[base],g=0;while(q&&q.spouseOf&&by[q.spouseOf]&&g++<50)q=by[q.spouseOf];
@@ -637,18 +795,27 @@ function download(name,blob){
 function today(){return new Date().toLocaleDateString("pt-PT",{day:"numeric",month:"long",year:"numeric"})}
 function subtitle(m){return plural(m.count,"pessoa","pessoas")+" · "+plural(m.gens,"geração","gerações")+" · "+today()}
 
-function payload(){return {app:"arvore-genealogica",version:1,title:state.title,people:state.people}}
+function payload(){return {app:"arvore-genealogica",version:2,title:state.title,people:state.people,settings:settings}}
+function cssVarsFor(theme){var p=fullPalette(theme);return "--bg:"+p.pageBg+";--ink:"+p.pageInk+";--mute:"+p.pageMute+";--line:"+p.pageLine+";--acc:"+p.acc+";--t-bg:"+p.bg+";--t-card:"+p.card+";--t-stroke:"+p.stroke+";--t-ink:"+p.ink+";--t-muted:"+p.muted+";--t-line:"+p.line+";--t-ring:"+p.ring+";--t-av:"+p.av}
+function pdfPalette(){
+  if(!settings.pdfWhite)return fullPalette(effTheme());
+  var q=fullPalette("light");
+  if(lum(q.ink)>0.7){q.ink=BASE.light.ink;q.muted=mix(q.ink,"#ffffff",.62);q.stroke=mix(q.ink,"#ffffff",.16)}
+  q.bg="#ffffff";q.card="#ffffff";return q;
+}
 function b64enc(str){var b=new TextEncoder().encode(str),s="";for(var i=0;i<b.length;i+=0x8000)s+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000));return btoa(s)}
 function b64dec(t){var s=atob(t),b=new Uint8Array(s.length);for(var i=0;i<s.length;i++)b[i]=s.charCodeAt(i);return new TextDecoder().decode(b)}
 
 $("btnHtml").addEventListener("click",function(){
   var m=layoutTree();if(!m.count){toast("Adiciona pessoas antes de exportar.");return}
   var r=buildSvg(m,PAL_VARS,{}),title=state.title.trim()||"Árvore genealógica";
-  var doc='<!DOCTYPE html>\n<html lang="pt-PT">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>'+esc(title)+'</title>\n<style>\n'+
-  ':root{--bg:#edf1ee;--ink:#18221e;--mute:#5b6a63;--line:#d3dcd7;--acc:#1f5f4a;--t-bg:#f6f8f6;--t-card:#fff;--t-stroke:#cdd7d2;--t-ink:#18221e;--t-muted:#5b6a63;--t-line:#9db0a7;--t-ring:#a8832f;--t-av:#e3ece7}\n'+
-  '@media (prefers-color-scheme:dark){:root{--bg:#101513;--ink:#e4ebe7;--mute:#97a79f;--line:#2b3732;--acc:#6cc3a0;--t-bg:#141a17;--t-card:#1d2622;--t-stroke:#33423b;--t-ink:#e8eee9;--t-muted:#9aaaa2;--t-line:#4d6359;--t-ring:#d1ad5b;--t-av:#27342e}}\n'+
+  var css;
+  if(settings.theme==="light")css=':root{'+cssVarsFor("light")+'}';
+  else if(settings.theme==="dark")css=':root{color-scheme:dark;'+cssVarsFor("dark")+'}';
+  else css=':root{'+cssVarsFor("light")+'}\n@media (prefers-color-scheme:dark){:root{color-scheme:dark;'+cssVarsFor("dark")+'}}';
+  var doc='<!DOCTYPE html>\n<html lang="pt-PT">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>'+esc(title)+'</title>\n<style>\n'+css+'\n'+
   '*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}\n'+
-  'header{padding:20px 16px 12px;max-width:1500px;margin:0 auto}h1{margin:0;font:700 2rem/1.2 Georgia,"Times New Roman",serif}p{margin:4px 0 0;color:var(--mute);font-size:.92rem}\n'+
+  'header{padding:20px 16px 12px;max-width:1500px;margin:0 auto}h1{margin:0;font:700 2rem/1.2 '+FONT+'}p{margin:4px 0 0;color:var(--mute);font-size:.92rem}\n'+
   '.scroll{max-width:1500px;margin:0 16px 24px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--t-bg)}.scroll svg{display:block;margin:0 auto;max-width:none}\n'+
   '@media print{@page{size:landscape;margin:10mm}body{background:#fff}.scroll{border:0;margin:0;overflow:visible}.scroll svg{width:100%;height:auto}}\n'+
   '</style>\n</head>\n<body>\n<header><h1>'+esc(title)+'</h1><p>'+esc(subtitle(m))+'</p></header>\n<div class="scroll">'+r.svg+'</div>\n<script type="application/json" id="arvore-data">'+JSON.stringify(payload()).replace(/</g,"\\u003c")+'<\/script>\n</body>\n</html>\n';
@@ -661,14 +828,14 @@ $("btnPdf").addEventListener("click",function(){
   if(!window.jspdf){toast("A biblioteca de PDF não carregou. Verifica a ligação à internet e recarrega a página.");return}
   var btn=this;btn.disabled=true;btn.textContent="A gerar PDF…";
   var title=state.title.trim()||"Árvore genealógica";
-  var r=buildSvg(m,PAL_PRINT,{title:title,subtitle:subtitle(m)});
+  var pal=pdfPalette(),r=buildSvg(m,pal,{title:title,subtitle:subtitle(m)});
   var url=URL.createObjectURL(new Blob([r.svg],{type:"image/svg+xml;charset=utf-8"})),img=new Image();
   var done=function(){btn.disabled=false;btn.textContent="Exportar PDF";URL.revokeObjectURL(url)};
   img.onload=function(){
     try{
       var k=Math.min(3,6000/Math.max(r.w,r.h),Math.sqrt(16e6/(r.w*r.h)));
       var c=document.createElement("canvas");c.width=Math.round(r.w*k);c.height=Math.round(r.h*k);
-      var ctx=c.getContext("2d");ctx.fillStyle=PAL_PRINT.bg;ctx.fillRect(0,0,c.width,c.height);
+      var ctx=c.getContext("2d");ctx.fillStyle=pal.bg;ctx.fillRect(0,0,c.width,c.height);
       ctx.drawImage(img,0,0,c.width,c.height);
       var data=c.toDataURL("image/jpeg",0.92);
       var land=r.w>=r.h,sizes=[[595.28,841.89],[841.89,1190.55],[1190.55,1683.78]],M=24,pw,ph,sc;
@@ -721,6 +888,7 @@ $("importFile").addEventListener("change",function(){
       if(!people.length)throw new Error("vazio");
       if(state.people.length&&!state.sample&&!confirm("Substituir a árvore atual pelo conteúdo deste ficheiro?"))return;
       state={title:String(x.title||""),people:people,sample:false};
+      if(x.settings){settings=normSettings(x.settings);saveSettings();applySettings();buildKinList()}
       $("treeTitle").value=state.title;save();lastAdded=null;resetForm();render();toast("Árvore aberta: "+plural(people.length,"pessoa","pessoas"));
     }catch(e){toast("Este ficheiro não tem dados da árvore. Só abre cópias e exports (HTML ou PDF) feitos por esta ferramenta.")}
   };
@@ -730,8 +898,116 @@ $("btnClear").addEventListener("click",function(){
   state={title:"",people:[],sample:false};$("treeTitle").value="";lastAdded=null;save();resetForm();render();$("fName").focus();
 });
 
+/* ---------- definições ---------- */
+var DEFAULT_KIN=["Eu","Pai","Mãe","Irmão","Irmã","Avô paterno","Avó paterna","Avô materno","Avó materna","Bisavô","Bisavó","Tio","Tia","Primo","Prima","Filho","Filha","Neto","Neta","Cônjuge","Cunhado","Cunhada","Sogro","Sogra","Padrinho","Madrinha"];
+var FONTS={serif:"Georgia,'Times New Roman',serif",palatino:"'Palatino Linotype',Palatino,'Book Antiqua',serif",sans:"'Helvetica Neue',Helvetica,Arial,sans-serif",mono:"'Courier New',Courier,monospace"};
+var COLOR_KEYS=["pageBg","treeBg","cardBg","ink","acc","line"];
+var BASE={
+  light:{pageBg:"#edf1ee",pageCard:"#ffffff",pageInk:"#18221e",pageMute:"#5b6a63",pageLine:"#d3dcd7",acc:"#1f5f4a",bg:"#f6f8f6",card:"#ffffff",stroke:"#cdd7d2",ink:"#18221e",muted:"#5b6a63",line:"#9db0a7",ring:"#a8832f",av:"#e3ece7"},
+  dark:{pageBg:"#101513",pageCard:"#18201c",pageInk:"#e4ebe7",pageMute:"#97a79f",pageLine:"#2b3732",acc:"#6cc3a0",bg:"#141a17",card:"#1d2622",stroke:"#33423b",ink:"#e8eee9",muted:"#9aaaa2",line:"#4d6359",ring:"#d1ad5b",av:"#27342e"}
+};
+function defaults(){return {theme:"auto",font:"serif",radius:14,photoShape:"circle",show:{photo:true,kin:true,date:true,place:true},colors:{pageBg:null,treeBg:null,cardBg:null,ink:null,acc:null,line:null},kinOptions:null,pdfWhite:true}}
+var settings=defaults();
+function normSettings(x){
+  var d=defaults();x=x&&typeof x==="object"?x:{};
+  if(["auto","light","dark"].indexOf(x.theme)>=0)d.theme=x.theme;
+  if(FONTS[x.font])d.font=x.font;
+  var r=+x.radius;if(isFinite(r))d.radius=Math.max(0,Math.min(28,Math.round(r)));
+  if(["circle","rounded","square"].indexOf(x.photoShape)>=0)d.photoShape=x.photoShape;
+  ["photo","kin","date","place"].forEach(function(k){if(x.show&&typeof x.show[k]==="boolean")d.show[k]=x.show[k]});
+  COLOR_KEYS.forEach(function(k){var v=x.colors&&x.colors[k];if(typeof v==="string"&&/^#[0-9a-f]{6}$/i.test(v))d.colors[k]=v.toLowerCase()});
+  if(Array.isArray(x.kinOptions))d.kinOptions=x.kinOptions.map(function(t){return String(t).trim().slice(0,60)}).filter(Boolean).slice(0,80);
+  if(typeof x.pdfWhite==="boolean")d.pdfWhite=x.pdfWhite;
+  return d;
+}
+function loadSettings(){var raw=null;try{raw=localStorage.getItem(KEY_S)}catch(e){}if(raw){try{settings=normSettings(JSON.parse(raw))}catch(e){}}}
+function saveSettings(){try{localStorage.setItem(KEY_S,JSON.stringify(settings))}catch(e){}}
+
+function hex2rgb(h){return [1,3,5].map(function(i){return parseInt(h.substr(i,2),16)})}
+function rgb2hex(a){return "#"+a.map(function(v){v=Math.max(0,Math.min(255,Math.round(v)));return (v<16?"0":"")+v.toString(16)}).join("")}
+function mix(a,b,w){var x=hex2rgb(a),y=hex2rgb(b);return rgb2hex([0,1,2].map(function(i){return x[i]*w+y[i]*(1-w)}))}
+function lum(h){var c=hex2rgb(h).map(function(v){v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2]}
+function effTheme(){return settings.theme==="auto"?((window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light"):settings.theme}
+function fullPalette(theme){
+  var p=Object.assign({},BASE[theme]),c=settings.colors;
+  if(c.pageBg){
+    p.pageBg=c.pageBg;p.dark=lum(c.pageBg)<0.4;
+    p.pageInk=p.dark?"#e4ebe7":"#18221e";p.pageMute=mix(p.pageInk,p.pageBg,.62);p.pageLine=mix(p.pageInk,p.pageBg,.16);
+    p.pageCard=p.dark?mix(p.pageBg,"#ffffff",.93):mix(p.pageBg,"#ffffff",.5);
+  }
+  if(c.treeBg)p.bg=c.treeBg;
+  if(c.cardBg)p.card=c.cardBg;
+  if(c.ink)p.ink=c.ink;
+  if(c.acc)p.acc=c.acc;
+  if(c.line)p.line=c.line;
+  if(c.ink||c.cardBg){p.muted=mix(p.ink,p.card,.62);p.stroke=mix(p.ink,p.card,.16)}
+  if(c.acc||c.cardBg)p.av=mix(p.acc,p.card,.14);
+  p.accInk=lum(p.acc)>0.4?"#0d1a14":"#ffffff";
+  return p;
+}
+function applySettings(){
+  var root=document.documentElement,r=root.style,c=settings.colors;
+  if(settings.theme==="auto")root.removeAttribute("data-theme");else root.setAttribute("data-theme",settings.theme);
+  var p=fullPalette(effTheme());
+  FONT=FONTS[settings.font];
+  r.setProperty("--font-display",FONT);
+  r.setProperty("--av-radius",settings.photoShape==="circle"?"50%":(settings.photoShape==="rounded"?"16px":"4px"));
+  var set=function(on,vars){Object.keys(vars).forEach(function(k){if(on)r.setProperty(k,vars[k]);else r.removeProperty(k)})};
+  set(!!c.acc,{"--acc":p.acc,"--acc-ink":p.accInk});
+  set(!!c.treeBg,{"--t-bg":p.bg});
+  set(!!c.cardBg,{"--t-card":p.card});
+  set(!!c.ink,{"--t-ink":p.ink});
+  set(!!c.line,{"--t-line":p.line});
+  set(!!(c.ink||c.cardBg),{"--t-muted":p.muted,"--t-stroke":p.stroke});
+  set(!!(c.acc||c.cardBg),{"--t-av":p.av});
+  set(!!c.pageBg,{"--bg":p.pageBg,"--card":p.pageCard,"--ink":p.pageInk,"--mute":p.pageMute,"--line":p.pageLine});
+  r.colorScheme=c.pageBg?(p.dark?"dark":"light"):"";
+  recalcCard();
+}
+function buildKinList(){$("kinList").innerHTML=(settings.kinOptions||DEFAULT_KIN).map(function(o){return '<option value="'+esc(o)+'">'}).join("")}
+function syncSettingsUI(){
+  $("sTheme").value=settings.theme;$("sFont").value=settings.font;
+  $("sRadius").value=settings.radius;$("sRadiusV").textContent=settings.radius+" px";
+  $("sShape").value=settings.photoShape;
+  ["photo","kin","date","place"].forEach(function(k){$("sShow_"+k).checked=settings.show[k]});
+  var p=fullPalette(effTheme()),map={pageBg:p.pageBg,treeBg:p.bg,cardBg:p.card,ink:p.ink,acc:p.acc,line:p.line};
+  COLOR_KEYS.forEach(function(k){$("c_"+k).value=settings.colors[k]||map[k];document.querySelector('.rs[data-k="'+k+'"]').hidden=!settings.colors[k]});
+  $("sKin").value=(settings.kinOptions||DEFAULT_KIN).join("\n");
+  $("sPdfWhite").checked=settings.pdfWhite;
+}
+function changed(syncUI){applySettings();saveSettings();render();if(syncUI)syncSettingsUI()}
+
+var dlg=$("settings"),resetArm=null;
+$("btnSettings").addEventListener("click",function(){syncSettingsUI();if(dlg.showModal)dlg.showModal();else dlg.setAttribute("open","")});
+$("setClose").addEventListener("click",function(){if(dlg.close)dlg.close();else dlg.removeAttribute("open")});
+dlg.addEventListener("click",function(e){if(e.target===dlg&&dlg.close)dlg.close()});
+$("sTheme").addEventListener("change",function(){settings.theme=this.value;changed(true)});
+$("sFont").addEventListener("change",function(){settings.font=this.value;changed()});
+$("sRadius").addEventListener("input",function(){settings.radius=+this.value;$("sRadiusV").textContent=settings.radius+" px";changed()});
+$("sShape").addEventListener("change",function(){settings.photoShape=this.value;changed()});
+["photo","kin","date","place"].forEach(function(k){$("sShow_"+k).addEventListener("change",function(){settings.show[k]=this.checked;changed()})});
+COLOR_KEYS.forEach(function(k){
+  $("c_"+k).addEventListener("input",function(){settings.colors[k]=this.value.toLowerCase();document.querySelector('.rs[data-k="'+k+'"]').hidden=false;changed()});
+});
+document.querySelectorAll(".rs").forEach(function(b){b.addEventListener("click",function(){settings.colors[b.dataset.k]=null;changed(true)})});
+$("sKin").addEventListener("input",function(){
+  var seenK={},list=[];
+  this.value.split(/\n/).forEach(function(t){t=t.trim().slice(0,60);if(t&&!seenK[t.toLowerCase()]){seenK[t.toLowerCase()]=1;list.push(t)}});
+  settings.kinOptions=list.slice(0,80);saveSettings();buildKinList();
+});
+$("sKinReset").addEventListener("click",function(){settings.kinOptions=null;saveSettings();buildKinList();syncSettingsUI()});
+$("sPdfWhite").addEventListener("change",function(){settings.pdfWhite=this.checked;saveSettings()});
+$("sResetAll").addEventListener("click",function(){
+  var b=this;
+  if(!b.classList.contains("arm")){b.classList.add("arm");b.textContent="Confirmar: repor tudo";clearTimeout(resetArm);resetArm=setTimeout(function(){b.classList.remove("arm");b.textContent="Repor todas as definições"},4000);return}
+  clearTimeout(resetArm);b.classList.remove("arm");b.textContent="Repor todas as definições";
+  settings=defaults();buildKinList();changed(true);toast("Definições repostas");
+});
+if(window.matchMedia){var mq=matchMedia("(prefers-color-scheme: dark)"),onMq=function(){if(settings.theme==="auto"||settings.colors.pageBg||settings.colors.cardBg){applySettings();if(dlg.open)syncSettingsUI()}};
+  if(mq.addEventListener)mq.addEventListener("change",onMq)}
+
 /* ---------- arranque ---------- */
-load();
+load();loadSettings();applySettings();buildKinList();
 $("treeTitle").value=state.title;
 resetForm();render();
 })();
