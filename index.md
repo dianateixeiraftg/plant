@@ -76,4 +76,8 @@ Pick a tool to get started.
     <strong>🏠 Painel da Casa</strong>
     <span>Equipamentos, notas e tarefas da casa</span>
   </a>
+  <a class="tool-btn" href="Tools/Arvore_Genealogica.html">
+    <strong>🌳 Árvore Genealógica</strong>
+    <span>Pessoas, parentescos e fotografias, com exportação em PDF e HTML</span>
+  </a>
 </div>
