@@ -719,17 +719,46 @@ $("cCancel").onclick = () => $("cropDlg").close();
 $("cOk").onclick = () => { cropP.crop = cbox.map(v => +v.toFixed(4)); $("cropDlg").close(); buildList(); render(); };
 
 /* ---------- output ---------- */
-$("dl").addEventListener("click", () => {
+function buildJpegFiles() {
   const S = settings();
-  canvases.forEach((c, i) => setTimeout(() => c.toBlob(async b => {
-    const exif = $("meta").checked && metas[i] ? metas[i].exif : null;
-    const out = finishJpeg(await b.arrayBuffer(), exif, c.width, c.height);
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([out], { type: "image/jpeg" }));
-    a.download = (mode === "collage" ? "collage-" : "photo-sheet-") + (i + 1) + "-" + S.W + "x" + S.H + "mm-300dpi.jpg";
-    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-    if ($("meta").checked && i === 0) toast(exif ? "Saved with the metadata of “" + metas[i].name + "”." : "Saved. The first photo has no metadata to copy (only JPEG originals carry it).");
-  }, "image/jpeg", 0.95), i * 400));
+  return Promise.all(canvases.map((c, i) => new Promise((res, rej) => c.toBlob(async b => {
+    try {
+      if (!b) throw new Error("Could not create the image.");
+      const exif = $("meta").checked && metas[i] ? metas[i].exif : null;
+      const out = finishJpeg(await b.arrayBuffer(), exif, c.width, c.height);
+      const name = (mode === "collage" ? "collage-" : "photo-sheet-") + (i + 1) + "-" + S.W + "x" + S.H + "mm-300dpi.jpg";
+      res({ file: new File([out], name, { type: "image/jpeg" }), exif });
+    } catch (e) { rej(e); }
+  }, "image/jpeg", 0.95))));
+}
+function downloadFile(f) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(f);
+  a.download = f.name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+$("dl").addEventListener("click", async () => {
+  if (!canvases.length) return;
+  let items;
+  try { items = await buildJpegFiles(); } catch (e) { toast("Could not prepare the image: " + e.message); return; }
+  const files = items.map(x => x.file);
+  const onPhone = window.matchMedia("(pointer:coarse)").matches;
+  // On phones a plain download does not reach the photo gallery: use the system share sheet ("Save Image" / "Save to Photos").
+  if (onPhone && navigator.canShare && navigator.canShare({ files })) {
+    try {
+      await navigator.share({ files });
+      return;
+    } catch (e) {
+      if (e && e.name === "AbortError") return; // person closed the share sheet
+      toast("The share sheet did not open, so the file was downloaded instead.");
+    }
+  }
+  files.forEach((f, i) => setTimeout(() => downloadFile(f), i * 400));
+  if ($("meta").checked) {
+    const exif = items[0].exif;
+    toast(exif ? "Saved with the metadata of “" + metas[0].name + "”." : "Saved. The first photo has no metadata to copy (only JPEG originals carry it).");
+  }
 });
 $("pr").addEventListener("click", () => {
   if (!canvases.length) return;
