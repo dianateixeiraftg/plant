@@ -182,10 +182,10 @@ legend{padding:0 6px;font-size:.88rem;color:var(--mute)}
     <div class="card">
       <h2>Pessoas <small id="listCount"></small></h2>
       <ul id="list"></ul>
-      <p class="note">Os dados ficam guardados neste navegador. Guarda uma cópia para não os perder se limpares os dados do site ou mudares de dispositivo.</p>
+      <p class="note">Os dados ficam guardados neste navegador. Guarda uma cópia (ou usa os exports) para não os perder se limpares os dados do site ou mudares de dispositivo.</p>
       <div class="row-btns">
         <button type="button" id="btnBackup">Guardar cópia (.json)</button>
-        <button type="button" id="btnImport">Abrir cópia</button>
+        <button type="button" id="btnImport">Abrir cópia ou export</button>
       </div>
     </div>
   </section>
@@ -209,7 +209,7 @@ legend{padding:0 6px;font-size:.88rem;color:var(--mute)}
 
 </main>
 
-<input class="sr" type="file" id="importFile" accept="application/json,.json" tabindex="-1">
+<input class="sr" type="file" id="importFile" accept=".json,.html,.htm,.pdf,application/json,text/html,application/pdf" tabindex="-1">
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -637,6 +637,10 @@ function download(name,blob){
 function today(){return new Date().toLocaleDateString("pt-PT",{day:"numeric",month:"long",year:"numeric"})}
 function subtitle(m){return plural(m.count,"pessoa","pessoas")+" · "+plural(m.gens,"geração","gerações")+" · "+today()}
 
+function payload(){return {app:"arvore-genealogica",version:1,title:state.title,people:state.people}}
+function b64enc(str){var b=new TextEncoder().encode(str),s="";for(var i=0;i<b.length;i+=0x8000)s+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000));return btoa(s)}
+function b64dec(t){var s=atob(t),b=new Uint8Array(s.length);for(var i=0;i<s.length;i++)b[i]=s.charCodeAt(i);return new TextDecoder().decode(b)}
+
 $("btnHtml").addEventListener("click",function(){
   var m=layoutTree();if(!m.count){toast("Adiciona pessoas antes de exportar.");return}
   var r=buildSvg(m,PAL_VARS,{}),title=state.title.trim()||"Árvore genealógica";
@@ -647,7 +651,7 @@ $("btnHtml").addEventListener("click",function(){
   'header{padding:20px 16px 12px;max-width:1500px;margin:0 auto}h1{margin:0;font:700 2rem/1.2 Georgia,"Times New Roman",serif}p{margin:4px 0 0;color:var(--mute);font-size:.92rem}\n'+
   '.scroll{max-width:1500px;margin:0 16px 24px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--t-bg)}.scroll svg{display:block;margin:0 auto;max-width:none}\n'+
   '@media print{@page{size:landscape;margin:10mm}body{background:#fff}.scroll{border:0;margin:0;overflow:visible}.scroll svg{width:100%;height:auto}}\n'+
-  '</style>\n</head>\n<body>\n<header><h1>'+esc(title)+'</h1><p>'+esc(subtitle(m))+'</p></header>\n<div class="scroll">'+r.svg+'</div>\n</body>\n</html>\n';
+  '</style>\n</head>\n<body>\n<header><h1>'+esc(title)+'</h1><p>'+esc(subtitle(m))+'</p></header>\n<div class="scroll">'+r.svg+'</div>\n<script type="application/json" id="arvore-data">'+JSON.stringify(payload()).replace(/</g,"\\u003c")+'<\/script>\n</body>\n</html>\n';
   download(slug(title)+".html",new Blob([doc],{type:"text/html;charset=utf-8"}));
   toast("HTML exportado");
 });
@@ -674,7 +678,7 @@ $("btnPdf").addEventListener("click",function(){
         if(sc>=0.6||i===sizes.length-1)break;
       }
       var jsPDF=window.jspdf.jsPDF,pdf=new jsPDF({orientation:land?"landscape":"portrait",unit:"pt",format:[pw,ph]});
-      pdf.setProperties({title:title});
+      pdf.setProperties({title:title,subject:"ARVOREDATA:"+b64enc(JSON.stringify(payload()))+":FIM"});
       var dw=r.w*sc,dh=r.h*sc;
       pdf.addImage(data,"JPEG",(pw-dw)/2,(ph-dh)/2,dw,dh);
       pdf.save(slug(title)+".pdf");
@@ -689,24 +693,38 @@ $("btnPdf").addEventListener("click",function(){
 /* ---------- cópia de dados ---------- */
 $("btnBackup").addEventListener("click",function(){
   if(!state.people.length){toast("Ainda não há dados para guardar.");return}
-  var data={app:"arvore-genealogica",version:1,title:state.title,people:state.people};
-  download("arvore-"+slug(state.title)+".json",new Blob([JSON.stringify(data)],{type:"application/json"}));
+  download("arvore-"+slug(state.title)+".json",new Blob([JSON.stringify(payload())],{type:"application/json"}));
   toast("Cópia guardada");
 });
 $("btnImport").addEventListener("click",function(){$("importFile").click()});
+
+function extractData(buf){
+  var bytes=new Uint8Array(buf),head=String.fromCharCode.apply(null,bytes.subarray(0,5));
+  if(head==="%PDF-"){
+    var bin="";for(var i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
+    var m=bin.match(/ARVOREDATA:([A-Za-z0-9+\/=]+):FIM/);
+    if(!m)throw new Error("pdf");
+    return JSON.parse(b64dec(m[1]));
+  }
+  var text=new TextDecoder().decode(bytes);
+  if(/^\s*[\[{]/.test(text))return JSON.parse(text);
+  var h=text.match(/<script type="application\/json" id="arvore-data">([\s\S]*?)<\/script>/);
+  if(!h)throw new Error("html");
+  return JSON.parse(h[1]);
+}
 $("importFile").addEventListener("change",function(){
   var f=this.files&&this.files[0],inp=this;if(!f)return;
   var rd=new FileReader();
   rd.onload=function(){
     try{
-      var x=JSON.parse(rd.result),people=sanitize(x&&x.people);
+      var x=extractData(rd.result),people=sanitize(x&&x.people);
       if(!people.length)throw new Error("vazio");
-      if(state.people.length&&!state.sample&&!confirm("Substituir a árvore atual pelo conteúdo desta cópia?"))return;
+      if(state.people.length&&!state.sample&&!confirm("Substituir a árvore atual pelo conteúdo deste ficheiro?"))return;
       state={title:String(x.title||""),people:people,sample:false};
-      $("treeTitle").value=state.title;save();lastAdded=null;resetForm();render();toast("Cópia aberta");
-    }catch(e){toast("Esse ficheiro não é uma cópia válida.")}
+      $("treeTitle").value=state.title;save();lastAdded=null;resetForm();render();toast("Árvore aberta: "+plural(people.length,"pessoa","pessoas"));
+    }catch(e){toast("Este ficheiro não tem dados da árvore. Só abre cópias e exports (HTML ou PDF) feitos por esta ferramenta.")}
   };
-  rd.readAsText(f);inp.value="";
+  rd.readAsArrayBuffer(f);inp.value="";
 });
 $("btnClear").addEventListener("click",function(){
   state={title:"",people:[],sample:false};$("treeTitle").value="";lastAdded=null;save();resetForm();render();$("fName").focus();
