@@ -155,6 +155,7 @@ textarea{width:100%;border:1px solid var(--line);background:var(--card);border-r
         <button type="button" id="qChild">+ Filho/a</button>
         <button type="button" id="qSpouse">+ Cônjuge</button>
         <button type="button" id="qSib">+ Irmão/ã</button>
+        <button type="button" id="qParent">+ Mãe/pai</button>
       </div>
       <form id="form" novalidate>
         <label class="f">Nome completo
@@ -187,6 +188,7 @@ textarea{width:100%;border:1px solid var(--line);background:var(--card);border-r
             <option value="child">Filho/a de…</option>
             <option value="spouse">Cônjuge de…</option>
             <option value="sibling">Irmão/irmã de…</option>
+            <option value="parent">Mãe/pai de…</option>
           </select>
           <select id="fTarget" aria-label="Pessoa a que se liga" hidden></select>
           <p class="hint" id="relHint">Uma pessoa inicial começa uma árvore nova, ao lado das outras. Serve para juntar o outro lado da família.</p>
@@ -609,12 +611,29 @@ function descendantsAndUnit(id){
   }
   return out;
 }
+function unitRoot(id){var by={};state.people.forEach(function(p){by[p.id]=p});var q=by[id],g=0;while(q&&q.spouseOf&&by[q.spouseOf]&&g++<50)q=by[q.spouseOf];return q?q.id:null}
+function ancestorsOf(id){
+  var by={},out={};state.people.forEach(function(p){by[p.id]=p});
+  var q=by[id],g=0;
+  while(q&&g++<50){
+    var r=by[unitRoot(q.id)];
+    var par=r&&r.parentId?by[r.parentId]:null;
+    if(!par)break;
+    var ur=unitRoot(par.id);
+    state.people.forEach(function(x){if(unitRoot(x.id)===ur)out[x.id]=1});
+    q=by[ur];
+  }
+  return out;
+}
 function updateHint(){
   var rel=$("fRel").value,t=$("fTarget").value,h;
   if(rel==="root")h="Uma pessoa inicial começa uma árvore nova, ao lado das outras. Serve para juntar o outro lado da família.";
   else if(rel==="child")h="A pessoa aparece por baixo de quem escolheres.";
   else if(rel==="spouse")h="A pessoa aparece ao lado de quem escolheres.";
-  else{
+  else if(rel==="parent"){
+    var xp=state.people.filter(function(x){return x.id===t})[0];
+    h=(xp&&xp.parentId)?"Quem escolheres já tem pais na árvore. Esta pessoa será adicionada como cônjuge do pai ou da mãe que já existe.":"A pessoa passa a ser mãe ou pai de quem escolheres e aparece por cima.";
+  }else{
     var tp=state.people.filter(function(x){return x.id===t})[0];
     h=(tp&&!tp.parentId)?"Esta pessoa não tem pais na árvore, por isso os irmãos ficam lado a lado, unidos por uma linha.":"Fica com os mesmos pais de quem escolheres.";
   }
@@ -625,13 +644,14 @@ function refreshTargets(prefer){
   sel.hidden=rel==="root";
   var ex=editingId?descendantsAndUnit(editingId):{};
   var by={};state.people.forEach(function(p){by[p.id]=p});
+  if(editingId&&rel==="parent"){var an=ancestorsOf(editingId);Object.keys(an).forEach(function(k){ex[k]=1})}
   if(editingId&&rel==="sibling"){
     state.people.forEach(function(p){var q=p,g=0;while(q&&q.siblingOf&&g++<50){if(q.siblingOf===editingId){ex[p.id]=1;break}q=by[q.siblingOf]}});
   }
   var h='<option value="">— escolher pessoa —</option>';
   layoutTree().order.forEach(function(o){
     var p=o.p;if(ex[p.id])return;
-    if((rel==="spouse"||rel==="sibling")&&o.spouse)return;
+    if((rel==="spouse"||rel==="sibling"||rel==="parent")&&o.spouse)return;
     h+='<option value="'+esc(p.id)+'">'+esc(p.name+(p.kin?" ("+p.kin+")":""))+"</option>";
   });
   sel.innerHTML=h;
@@ -683,8 +703,12 @@ $("form").addEventListener("submit",function(e){
   e.preventDefault();
   var name=$("fName").value.trim(),rel=$("fRel").value,target=$("fTarget").value;
   if(!name){msg("Escreve o nome da pessoa.");$("fName").focus();return}
-  if(rel!=="root"&&!target){msg(rel==="child"?"Escolhe de quem é filho/a.":(rel==="sibling"?"Escolhe de quem é irmão/irmã.":"Escolhe de quem é cônjuge."));$("fTarget").focus();return}
-  var p,isNew=!editingId;
+  if(rel!=="root"&&!target){msg(rel==="child"?"Escolhe de quem é filho/a.":(rel==="sibling"?"Escolhe de quem é irmão/irmã.":(rel==="parent"?"Escolhe de quem é mãe ou pai.":"Escolhe de quem é cônjuge.")));$("fTarget").focus();return}
+  if(rel==="parent"&&editingId){
+    var X0=state.people.filter(function(x){return x.id===target})[0];
+    if(X0&&X0.parentId&&unitRoot(X0.parentId)!==unitRoot(editingId)){msg("Essa pessoa já tem pais na árvore. Liga esta pessoa como cônjuge do pai ou da mãe que já existe.");$("fTarget").focus();return}
+  }
+  var p,isNew=!editingId,parentNote=null;
   if(isNew){
     if(state.sample){
       if(rel==="root"){state.people=[];state.title="";$("treeTitle").value=""}
@@ -696,16 +720,28 @@ $("form").addEventListener("submit",function(e){
     state.sample=false;
   }
   p.name=name;p.kin=$("fKin").value.trim();p.date=$("fDate").value.trim();p.place=$("fPlace").value.trim();p.photo=formPhoto;
-  p.parentId=null;p.spouseOf=null;p.siblingOf=null;
+  if(!(rel==="parent"&&!isNew)){p.parentId=null;p.spouseOf=null;p.siblingOf=null}
   if(rel==="child")p.parentId=target;
   else if(rel==="spouse")p.spouseOf=target;
   else if(rel==="sibling"){var tg=state.people.filter(function(x){return x.id===target})[0];if(tg&&tg.parentId)p.parentId=tg.parentId;else p.siblingOf=target}
+  else if(rel==="parent"){
+    var by2={};state.people.forEach(function(x){by2[x.id]=x});
+    var X=by2[target];
+    if(X){
+      if(X.parentId){
+        if(isNew){p.spouseOf=unitRoot(X.parentId);parentNote=X.name}
+      }else{
+        var h=X,gg=0;while(h.siblingOf&&by2[h.siblingOf]&&gg++<50)h=by2[h.siblingOf];
+        h.parentId=p.id;
+      }
+    }
+  }
   if(isNew){state.people.push(p);lastAdded=p.id}
   state.people=sanitize(state.people);
   save();
   var shown=p.name;
   resetForm();render();
-  toast(isNew?"Adicionada: "+shown:"Alterações guardadas");
+  toast(parentNote?shown+" foi adicionado/a como cônjuge do pai ou da mãe de "+parentNote:(isNew?"Adicionada: "+shown:"Alterações guardadas"));
   if(isNew)$("fName").focus();
 });
 $("fRel").addEventListener("change",function(){refreshTargets("")});
@@ -735,6 +771,7 @@ $("btnDel").addEventListener("click",function(){
 
 $("qChild").addEventListener("click",function(){var base=editingId;resetForm();$("fRel").value="child";refreshTargets(base);$("fName").focus()});
 $("qSib").addEventListener("click",function(){var base=editingId;resetForm();$("fRel").value="sibling";refreshTargets(base);$("fName").focus()});
+$("qParent").addEventListener("click",function(){var base=editingId;resetForm();$("fRel").value="parent";refreshTargets(base);$("fName").focus()});
 $("qSpouse").addEventListener("click",function(){
   var base=editingId,by={};state.people.forEach(function(p){by[p.id]=p});
   var q=by[base],g=0;while(q&&q.spouseOf&&by[q.spouseOf]&&g++<50)q=by[q.spouseOf];
