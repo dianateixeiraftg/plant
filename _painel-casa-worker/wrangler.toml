@@ -1,0 +1,15 @@
+name = "painel-casa"
+main = "worker.js"
+compatibility_date = "2025-09-01"
+
+[vars]
+# Endereço do teu site, sem barra no fim.
+ALLOWED_ORIGIN = "https://dianateixeiraftg.github.io"
+
+# Os segredos NÃO ficam aqui. Define-os com:
+#   npx wrangler secret put PIN
+#   npx wrangler secret put FOX_API_KEY
+#   npx wrangler secret put FOX_SN
+#   npx wrangler secret put SHELLY_AUTH_KEY
+#   npx wrangler secret put SHELLY_HOST
+#   npx wrangler secret put SHELLY_DEVICES

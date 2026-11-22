@@ -55,6 +55,7 @@
 
 * { box-sizing: border-box; }
 body {
+  margin: 0;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--f-body);
@@ -88,7 +89,8 @@ h2 { font-family: var(--f-display); font-size: 20px; font-weight: 600; margin: 0
 .kind { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
 .shows { margin: 0; font-size: 13px; color: var(--muted); }
 label.lbl { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 4px; }
-textarea, input[type="text"], select {
+[hidden] { display: none !important; }
+textarea, input[type="text"], input[type="password"], select {
   width: 100%; font: inherit; font-size: 14px; color: var(--ink); background: var(--bg);
   border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px;
 }
@@ -115,6 +117,35 @@ li.done .t-text { color: var(--muted); text-decoration: line-through; }
 .x:hover { color: var(--danger); }
 .empty { color: var(--muted); font-size: 14px; padding: 12px 0 2px; border-top: 1px solid var(--line); margin: 0; }
 
+.led.on { background: var(--accent); }
+.led.err { background: var(--danger); }
+.live { border-top: 1px dashed var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.live-err { margin: 0; font-size: 12px; color: var(--danger); overflow-wrap: anywhere; }
+.metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; margin: 0; }
+.metrics div { min-width: 0; }
+.metrics dt { font-size: 11px; letter-spacing: .04em; color: var(--muted); }
+.metrics dd { margin: 0; font-family: var(--f-display); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.metrics dd small { font-family: var(--f-body); font-size: 12px; font-weight: 400; color: var(--muted); margin-left: 3px; }
+.relays { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.relays li { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.r-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.r-w { flex: none; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.sw { flex: none; width: 46px; height: 26px; padding: 0; position: relative; border-radius: 13px; border: 1px solid var(--line-strong); background: var(--bg); cursor: pointer; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--led-off); transition: transform .15s; }
+.sw[aria-checked="true"] { background: var(--accent); border-color: var(--accent); }
+.sw[aria-checked="true"]::after { transform: translateX(20px); background: var(--accent-ink); }
+.sw:disabled { opacity: .5; cursor: default; }
+@media (prefers-reduced-motion: reduce) { .sw::after { transition: none; } }
+
+.conn { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 0 14px; }
+.conn summary { cursor: pointer; padding: 12px 0; font-family: var(--f-display); font-weight: 600; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.conn summary small { font-family: var(--f-body); font-weight: 400; font-size: 13px; color: var(--muted); }
+.conn form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; padding-bottom: 14px; }
+.conn .full { grid-column: 1 / -1; }
+.conn .row { display: flex; flex-wrap: wrap; gap: 8px; }
+.conn-msg { margin: 0; font-size: 13px; color: var(--danger); min-height: 18px; }
+@media (max-width: 560px) { .conn form { grid-template-columns: 1fr; } }
+
 footer { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
 </style>
 </head>
@@ -128,8 +159,28 @@ footer { font-size: 12px; color: var(--muted); display: flex; flex-direction: co
       <span><b id="n-live">0</b>com dados em direto</span>
       <span><b id="n-open">0</b>tarefas por fazer</span>
     </div>
-    <p class="note-top">Cada módulo abre a app do equipamento. Os valores em direto ainda não estão ligados: por agora podes guardar a última leitura de cada um e uma lista de tarefas da casa.</p>
+    <p class="note-top">Shelly e Fox ESS mostram dados em direto quando ligares o Worker abaixo. Os restantes módulos guardam a última leitura que escreveres e abrem a respetiva app.</p>
   </header>
+
+  <details class="conn" id="conn">
+    <summary>Ligação ao Worker <small id="conn-state">não ligado</small></summary>
+    <form id="conn-form" autocomplete="off">
+      <div class="full">
+        <label class="lbl" for="c-url">Endereço do Worker</label>
+        <input type="text" id="c-url" inputmode="url" placeholder="https://painel-casa.o-teu-nome.workers.dev" spellcheck="false">
+      </div>
+      <div class="full">
+        <label class="lbl" for="c-pin">PIN</label>
+        <input type="password" id="c-pin" autocomplete="off" spellcheck="false">
+      </div>
+      <p class="conn-msg full" id="conn-msg" role="status"></p>
+      <div class="row full">
+        <button class="btn primary" type="submit">Guardar e ligar</button>
+        <button class="btn" type="button" id="conn-clear">Esquecer neste dispositivo</button>
+      </div>
+      <p class="hint full">O endereço e o PIN ficam guardados só neste dispositivo, nunca no repositório. Usa a página apenas em dispositivos teus.</p>
+    </form>
+  </details>
 
   <section aria-labelledby="h-eq">
     <h2 id="h-eq">Equipamentos</h2>
@@ -240,10 +291,11 @@ footer { font-size: 12px; color: var(--muted); display: flex; flex-direction: co
       var card = h("article", { class: "card" },
         h("div", { class: "card-top" },
           h("span", { class: "tag", text: m.tag }),
-          h("div", { class: "state" }, h("span", { class: "led", "aria-hidden": "true" }), h("span", { text: "Sem ligação em direto" }), h("span", { class: "lever", "aria-hidden": "true" }))
+          h("div", { class: "state" }, h("span", { class: "led", id: "led-" + m.id, "aria-hidden": "true" }), h("span", { id: "st-" + m.id, text: "Sem ligação em direto" }), h("span", { class: "lever", "aria-hidden": "true" }))
         ),
         h("div", null, h("h3", { text: m.name }), h("p", { class: "kind", text: m.kind })),
         h("p", { class: "shows", text: m.shows }),
+        (m.id === "shelly" || m.id === "foxess") ? h("div", { class: "live", id: "live-" + m.id, hidden: "" }) : null,
         h("div", null,
           h("label", { class: "lbl", for: "note-" + m.id, text: "Última leitura ou nota" }),
           ta,
@@ -309,9 +361,174 @@ footer { font-size: 12px; color: var(--muted); display: flex; flex-direction: co
     inp.focus();
   });
 
+  // ---------- ligação ao Worker (dados em direto) ----------
+  var CONN_KEY = "painel-casa-ligacao";
+  var conn = { url: "", pin: "" };
+  var pollTimers = {};
+  var liveOk = {};
+  var LIVE_IDS = ["shelly", "foxess"];
+  var POLL_MS = { shelly: 20000, foxess: 120000 }; // a Fox ESS limita as chamadas diárias
+
+  var FOX_ROWS = [
+    ["pvPower", "Produção solar"],
+    ["loadsPower", "Consumo da casa"],
+    ["feedinPower", "Injetado na rede"],
+    ["gridConsumptionPower", "Da rede"],
+    ["SoC", "Bateria"],
+    ["todayYield", "Hoje"]
+  ];
+
+  function connLoad() {
+    try {
+      var c = JSON.parse(localStorage.getItem(CONN_KEY));
+      if (c && c.url && c.pin) conn = { url: String(c.url).replace(/\/+$/, ""), pin: String(c.pin) };
+    } catch (e) {}
+  }
+  function connPersist() { try { localStorage.setItem(CONN_KEY, JSON.stringify(conn)); } catch (e) {} }
+  function connForget() { conn = { url: "", pin: "" }; try { localStorage.removeItem(CONN_KEY); } catch (e) {} }
+
+  function fmt(n, d) { return Number(n).toLocaleString("pt-PT", { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function hora(ms) { return new Date(ms).toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit", second: "2-digit" }); }
+
+  function api(path, opts) {
+    opts = opts || {};
+    var headers = { "X-Pin": conn.pin };
+    if (opts.body) headers["Content-Type"] = "application/json";
+    return fetch(conn.url + path, {
+      method: opts.method || "GET",
+      headers: headers,
+      body: opts.body ? JSON.stringify(opts.body) : undefined
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (!r.ok) { var err = new Error(j.error || ("Erro " + r.status)); err.status = r.status; throw err; }
+        return j;
+      });
+    }, function () {
+      throw new Error("Sem ligação ao Worker. Confirma o endereço e a rede.");
+    });
+  }
+
+  function setLiveState(id, kind) {
+    var led = $("led-" + id), st = $("st-" + id);
+    if (!led || !st) return;
+    led.className = "led" + (kind === "on" ? " on" : kind === "err" ? " err" : "");
+    st.textContent = kind === "on" ? "Em direto" : kind === "err" ? "Sem resposta" : "Sem ligação em direto";
+    liveOk[id] = kind === "on";
+    var n = 0; LIVE_IDS.forEach(function (k) { if (liveOk[k]) n++; });
+    $("n-live").textContent = n;
+  }
+  function showErr(id, msg) {
+    var box = $("live-" + id);
+    if (!box) return;
+    box.hidden = false;
+    var p = box.querySelector(".live-err");
+    if (!p) { p = h("p", { class: "live-err", role: "status" }); box.insertBefore(p, box.firstChild); }
+    p.textContent = msg;
+  }
+
+  function renderFox(d) {
+    var box = $("live-foxess");
+    box.textContent = "";
+    box.hidden = false;
+    var dl = h("dl", { class: "metrics" });
+    FOX_ROWS.forEach(function (r) {
+      var v = d.values && d.values[r[0]];
+      if (!v) return;
+      var dd = h("dd", { text: fmt(v.value, v.unit === "%" ? 0 : 2) });
+      if (v.unit) dd.appendChild(h("small", { text: v.unit }));
+      dl.appendChild(h("div", null, h("dt", { text: r[1] }), dd));
+    });
+    box.appendChild(dl.children.length ? dl : h("p", { class: "hint", text: "A Fox ESS não devolveu valores." }));
+    box.appendChild(h("div", { class: "stamp", text: "Lido às " + hora(d.fetchedAt) }));
+  }
+
+  function renderShelly(d) {
+    var box = $("live-shelly");
+    box.textContent = "";
+    box.hidden = false;
+    var ul = h("ul", { class: "relays" });
+    d.devices.forEach(function (dev) {
+      var sw = h("button", { class: "sw", type: "button", role: "switch", "aria-label": dev.name, "aria-checked": dev.output ? "true" : "false" });
+      if (!dev.online || dev.output === null) sw.disabled = true;
+      sw.addEventListener("click", function () { toggleRelay(dev, sw); });
+      var w = !dev.online ? "offline" : (dev.power != null && !isNaN(dev.power) ? fmt(dev.power, 1) + " W" : "");
+      ul.appendChild(h("li", null, h("span", { class: "r-name", text: dev.name }), h("span", { class: "r-w", text: w }), sw));
+    });
+    box.appendChild(ul);
+    box.appendChild(h("div", { class: "stamp", text: "Lido às " + hora(d.fetchedAt) }));
+  }
+
+  function toggleRelay(dev, btn) {
+    var want = btn.getAttribute("aria-checked") !== "true";
+    btn.disabled = true;
+    api("/api/shelly/switch", { method: "POST", body: { id: dev.id, channel: dev.channel, on: want } })
+      .then(function () {
+        btn.setAttribute("aria-checked", want ? "true" : "false");
+        setTimeout(function () { poll("shelly"); }, 1500); // a Shelly Cloud demora um pouco a refletir o estado
+      })
+      .catch(function (e) { showErr("shelly", e.message); })
+      .then(function () { btn.disabled = false; });
+  }
+
+  function poll(id) {
+    if (!conn.url || !conn.pin) return Promise.resolve();
+    return api(id === "shelly" ? "/api/shelly" : "/api/fox").then(function (d) {
+      if (id === "shelly") renderShelly(d); else renderFox(d);
+      setLiveState(id, "on");
+    }).catch(function (e) {
+      setLiveState(id, "err");
+      showErr(id, e.message);
+      if (e.status === 401) { stopLive(); $("conn").open = true; $("conn-msg").textContent = "O Worker recusou o PIN."; }
+    });
+  }
+
+  function stopLive() {
+    LIVE_IDS.forEach(function (id) { clearInterval(pollTimers[id]); pollTimers[id] = null; });
+  }
+  function startLive() {
+    stopLive();
+    $("conn-state").textContent = conn.url ? "ligado a " + conn.url.replace(/^https:\/\//, "") : "não ligado";
+    LIVE_IDS.forEach(function (id) {
+      setLiveState(id, "off");
+      var box = $("live-" + id);
+      if (!conn.url) { box.hidden = true; box.textContent = ""; return; }
+      poll(id);
+      pollTimers[id] = setInterval(function () { if (!document.hidden) poll(id); }, POLL_MS[id]);
+    });
+  }
+
+  function initConn() {
+    connLoad();
+    $("c-url").value = conn.url;
+    $("c-pin").value = conn.pin;
+    if (!conn.url) $("conn").open = true;
+    $("conn-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var url = $("c-url").value.trim().replace(/\/+$/, ""), pin = $("c-pin").value;
+      if (!/^https:\/\/[^\s\/]+$/.test(url)) { $("conn-msg").textContent = "Escreve o endereço completo do Worker, a começar por https://"; return; }
+      if (!pin) { $("conn-msg").textContent = "Escreve o PIN."; return; }
+      $("conn-msg").textContent = "";
+      conn = { url: url, pin: pin };
+      connPersist();
+      startLive();
+    });
+    $("conn-clear").addEventListener("click", function () {
+      connForget();
+      $("c-url").value = "";
+      $("c-pin").value = "";
+      $("conn-msg").textContent = "";
+      startLive();
+    });
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden && conn.url) LIVE_IDS.forEach(poll);
+    });
+    startLive();
+  }
+
   // ---------- arranque ----------
   buildCards();
   renderTasks();
+  initConn();
 
   function useLocal(msg) {
     var d = lsLoad();
